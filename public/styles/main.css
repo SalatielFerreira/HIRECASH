@@ -9,8 +9,18 @@
 @import './pages/candidato.css';
 @import './pages/comissao.css';
 
+html,
+body {
+  overflow-x: hidden;
+}
+
 body {
   background: linear-gradient(180deg, #eef0f9, #e2e5f5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -19,18 +29,48 @@ body {
   }
 }
 
+/*
+ * Mobile-first: em telas pequenas (e quando instalado como app) o HireCash
+ * ocupa a tela inteira, de ponta a ponta, como um app nativo.
+ */
 #app {
   position: relative;
   display: flex;
   flex-direction: column;
   width: 100%;
   max-width: var(--app-max-width);
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
   margin-inline: auto;
   background: var(--color-bg);
-  overflow-x: hidden;
-  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+/*
+ * A partir de telas médias/grandes, exibido no navegador, o app vira um
+ * "cartão" centralizado com proporção de celular — fica agradável em
+ * tablets, notebooks e monitores grandes, em vez de esticar a altura toda.
+ */
+@media (min-width: 640px) {
+  #app {
+    height: min(860px, 92vh);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+/*
+ * Quando instalado/aberto como aplicativo (PWA standalone), volta a ocupar
+ * a janela inteira, independentemente da largura — sem cantos arredondados
+ * nem sombra, como um app de verdade.
+ */
+@media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui) {
+  #app {
+    height: 100vh;
+    height: 100dvh;
+    border-radius: 0;
+    box-shadow: none;
+  }
 }
 
 .app-content {

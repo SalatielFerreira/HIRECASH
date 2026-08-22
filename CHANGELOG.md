@@ -17,6 +17,10 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 - Utilitário de logs de aplicação (`logger.js`) com níveis e histórico persistido em `localStorage`.
 - Camada de armazenamento local (`storage.service.js`).
 
+### Alterado
+
+- Layout responsivo: o app agora ocupa a tela inteira (sem molduras) em celulares e quando instalado como PWA; em telas médias/grandes exibidas no navegador (tablet, notebook, monitor), aparece como um cartão centralizado com proporção de celular, cantos arredondados e sombra, em vez de esticar a altura toda da janela.
+
 ## [0.1.0] - 2026-08-21
 
 ### Adicionado

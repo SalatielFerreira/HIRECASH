@@ -15,6 +15,7 @@ Sem login — o app abre direto no Dashboard e pode ser instalado como aplicativ
 - [Ícones do PWA](#ícones-do-pwa)
 - [Deploy (GitHub Pages)](#deploy-github-pages)
 - [Logs](#logs)
+- [Versionamento](#versionamento)
 - [Changelog](#changelog)
 
 ## Visão geral
@@ -26,6 +27,7 @@ Sem login — o app abre direto no Dashboard e pode ser instalado como aplicativ
 - **Alertas centralizados**: caixas de alerta (toast) posicionadas entre o topo e o meio da tela, com variações de sucesso, erro, aviso e informação.
 - **Cadastro de candidatos**: botão + na página Candidato abre um modal (só fecha pelo X) com o formulário completo; ao salvar, o candidato aparece como uma linha em uma tabela estilo planilha, persistida em `localStorage`.
 - **Layout de tela cheia e responsivo**: o app ocupa a tela inteira em qualquer aparelho (celular, tablet, computador), sem molduras — importante para telas com bastante dado, como a tabela de candidatos.
+- **Versão visível**: nome do app e número da versão aparecem centralizados no rodapé da página de Configuração, atualizados a cada entrega (veja [Versionamento](#versionamento)).
 
 ## Stack
 
@@ -53,7 +55,8 @@ HIRECASH/
 │       ├── components/alert.js    # showAlert()
 │       ├── pages/                 # dashboard.js, candidato.js, comissao.js, configuracao.js
 │       ├── services/              # storage.service.js, candidatos.service.js
-│       └── utils/                 # logger.js, theme.js (tema claro/escuro)
+│       ├── utils/                 # logger.js, theme.js (tema claro/escuro)
+│       └── version.js             # nome + versão exibidos em Configuração
 ├── scripts/                       # scripts Node de apoio (não vão para produção)
 │   └── generate-icons.js
 ├── logs/                          # logs locais de desenvolvimento (git-ignorado)
@@ -112,6 +115,16 @@ A cada push em `main`, o GitHub republica automaticamente em `https://salatielfe
 - **Em tempo de execução (navegador)**: `docs/scripts/utils/logger.js` registra eventos da aplicação (rotas, service worker, alertas) no console e mantém um histórico rotativo em `localStorage`, acessível via `logger.getLogs()` no console do navegador. Para ativar logs de depuração (`debug`), execute `localStorage.setItem('hirecash_debug', 'true')`.
 - **Em desenvolvimento**: a pasta `logs/` é reservada para logs locais (build, scripts) e é ignorada pelo Git.
 
+## Versionamento
+
+O número da versão aparece para o usuário no rodapé da página de Configuração, para ele sempre saber qual versão do app está usando. A cada entrega, três arquivos são atualizados juntos:
+
+1. `docs/scripts/version.js` — `APP_VERSION`, o que o usuário vê no app.
+2. `package.json` — campo `version` (mesma versão, convenção do npm).
+3. `CHANGELOG.md` — nova entrada com a data e o que mudou.
+
+Segue [Versionamento Semântico](https://semver.org/lang/pt-BR/): `MAJOR.MINOR.PATCH` — `PATCH` para correções, `MINOR` para funcionalidades novas compatíveis, `MAJOR` para mudanças que quebram compatibilidade.
+
 ## Changelog
 
-Alterações relevantes são registradas em [CHANGELOG.md](./CHANGELOG.md), seguindo [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e [Versionamento Semântico](https://semver.org/lang/pt-BR/).
+Alterações relevantes são registradas em [CHANGELOG.md](./CHANGELOG.md), seguindo [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).

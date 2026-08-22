@@ -78,3 +78,20 @@
 .theme-switch.is-dark .theme-switch__icon--moon {
   opacity: 1;
 }
+
+.app-version {
+  margin-top: var(--space-6);
+  text-align: center;
+}
+
+.app-version__name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.app-version__number {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}

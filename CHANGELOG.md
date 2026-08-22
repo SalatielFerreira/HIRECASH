@@ -7,6 +7,8 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.2.0] - 2026-08-22
+
 ### Adicionado
 
 - Estrutura inicial do projeto (pastas, lint, formatação, CI/CD para GitHub Pages).
@@ -19,6 +21,7 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 - Camada de armazenamento local (`storage.service.js`).
 - Cadastro de candidatos na página Candidato: botão + no cabeçalho abre um modal (título + X, só fecha pelo X — não fecha clicando fora nem com Esc, para não perder dados digitados) com formulário completo (vaga, status da vaga, nome, LinkedIn, pretensão salarial com máscara R$, localização, modalidade, fonte, etapa, status do candidato, observação). Ao salvar, o candidato vira uma linha em uma tabela estilo planilha (com rolagem horizontal em telas estreitas), persistida em `localStorage` via `candidatos.service.js`.
 - Componentes reutilizáveis de formulário (`form.css`), modal (`modal.css`) e tabela de dados com badges coloridos por status (`table.css`).
+- Número da versão exibido centralizado no rodapé da página de Configuração (`version.js`), para o usuário sempre saber qual versão do app está usando. Atualizado a cada entrega.
 
 ### Corrigido
 

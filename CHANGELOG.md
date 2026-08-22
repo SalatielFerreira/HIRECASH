@@ -7,7 +7,16 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
-## [0.3.0] - 2026-08-22
+## [0.3.1] - 2026-08-22
+
+### Corrigido
+
+- **Rolagem do modal**: o `<form>` dentro do modal não era um container flex, o que quebrava a cadeia entre `.modal` e `.modal__body`/`.modal__footer` — o corpo nunca encolhia para caber no espaço disponível, o scroll interno não ativava de verdade, e em telas menores o botão de ação (ex.: Salvar) podia sair da área visível/alcançável. Corrigido para todos os modais (não só o de candidato) com a nova classe `.modal__form`.
+- **Zoom por duplo toque no iPhone**: tocar duas vezes em qualquer lugar da tela (não só em botões) não ativa mais o zoom do Safari — `touch-action: manipulation` aplicado no `<html>`. O zoom por pinça (dois dedos) continua funcionando normalmente, para não prejudicar acessibilidade.
+
+### Alterado
+
+- `.modal__body` ganhou `-webkit-overflow-scrolling: touch` para rolagem mais suave no iOS.
 
 ### Adicionado
 

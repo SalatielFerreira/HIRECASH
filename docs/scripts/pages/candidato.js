@@ -130,7 +130,7 @@ function renderModal() {
           </button>
         </div>
 
-        <form id="candidato-form" novalidate>
+        <form id="candidato-form" class="modal__form" novalidate>
           <div class="modal__body">
             <div class="form-grid">
               <div class="field">

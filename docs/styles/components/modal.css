@@ -81,9 +81,29 @@
   }
 }
 
+/*
+ * O <form> de um modal precisa desse seletor: sem ele, o form (um bloco
+ * comum, sem display:flex) quebra a cadeia do flexbox entre .modal e
+ * .modal__body/.modal__footer — o corpo nunca encolhia para caber no
+ * espaço disponível, o scroll interno não ativava de verdade, e o rodapé
+ * (botão de ação) podia sair da área visível. Use em qualquer <form> que
+ * fique diretamente dentro de um .modal.
+ */
+.modal__form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
 .modal__body {
   padding: var(--space-5);
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+
+  /* Sem isso, um item flex nunca encolhe além do tamanho do próprio
+     conteúdo (min-height:auto é o padrão). */
+  min-height: 0;
   flex: 1 1 auto;
 }
 

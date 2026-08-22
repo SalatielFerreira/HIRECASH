@@ -16,6 +16,11 @@ html {
   /* stylelint-disable-next-line property-no-vendor-prefix -- necessário: Safari não suporta a versão sem prefixo */
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+
+  /* Desativa o zoom por duplo toque em QUALQUER lugar da tela (não só em
+     botões/links) — continua permitindo pinça (pinch-zoom) normalmente,
+     então não prejudica quem depende disso para acessibilidade. */
+  touch-action: manipulation;
 }
 
 body {
@@ -26,12 +31,6 @@ body {
 
   /* Remove o retângulo cinza ao tocar em links/botões no iOS e Android. */
   -webkit-tap-highlight-color: transparent;
-}
-
-a,
-button {
-  /* Resposta de toque mais rápida (sem delay de 300ms) e sem zoom de duplo toque. */
-  touch-action: manipulation;
 }
 
 img,

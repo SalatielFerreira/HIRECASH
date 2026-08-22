@@ -64,12 +64,30 @@
   --z-alert: 1000;
 }
 
+/*
+ * Tema escuro. As cores de marca (--color-primary, --color-accent etc.)
+ * são as MESMAS nos dois temas — só a superfície e o texto mudam.
+ *
+ * Duas formas de ativar:
+ * 1) Automático: segue o sistema operacional (prefers-color-scheme),
+ *    a não ser que o usuário já tenha escolhido um tema manualmente.
+ * 2) Manual: o toggle em Configuração define [data-theme] no <html>,
+ *    que tem prioridade sobre o sistema.
+ */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --color-bg: #0f1117;
     --color-surface: #1a1d27;
     --color-border: #2b2f3a;
     --color-text-primary: #f3f4f6;
     --color-text-secondary: #9ca3af;
   }
+}
+
+:root[data-theme='dark'] {
+  --color-bg: #0f1117;
+  --color-surface: #1a1d27;
+  --color-border: #2b2f3a;
+  --color-text-primary: #f3f4f6;
+  --color-text-secondary: #9ca3af;
 }

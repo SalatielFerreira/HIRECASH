@@ -20,7 +20,8 @@ Sem login — o app abre direto no Dashboard e pode ser instalado como aplicativ
 ## Visão geral
 
 - **Sem autenticação**: o app abre direto no Dashboard.
-- **3 abas** na barra inferior, nesta ordem: **Candidato** → **Dashboard** (inicial) → **Comissão**.
+- **4 abas** na barra inferior, nesta ordem: **Candidato** → **Dashboard** (inicial) → **Comissão** → **Configuração**.
+- **Tema claro/escuro**: alternável manualmente em Configuração (ícones sol/lua), com persistência em `localStorage` e sem flash ao recarregar. A cor de marca (roxo) é a mesma nos dois temas — só fundo, superfícies e texto mudam.
 - **Instalável**: manifesto PWA + service worker com cache do app shell (funciona offline após o primeiro carregamento).
 - **Alertas centralizados**: caixas de alerta (toast) posicionadas entre o topo e o meio da tela, com variações de sucesso, erro, aviso e informação.
 
@@ -48,9 +49,9 @@ HIRECASH/
 │       ├── app.js                 # ponto de entrada
 │       ├── router.js              # roteamento por hash (#/dashboard...)
 │       ├── components/alert.js    # showAlert()
-│       ├── pages/                 # dashboard.js, candidato.js, comissao.js
+│       ├── pages/                 # dashboard.js, candidato.js, comissao.js, configuracao.js
 │       ├── services/              # storage.service.js (wrapper de localStorage)
-│       └── utils/logger.js        # logs da aplicação
+│       └── utils/                 # logger.js, theme.js (tema claro/escuro)
 ├── scripts/                       # scripts Node de apoio (não vão para produção)
 │   └── generate-icons.js
 ├── logs/                          # logs locais de desenvolvimento (git-ignorado)

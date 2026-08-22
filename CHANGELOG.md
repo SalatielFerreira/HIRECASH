@@ -10,8 +10,9 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 ### Adicionado
 
 - Estrutura inicial do projeto (pastas, lint, formatação, CI/CD para GitHub Pages).
-- Shell do PWA: barra superior, área de conteúdo e barra inferior com navegação por três abas (Candidato, Dashboard, Comissão).
-- Sistema de rotas via hash (`#/dashboard`, `#/candidato`, `#/comissao`), com Dashboard como página inicial.
+- Shell do PWA: barra superior, área de conteúdo e barra inferior com navegação por quatro abas (Candidato, Dashboard, Comissão, Configuração).
+- Sistema de rotas via hash (`#/dashboard`, `#/candidato`, `#/comissao`, `#/configuracao`), com Dashboard como página inicial.
+- Página de Configuração com alternância de tema claro/escuro (ícones sol/lua), persistida em `localStorage` e aplicada antes da primeira renderização (sem flash). A cor de marca (roxo) permanece a mesma nos dois temas — só fundo, superfícies e texto mudam.
 - Componente de alerta (toast) centralizado entre o topo e o meio da tela, com variações de sucesso, erro, aviso e informação.
 - Suporte a instalação como aplicativo (manifesto PWA + service worker com cache offline do app shell).
 - Utilitário de logs de aplicação (`logger.js`) com níveis e histórico persistido em `localStorage`.

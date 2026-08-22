@@ -5,6 +5,7 @@
 import { candidatoPage } from './pages/candidato.js';
 import { dashboardPage } from './pages/dashboard.js';
 import { comissaoPage } from './pages/comissao.js';
+import { configuracaoPage } from './pages/configuracao.js';
 import { logger } from './utils/logger.js';
 
 const APP_NAME = 'HireCash';
@@ -14,6 +15,7 @@ const ROUTES = {
   candidato: candidatoPage,
   dashboard: dashboardPage,
   comissao: comissaoPage,
+  configuracao: configuracaoPage,
 };
 
 function getRouteFromHash() {

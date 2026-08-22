@@ -8,6 +8,7 @@
 @import './pages/dashboard.css';
 @import './pages/candidato.css';
 @import './pages/comissao.css';
+@import './pages/configuracao.css';
 
 html,
 body {
@@ -24,9 +25,13 @@ body {
 }
 
 @media (prefers-color-scheme: dark) {
-  body {
+  html:not([data-theme='light']) body {
     background: #05060a;
   }
+}
+
+html[data-theme='dark'] body {
+  background: #05060a;
 }
 
 /*

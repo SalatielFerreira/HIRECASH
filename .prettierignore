@@ -1,5 +1,5 @@
 node_modules/
-public/icons/*.png
-public/icons/*.ico
+docs/icons/*.png
+docs/icons/*.ico
 logs/
 CHANGELOG.md

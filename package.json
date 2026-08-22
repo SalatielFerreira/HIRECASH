@@ -7,9 +7,9 @@
   "license": "UNLICENSED",
   "type": "module",
   "scripts": {
-    "dev": "live-server public --port=5500 --quiet --no-browser",
-    "lint": "eslint public/scripts",
-    "lint:css": "stylelint \"public/styles/**/*.css\"",
+    "dev": "live-server docs --port=5500 --quiet --no-browser",
+    "lint": "eslint docs/scripts",
+    "lint:css": "stylelint \"docs/styles/**/*.css\"",
     "lint:all": "npm run lint && npm run lint:css",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

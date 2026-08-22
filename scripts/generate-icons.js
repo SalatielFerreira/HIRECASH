@@ -1,5 +1,5 @@
 /**
- * Gera os ícones PNG do PWA (public/icons) a partir do SVG mestre.
+ * Gera os ícones PNG do PWA (docs/icons) a partir do SVG mestre.
  * Uso: npm run generate:icons
  */
 import { mkdir } from 'node:fs/promises';
@@ -8,7 +8,7 @@ import path from 'node:path';
 import sharp from 'sharp';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ICONS_DIR = path.join(__dirname, '..', 'public', 'icons');
+const ICONS_DIR = path.join(__dirname, '..', 'docs', 'icons');
 const SOURCE_SVG = path.join(ICONS_DIR, 'icon.svg');
 
 const MASKABLE_SAFE_ZONE = 0.8; // ícone ocupa 80% da tela, deixando margem de segurança

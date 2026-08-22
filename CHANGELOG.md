@@ -17,16 +17,20 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 - Suporte a instalação como aplicativo (manifesto PWA + service worker com cache offline do app shell).
 - Utilitário de logs de aplicação (`logger.js`) com níveis e histórico persistido em `localStorage`.
 - Camada de armazenamento local (`storage.service.js`).
+- Cadastro de candidatos na página Candidato: botão + no cabeçalho abre um modal (título + X, só fecha pelo X — não fecha clicando fora nem com Esc, para não perder dados digitados) com formulário completo (vaga, status da vaga, nome, LinkedIn, pretensão salarial com máscara R$, localização, modalidade, fonte, etapa, status do candidato, observação). Ao salvar, o candidato vira uma linha em uma tabela estilo planilha (com rolagem horizontal em telas estreitas), persistida em `localStorage` via `candidatos.service.js`.
+- Componentes reutilizáveis de formulário (`form.css`), modal (`modal.css`) e tabela de dados com badges coloridos por status (`table.css`).
 
 ### Corrigido
 
 - GitHub Pages estava servindo o `README.md` em vez do app (o modo "Deploy from a branch" não reconhece a pasta `public/`). Pasta renomeada para `docs/` e o Pages passa a publicar diretamente dela, sem depender do GitHub Actions para o deploy.
+- A animação de entrada das páginas (`.page-enter`) mantinha um `transform` residual depois de terminar (`animation-fill-mode: both`), o que criava um *containing block* indevido para elementos `position: fixed` aninhados dentro da página — o modal de candidato abria ancorado fora da tela em vez de cobrir a janela inteira. Removido o fill-mode residual.
 
 ### Alterado
 
 - Workflow do GitHub Actions (`ci.yml`) simplificado para rodar apenas lint (JS + CSS) como checagem de qualidade; o deploy fica a cargo do GitHub Pages diretamente.
-- Layout responsivo: o app agora ocupa a tela inteira (sem molduras) em celulares e quando instalado como PWA; em telas médias/grandes exibidas no navegador (tablet, notebook, monitor), aparece como um cartão centralizado com proporção de celular, cantos arredondados e sombra, em vez de esticar a altura toda da janela.
+- Layout de tela cheia em qualquer aparelho: o app agora ocupa 100% da largura/altura sempre — celular, tablet, computador ou instalado como PWA — em vez de aparecer como um cartão centralizado em telas maiores (decisão revertida para dar espaço à tabela de candidatos, que tem 11 colunas). Cada página limita sua própria largura de leitura quando faz sentido (720px para páginas de cartões, 1400px para a página de Candidato).
 - Compatibilidade entre sistemas operacionais (Windows, Android, iOS): tags específicas para instalação como app no iPhone/iPad (que não segue o manifest da mesma forma que Android/Windows), `id` e `display_override` no manifesto, remoção do destaque cinza de toque, resposta de toque mais rápida e sem zoom de duplo toque, e estados de hover no mouse restritos a dispositivos com ponteiro fino (não afetam toque).
+- Fundos de alerta/badge (`--color-*-bg`) passaram a ser translúcidos, para se adaptarem automaticamente ao tema claro/escuro sem precisar de uma variante extra por tema.
 
 ## [0.1.0] - 2026-08-21
 

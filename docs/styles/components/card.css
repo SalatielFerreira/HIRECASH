@@ -80,3 +80,48 @@
     background: var(--color-bg);
   }
 }
+
+.icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+  transition:
+    transform var(--transition-fast),
+    opacity var(--transition-fast);
+}
+
+.icon-button svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+}
+
+.icon-button:active {
+  transform: scale(0.93);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .icon-button:hover {
+    opacity: 0.92;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: var(--space-6) var(--space-5);
+}
+
+.empty-state .card__icon {
+  margin: 0 auto var(--space-3);
+}
+
+.empty-state p {
+  margin-top: var(--space-2);
+}

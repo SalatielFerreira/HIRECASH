@@ -5,6 +5,9 @@
 @import './components/bottomnav.css';
 @import './components/alert.css';
 @import './components/card.css';
+@import './components/form.css';
+@import './components/modal.css';
+@import './components/table.css';
 @import './pages/dashboard.css';
 @import './pages/candidato.css';
 @import './pages/comissao.css';
@@ -16,66 +19,25 @@ body {
 }
 
 body {
-  background: linear-gradient(180deg, #eef0f9, #e2e5f5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  min-height: 100dvh;
-}
-
-@media (prefers-color-scheme: dark) {
-  html:not([data-theme='light']) body {
-    background: #05060a;
-  }
-}
-
-html[data-theme='dark'] body {
-  background: #05060a;
+  background: var(--color-bg);
 }
 
 /*
- * Mobile-first: em telas pequenas (e quando instalado como app) o HireCash
- * ocupa a tela inteira, de ponta a ponta, como um app nativo.
+ * O app ocupa a tela inteira (de ponta a ponta) em qualquer aparelho —
+ * celular, tablet, computador ou instalado como PWA — para caber
+ * conteúdo denso como a tabela de candidatos. Cada página limita a
+ * própria largura de leitura internamente quando faz sentido (ver
+ * .page-candidato etc. abaixo).
  */
 #app {
   position: relative;
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: var(--app-max-width);
   height: 100vh;
   height: 100dvh;
-  margin-inline: auto;
   background: var(--color-bg);
   overflow: hidden;
-}
-
-/*
- * A partir de telas médias/grandes, exibido no navegador, o app vira um
- * "cartão" centralizado com proporção de celular — fica agradável em
- * tablets, notebooks e monitores grandes, em vez de esticar a altura toda.
- */
-@media (min-width: 640px) {
-  #app {
-    height: min(860px, 92vh);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
-  }
-}
-
-/*
- * Quando instalado/aberto como aplicativo (PWA standalone), volta a ocupar
- * a janela inteira, independentemente da largura — sem cantos arredondados
- * nem sombra, como um app de verdade.
- */
-@media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui) {
-  #app {
-    height: 100vh;
-    height: 100dvh;
-    border-radius: 0;
-    box-shadow: none;
-  }
 }
 
 .app-content {
@@ -85,8 +47,19 @@ html[data-theme='dark'] body {
   padding: var(--space-5) var(--space-5) var(--space-6);
 }
 
+.app-content.no-scroll {
+  overflow: hidden;
+}
+
+/*
+ * Sem "both"/"forwards" de propósito: um transform que "gruda" depois da
+ * animação vira containing block para descendentes position:fixed (como
+ * o modal), fazendo-o se ancorar errado. Sem fill-mode, ao terminar o
+ * elemento volta ao transform:none do estilo normal — mesma animação
+ * visual, sem esse efeito colateral.
+ */
 .page-enter {
-  animation: page-in var(--transition-base) both;
+  animation: page-in var(--transition-base);
 }
 
 @keyframes page-in {
@@ -101,10 +74,32 @@ html[data-theme='dark'] body {
   }
 }
 
+/* Largura de leitura confortável para páginas de cartões/texto. */
+.page-dashboard,
+.page-comissao,
+.page-configuracao {
+  max-width: 720px;
+  margin-inline: auto;
+}
+
+/* A página de Candidato tem uma tabela larga (11 colunas) e por isso
+   ganha bem mais espaço antes de também centralizar em telas enormes. */
+.page-candidato {
+  max-width: 1400px;
+  margin-inline: auto;
+}
+
 .page-header {
   margin-bottom: var(--space-5);
 }
 
 .page-header h1 {
   margin-bottom: 2px;
+}
+
+.page-header--with-action {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
 }

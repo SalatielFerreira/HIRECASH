@@ -24,6 +24,8 @@ Sem login — o app abre direto no Dashboard e pode ser instalado como aplicativ
 - **Tema claro/escuro**: alternável manualmente em Configuração (ícones sol/lua), com persistência em `localStorage` e sem flash ao recarregar. A cor de marca (roxo) é a mesma nos dois temas — só fundo, superfícies e texto mudam.
 - **Instalável**: manifesto PWA + service worker com cache do app shell (funciona offline após o primeiro carregamento).
 - **Alertas centralizados**: caixas de alerta (toast) posicionadas entre o topo e o meio da tela, com variações de sucesso, erro, aviso e informação.
+- **Cadastro de candidatos**: botão + na página Candidato abre um modal (só fecha pelo X) com o formulário completo; ao salvar, o candidato aparece como uma linha em uma tabela estilo planilha, persistida em `localStorage`.
+- **Layout de tela cheia e responsivo**: o app ocupa a tela inteira em qualquer aparelho (celular, tablet, computador), sem molduras — importante para telas com bastante dado, como a tabela de candidatos.
 
 ## Stack
 
@@ -50,7 +52,7 @@ HIRECASH/
 │       ├── router.js              # roteamento por hash (#/dashboard...)
 │       ├── components/alert.js    # showAlert()
 │       ├── pages/                 # dashboard.js, candidato.js, comissao.js, configuracao.js
-│       ├── services/              # storage.service.js (wrapper de localStorage)
+│       ├── services/              # storage.service.js, candidatos.service.js
 │       └── utils/                 # logger.js, theme.js (tema claro/escuro)
 ├── scripts/                       # scripts Node de apoio (não vão para produção)
 │   └── generate-icons.js

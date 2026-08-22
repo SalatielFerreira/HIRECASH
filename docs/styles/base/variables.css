@@ -6,15 +6,16 @@
   --color-accent: #10b981;
   --color-accent-dark: #059669;
 
-  /* Semânticas (alertas) */
+  /* Semânticas (alertas, badges) — fundos translúcidos, então já se
+     adaptam sozinhos ao tema claro/escuro sem precisar de variante extra. */
   --color-success: #10b981;
-  --color-success-bg: #ecfdf5;
+  --color-success-bg: rgba(16, 185, 129, 0.14);
   --color-warning: #f59e0b;
-  --color-warning-bg: #fffbeb;
+  --color-warning-bg: rgba(245, 158, 11, 0.16);
   --color-error: #ef4444;
-  --color-error-bg: #fef2f2;
+  --color-error-bg: rgba(239, 68, 68, 0.14);
   --color-info: #3b82f6;
-  --color-info-bg: #eff6ff;
+  --color-info-bg: rgba(59, 130, 246, 0.14);
 
   /* Superfícies e texto */
   --color-bg: #f5f6fa;
@@ -46,7 +47,6 @@
   /* Layout */
   --topbar-height: 60px;
   --bottomnav-height: 76px;
-  --app-max-width: 480px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 
@@ -62,6 +62,7 @@
   --z-topbar: 100;
   --z-bottomnav: 100;
   --z-alert: 1000;
+  --z-modal: 2000;
 }
 
 /*

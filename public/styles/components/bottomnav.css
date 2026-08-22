@@ -46,3 +46,9 @@
 .nav-item.is-active svg {
   transform: translateY(-1px);
 }
+
+@media (hover: hover) and (pointer: fine) {
+  .nav-item:not(.is-active):hover {
+    color: var(--color-primary-light);
+  }
+}

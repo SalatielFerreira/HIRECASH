@@ -11,11 +11,27 @@ body {
   height: 100%;
 }
 
+html {
+  /* Evita que o iOS aumente a fonte automaticamente ao girar a tela. */
+  /* stylelint-disable-next-line property-no-vendor-prefix -- necessário: Safari não suporta a versão sem prefixo */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   overscroll-behavior-y: none;
+
+  /* Remove o retângulo cinza ao tocar em links/botões no iOS e Android. */
+  -webkit-tap-highlight-color: transparent;
+}
+
+a,
+button {
+  /* Resposta de toque mais rápida (sem delay de 300ms) e sem zoom de duplo toque. */
+  touch-action: manipulation;
 }
 
 img,

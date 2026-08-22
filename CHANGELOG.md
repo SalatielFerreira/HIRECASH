@@ -20,6 +20,7 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 ### Alterado
 
 - Layout responsivo: o app agora ocupa a tela inteira (sem molduras) em celulares e quando instalado como PWA; em telas médias/grandes exibidas no navegador (tablet, notebook, monitor), aparece como um cartão centralizado com proporção de celular, cantos arredondados e sombra, em vez de esticar a altura toda da janela.
+- Compatibilidade entre sistemas operacionais (Windows, Android, iOS): tags específicas para instalação como app no iPhone/iPad (que não segue o manifest da mesma forma que Android/Windows), `id` e `display_override` no manifesto, remoção do destaque cinza de toque, resposta de toque mais rápida e sem zoom de duplo toque, e estados de hover no mouse restritos a dispositivos com ponteiro fino (não afetam toque).
 
 ## [0.1.0] - 2026-08-21
 

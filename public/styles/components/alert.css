@@ -68,6 +68,13 @@
   color: var(--color-text-secondary);
   padding: 2px;
   border-radius: var(--radius-sm);
+  transition: color var(--transition-fast);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .alert__close:hover {
+    color: var(--color-text-primary);
+  }
 }
 
 .alert__close svg {

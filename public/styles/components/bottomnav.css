@@ -1,0 +1,48 @@
+.bottomnav {
+  position: sticky;
+  bottom: 0;
+  z-index: var(--z-bottomnav);
+  display: flex;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  box-shadow: 0 -4px 16px rgba(17, 24, 39, 0.06);
+  padding-bottom: var(--safe-bottom);
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px 0 8px;
+  color: var(--color-text-secondary);
+  transition:
+    color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.nav-item svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  transition: transform var(--transition-fast);
+}
+
+.nav-item__label {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.nav-item:active {
+  transform: scale(0.94);
+}
+
+.nav-item.is-active {
+  color: var(--color-primary);
+}
+
+.nav-item.is-active svg {
+  transform: translateY(-1px);
+}

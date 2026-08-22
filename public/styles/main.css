@@ -1,0 +1,65 @@
+@import './base/reset.css';
+@import './base/variables.css';
+@import './base/typography.css';
+@import './components/topbar.css';
+@import './components/bottomnav.css';
+@import './components/alert.css';
+@import './components/card.css';
+@import './pages/dashboard.css';
+@import './pages/candidato.css';
+@import './pages/comissao.css';
+
+body {
+  background: linear-gradient(180deg, #eef0f9, #e2e5f5);
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #05060a;
+  }
+}
+
+#app {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--app-max-width);
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin-inline: auto;
+  background: var(--color-bg);
+  overflow-x: hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+.app-content {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--space-5) var(--space-5) var(--space-6);
+}
+
+.page-enter {
+  animation: page-in var(--transition-base) both;
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-header {
+  margin-bottom: var(--space-5);
+}
+
+.page-header h1 {
+  margin-bottom: 2px;
+}

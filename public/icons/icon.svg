@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6366F1"/>
+      <stop offset="1" stop-color="#4338CA"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <!-- Maleta (hire) -->
+  <path d="M176 208h160a24 24 0 0 1 24 24v128a24 24 0 0 1-24 24H176a24 24 0 0 1-24-24V232a24 24 0 0 1 24-24z"
+        fill="none" stroke="#FFFFFF" stroke-width="18" stroke-linejoin="round"/>
+  <path d="M208 208v-16a24 24 0 0 1 24-24h48a24 24 0 0 1 24 24v16"
+        fill="none" stroke="#FFFFFF" stroke-width="18" stroke-linejoin="round"/>
+  <line x1="152" y1="272" x2="360" y2="272" stroke="#FFFFFF" stroke-width="18"/>
+
+  <!-- Moeda (cash) -->
+  <circle cx="256" cy="272" r="34" fill="#10B981" stroke="#FFFFFF" stroke-width="10"/>
+  <text x="256" y="283" font-family="Arial, sans-serif" font-size="34" font-weight="700"
+        text-anchor="middle" fill="#FFFFFF">$</text>
+</svg>

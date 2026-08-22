@@ -61,6 +61,7 @@
   /* Camadas */
   --z-topbar: 100;
   --z-bottomnav: 100;
+  --z-banner: 900;
   --z-alert: 1000;
   --z-modal: 2000;
 }

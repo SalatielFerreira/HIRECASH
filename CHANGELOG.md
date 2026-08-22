@@ -7,6 +7,18 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.3.0] - 2026-08-22
+
+### Adicionado
+
+- Banner "Atualização disponível" (botão Atualizar): quando uma nova versão do app é publicada, o service worker a baixa em segundo plano e este banner aparece centralizado logo acima da barra de navegação inferior. Ao confirmar, a nova versão assume e a página recarrega sozinha. Antes disso, também passa a checar por atualizações sempre que o usuário volta para a aba.
+- Banner "Instalar aplicativo" (mesmo formato visual): aparece ao abrir o app se ele ainda não estiver instalado. No Android/desktop usa o prompt nativo do navegador (botão Instalar aciona a instalação de verdade); no iPhone/iPad, como o Safari não permite instalar via código, mostra instruções ("toque em Compartilhar e depois em Adicionar à Tela de Início"). Fica de fora se o app já estiver instalado, e não volta a incomodar depois que o usuário confirma ou fecha.
+- Componente de banner reutilizável (`banner.js` / `banner.css`), diferente do alerta (toast) existente — fica na tela até o usuário agir, em vez de sumir sozinho.
+
+### Alterado
+
+- O service worker não ativa mais uma nova versão sozinho: agora ela fica "esperando" até o usuário confirmar no banner de atualização, evitando trocar o app debaixo do usuário sem aviso.
+
 ## [0.2.0] - 2026-08-22
 
 ### Adicionado

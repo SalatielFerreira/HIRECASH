@@ -23,7 +23,8 @@ Sem login — o app abre direto no Dashboard e pode ser instalado como aplicativ
 - **Sem autenticação**: o app abre direto no Dashboard.
 - **4 abas** na barra inferior, nesta ordem: **Candidato** → **Dashboard** (inicial) → **Comissão** → **Configuração**.
 - **Tema claro/escuro**: alternável manualmente em Configuração (ícones sol/lua), com persistência em `localStorage` e sem flash ao recarregar. A cor de marca (roxo) é a mesma nos dois temas — só fundo, superfícies e texto mudam.
-- **Instalável**: manifesto PWA + service worker com cache do app shell (funciona offline após o primeiro carregamento).
+- **Instalável**: manifesto PWA + service worker com cache do app shell (funciona offline após o primeiro carregamento). Ao abrir o app sem ele estar instalado, aparece um banner "Instalar aplicativo" — prompt nativo no Android/desktop, instruções de "Adicionar à Tela de Início" no iPhone/iPad (o Safari não permite instalar por código).
+- **Atualização com aviso**: uma nova versão publicada não troca o app sozinha — um banner "Atualização disponível" avisa o usuário, e só recarrega quando ele confirma.
 - **Alertas centralizados**: caixas de alerta (toast) posicionadas entre o topo e o meio da tela, com variações de sucesso, erro, aviso e informação.
 - **Cadastro de candidatos**: botão + na página Candidato abre um modal (só fecha pelo X) com o formulário completo; ao salvar, o candidato aparece como uma linha em uma tabela estilo planilha, persistida em `localStorage`.
 - **Layout de tela cheia e responsivo**: o app ocupa a tela inteira em qualquer aparelho (celular, tablet, computador), sem molduras — importante para telas com bastante dado, como a tabela de candidatos.
@@ -46,15 +47,15 @@ HIRECASH/
 │   ├── icons/                     # Ícones do PWA (icon.svg é a fonte)
 │   ├── styles/
 │   │   ├── base/                  # reset, variáveis de design, tipografia
-│   │   ├── components/            # topbar, bottomnav, alert, card
+│   │   ├── components/            # topbar, bottomnav, alert, banner, card...
 │   │   ├── pages/                 # estilos específicos de cada página
 │   │   └── main.css
 │   └── scripts/
 │       ├── app.js                 # ponto de entrada
 │       ├── router.js              # roteamento por hash (#/dashboard...)
-│       ├── components/alert.js    # showAlert()
+│       ├── components/            # alert.js (showAlert), banner.js (showBanner)
 │       ├── pages/                 # dashboard.js, candidato.js, comissao.js, configuracao.js
-│       ├── services/              # storage.service.js, candidatos.service.js
+│       ├── services/              # storage, candidatos, update (atualização), install (instalar)
 │       ├── utils/                 # logger.js, theme.js (tema claro/escuro)
 │       └── version.js             # nome + versão exibidos em Configuração
 ├── scripts/                       # scripts Node de apoio (não vão para produção)

@@ -10,6 +10,9 @@ const ICON_PLUS =
 const ICON_CLOSE =
   '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
 
+const ICON_SEARCH =
+  '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
+
 const STATUS_VAGA_OPTIONS = ['Não publicada', 'Publicada', 'Congelada', 'Cancelada'];
 const MODALIDADE_OPTIONS = ['Presencial', 'Remoto', 'Híbrido'];
 const FONTE_OPTIONS = ['Gupy', 'Indicação', 'LinkedIn'];
@@ -86,6 +89,33 @@ function escapeHtml(value) {
 
 function formatCurrency(cents) {
   return (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+/**
+ * Ordenação em português, ignorando maiúsculas e acentos, e com números
+ * lidos como números — "Vaga 2" vem antes de "Vaga 10", não depois.
+ */
+const collator = new Intl.Collator('pt-BR', { sensitivity: 'base', numeric: true });
+
+/** Lista ordenada pelo nome da vaga; empate desempata pelo nome do candidato. */
+function ordenarPorVaga(candidatos) {
+  return [...candidatos].sort(
+    (a, b) =>
+      collator.compare(a.vaga || '', b.vaga || '') || collator.compare(a.nome || '', b.nome || '')
+  );
+}
+
+/** Minúsculas e sem acento, para a busca casar "Analista" com "analista". */
+function normalizar(texto) {
+  return String(texto ?? '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '');
+}
+
+/** Texto que a barra de busca compara: vaga + nome do candidato. */
+function textoBusca(candidato) {
+  return normalizar(`${candidato.vaga || ''} ${candidato.nome || ''}`);
 }
 
 function badge(text, variant) {
@@ -185,11 +215,23 @@ function candidatoRow(candidato) {
       `<td class="data-table__cell" data-id="${escapeHtml(candidato.id)}" data-field="${field.key}" tabindex="0">${cellContent(field, candidato)}</td>`
   ).join('');
 
-  return `<tr>${cells}</tr>`;
+  return `<tr data-busca="${escapeHtml(textoBusca(candidato))}">${cells}</tr>`;
 }
 
 function renderTable(candidatos) {
   return `
+    <div class="search-bar">
+      <span class="search-bar__icon">${ICON_SEARCH}</span>
+      <input
+        type="search"
+        id="busca-candidato"
+        class="search-bar__input"
+        placeholder="Buscar por vaga ou candidato"
+        aria-label="Buscar por vaga ou candidato"
+        autocomplete="off"
+      />
+    </div>
+
     <div class="data-table-scroll">
       <table class="data-table">
         <thead>
@@ -202,6 +244,8 @@ function renderTable(candidatos) {
         </tbody>
       </table>
     </div>
+
+    <p class="search-empty" id="busca-vazia" hidden>Nenhum candidato encontrado.</p>
   `;
 }
 
@@ -277,7 +321,7 @@ export const candidatoPage = {
   title: 'Candidato',
 
   render() {
-    const candidatos = listCandidatos();
+    const candidatos = ordenarPorVaga(listCandidatos());
 
     return `
       <div class="page-candidato page-enter">
@@ -397,6 +441,30 @@ export const candidatoPage = {
       return;
     }
 
+    // --- Busca por vaga ou nome do candidato -------------------------
+    // Filtra escondendo linhas, em vez de re-renderizar a tabela, para
+    // não perder o foco (nem o texto) do campo a cada tecla digitada.
+
+    const searchInput = container.querySelector('#busca-candidato');
+    const searchEmpty = container.querySelector('#busca-vazia');
+
+    function aplicarFiltro() {
+      const termo = normalizar(searchInput.value.trim());
+      let visiveis = 0;
+
+      tbody.querySelectorAll('tr').forEach((row) => {
+        const casa = !termo || row.dataset.busca.includes(termo);
+        row.hidden = !casa;
+        if (casa) {
+          visiveis += 1;
+        }
+      });
+
+      searchEmpty.hidden = visiveis > 0;
+    }
+
+    searchInput.addEventListener('input', aplicarFiltro);
+
     let editing = null;
 
     function finishEdit(save) {
@@ -429,6 +497,15 @@ export const candidatoPage = {
 
       cell.classList.remove('is-editing');
       cell.innerHTML = cellContent(field, atualizado);
+
+      // Editar vaga ou nome muda o que a busca deve encontrar. A ordenação
+      // por vaga, essa fica como está até a próxima renderização — mover a
+      // linha de lugar embaixo do dedo do usuário seria pior.
+      const row = cell.closest('tr');
+      if (row) {
+        row.dataset.busca = textoBusca(atualizado);
+      }
+      aplicarFiltro();
     }
 
     function startEdit(cell) {

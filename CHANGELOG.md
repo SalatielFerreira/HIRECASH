@@ -7,6 +7,21 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.6.0] - 2026-09-03
+
+### Adicionado
+
+- **Barra de busca** acima da tabela de candidatos, filtrando pelo nome da **vaga** ou pelo nome do **candidato** ao mesmo tempo. Ignora maiúsculas e acentos ("comissao" encontra "Comissão"). Quando nada casa, aparece "Nenhum candidato encontrado".
+  - O filtro esconde e mostra linhas em vez de redesenhar a tabela, para não perder o foco nem o texto digitado a cada tecla.
+  - Editar a vaga ou o nome direto na tabela atualiza o que a busca enxerga na hora.
+
+### Alterado
+
+- **Tabela de candidatos ordenada pelo nome da vaga**, em ordem alfabética de português (ignora acentos e maiúsculas), com o nome do candidato como desempate. Números são lidos como números, então "Vaga 2" vem antes de "Vaga 10". A ordem é aplicada a cada renderização da página — editar a vaga de uma linha não a move de lugar na hora, para não puxar a linha debaixo do dedo do usuário no meio da edição.
+- Botão **Importar** (Configuração) agora é verde (`--color-accent`), a mesma cor do ícone da página de Comissão, em vez de contornado. Nova variante `.btn--accent`.
+- Título da barra superior aumentado de 17px para 30px (quase o dobro), com entrelinha e espaçamento ajustados para continuar cabendo na altura de 60px da barra.
+- `CACHE_VERSION` do service worker: `hirecash-v7` → `hirecash-v8`.
+
 ## [0.5.0] - 2026-09-03
 
 ### Adicionado

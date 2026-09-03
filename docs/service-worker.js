@@ -5,7 +5,7 @@
  *
  * IMPORTANTE: incremente CACHE_VERSION a cada release para invalidar o cache antigo.
  */
-const CACHE_VERSION = 'hirecash-v7';
+const CACHE_VERSION = 'hirecash-v8';
 
 const APP_SHELL = [
   './',

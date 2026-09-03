@@ -142,7 +142,7 @@ export const configuracaoPage = {
               ${ICON_EXPORT}
               Exportar
             </button>
-            <button type="button" class="btn btn--outline" id="btn-importar">
+            <button type="button" class="btn btn--accent" id="btn-importar">
               ${ICON_IMPORT}
               Importar
             </button>

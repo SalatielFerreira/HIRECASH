@@ -29,10 +29,13 @@
   stroke: var(--color-text-inverse);
 }
 
+/* Quase o dobro do tamanho anterior (17px). Cabe nos 60px da barra:
+   30px × 1.15 de entrelinha ≈ 35px. */
 .topbar__title {
-  font-size: 17px;
+  font-size: 30px;
   font-weight: 700;
-  letter-spacing: -0.01em;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
 }
 
 .topbar__title span {

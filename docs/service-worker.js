@@ -5,13 +5,36 @@
  *
  * IMPORTANTE: incremente CACHE_VERSION a cada release para invalidar o cache antigo.
  */
-const CACHE_VERSION = 'hirecash-v9';
+const CACHE_VERSION = 'hirecash-v10';
 
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
+
+  // Todos os CSS precisam estar aqui, não só o main.css: o navegador
+  // resolve os @import dele como requisições próprias, e o que não está
+  // no app shell não é rebaixado no install de uma versão nova — fica
+  // saindo do cache antigo até a revalidação em segundo plano. Era isso
+  // que fazia uma release aparecer com HTML novo e CSS velho no primeiro
+  // carregamento. Ao acrescentar um CSS em main.css, acrescente aqui também.
   './styles/main.css',
+  './styles/base/reset.css',
+  './styles/base/variables.css',
+  './styles/base/typography.css',
+  './styles/components/topbar.css',
+  './styles/components/bottomnav.css',
+  './styles/components/alert.css',
+  './styles/components/banner.css',
+  './styles/components/card.css',
+  './styles/components/form.css',
+  './styles/components/modal.css',
+  './styles/components/table.css',
+  './styles/pages/dashboard.css',
+  './styles/pages/candidato.css',
+  './styles/pages/comissao.css',
+  './styles/pages/configuracao.css',
+
   './scripts/app.js',
   './scripts/router.js',
   './scripts/version.js',

@@ -7,6 +7,13 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.6.2] - 2026-09-03
+
+### Corrigido
+
+- **Uma versão nova podia carregar com HTML novo e CSS antigo.** O `APP_SHELL` do service worker listava só `styles/main.css`, mas o navegador resolve cada `@import` dele como uma requisição própria — e os 15 arquivos importados não estavam no app shell. Como só o que está no app shell é rebaixado no `install`, os parciais continuavam vindo do cache antigo até a revalidação em segundo plano, ou seja, um carregamento inteiro depois. Na 0.6.1 isso apareceu de forma grave: o SVG novo da barra superior chegava sem as regras que o posicionam, entrava no fluxo do flex e empurrava o título para a direita, transbordando a barra. Todos os CSS entraram no `APP_SHELL`.
+- `CACHE_VERSION` do service worker: `hirecash-v9` → `hirecash-v10`.
+
 ## [0.6.1] - 2026-09-03
 
 ### Alterado

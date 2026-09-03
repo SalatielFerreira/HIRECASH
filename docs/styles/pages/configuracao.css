@@ -79,6 +79,32 @@
   opacity: 1;
 }
 
+.backup-hint {
+  margin-top: var(--space-3);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+/* Os dois botões dividem a largura em partes iguais, lado a lado, para
+   ficarem confortáveis de tocar também em tela estreita. */
+.backup-actions {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.backup-actions .btn {
+  flex: 1;
+  min-width: 0;
+}
+
+.backup-actions .btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  flex-shrink: 0;
+}
+
 .app-version {
   margin-top: var(--space-6);
   text-align: center;

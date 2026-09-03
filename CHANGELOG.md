@@ -7,6 +7,20 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.5.0] - 2026-09-03
+
+### Adicionado
+
+- **Backup dos candidatos** na página de Configuração, em um cartão logo abaixo de "Aparência", com dois botões lado a lado:
+  - **Exportar** gera um arquivo `hirecash-candidatos-AAAA-MM-DD.json`. No celular/tablet abre a folha de compartilhamento do sistema (dá para mandar para o WhatsApp, e-mail, Google Drive...); no computador abre o diálogo "Salvar como" (Chrome/Edge). Em navegador sem esses recursos, cai no download direto.
+  - **Importar** abre o explorador de arquivos para escolher um backup.
+  - O cartão mostra quantos candidatos existem no aparelho e lembra que os dados ficam só neste navegador.
+- `buildBackup()` e `importCandidatos(payload)` em `candidatos.service.js`. A importação casa pelo `id`: atualiza quem já existe e acrescenta o resto — **nunca apaga** um candidato que não esteja no arquivo, então importar um backup antigo não derruba cadastros novos. O alerta informa quantos entraram e quantos foram atualizados. Aceita também uma lista solta de candidatos (sem o envelope do backup), e gera `id` para registros que não tiverem.
+
+### Corrigido
+
+- `CACHE_VERSION` do service worker não foi incrementado na 0.4.0 (ficou em `hirecash-v6`), o que deixava o app shell em cache apontando para a versão anterior até a revalidação em segundo plano. Agora em `hirecash-v7`.
+
 ## [0.4.0] - 2026-09-03
 
 ### Adicionado

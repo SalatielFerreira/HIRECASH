@@ -1,4 +1,7 @@
 import { getTheme, toggleTheme } from '../utils/theme.js';
+import { showAlert } from '../components/alert.js';
+import { buildBackup, importCandidatos, listCandidatos } from '../services/candidatos.service.js';
+import { logger } from '../utils/logger.js';
 import { APP_NAME, APP_VERSION } from '../version.js';
 
 const ICON_CONFIG =
@@ -10,10 +13,77 @@ const ICON_SUN =
 const ICON_MOON =
   '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>';
 
+const ICON_SHIELD =
+  '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>';
+
+const ICON_EXPORT =
+  '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>';
+
+const ICON_IMPORT =
+  '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg>';
+
+function backupFileName() {
+  return `hirecash-candidatos-${new Date().toISOString().slice(0, 10)}.json`;
+}
+
+function plural(quantidade, singular, pluralForma) {
+  return `${quantidade} ${quantidade === 1 ? singular : pluralForma}`;
+}
+
+/** Em aparelho de toque preferimos o compartilhamento nativo do sistema. */
+function isTouchDevice() {
+  return window.matchMedia('(pointer: coarse)').matches;
+}
+
+/**
+ * Salva o backup usando o melhor recurso disponível no aparelho:
+ * 1. celular/tablet → folha de compartilhamento do sistema;
+ * 2. navegador com File System Access (Chrome/Edge) → diálogo "Salvar como";
+ * 3. demais → download direto na pasta padrão.
+ *
+ * Retorna `false` quando o usuário cancela, para não exibir alerta de sucesso.
+ */
+async function salvarArquivo(conteudo, nome) {
+  const arquivo = new File([conteudo], nome, { type: 'application/json' });
+
+  if (isTouchDevice() && navigator.canShare?.({ files: [arquivo] })) {
+    await navigator.share({ files: [arquivo], title: nome });
+    return true;
+  }
+
+  if (typeof window.showSaveFilePicker === 'function') {
+    const handle = await window.showSaveFilePicker({
+      suggestedName: nome,
+      types: [
+        {
+          description: 'Backup HireCash',
+          accept: { 'application/json': ['.json'] },
+        },
+      ],
+    });
+    const writable = await handle.createWritable();
+    await writable.write(conteudo);
+    await writable.close();
+    return true;
+  }
+
+  const url = URL.createObjectURL(new Blob([conteudo], { type: 'application/json' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = nome;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  return true;
+}
+
 export const configuracaoPage = {
   title: 'Configuração',
 
   render() {
+    const total = listCandidatos().length;
+
     return `
       <div class="page-configuracao page-enter">
         <header class="page-header">
@@ -47,6 +117,45 @@ export const configuracaoPage = {
           </div>
         </section>
 
+        <section class="card">
+          <div class="card__header">
+            <span class="card__icon">${ICON_SHIELD}</span>
+            <h2>Backup dos candidatos</h2>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-row__text">
+              <h3>Cópia de segurança</h3>
+              <p class="text-muted" id="backup-status">
+                ${plural(total, 'candidato salvo', 'candidatos salvos')} neste aparelho
+              </p>
+            </div>
+          </div>
+
+          <p class="text-muted backup-hint">
+            Os candidatos ficam guardados só neste navegador. Exporte um arquivo de vez em
+            quando para não perder nada ao limpar os dados do navegador ou trocar de aparelho.
+          </p>
+
+          <div class="backup-actions">
+            <button type="button" class="btn btn--primary" id="btn-exportar">
+              ${ICON_EXPORT}
+              Exportar
+            </button>
+            <button type="button" class="btn btn--outline" id="btn-importar">
+              ${ICON_IMPORT}
+              Importar
+            </button>
+          </div>
+
+          <input
+            type="file"
+            id="backup-file"
+            accept="application/json,.json"
+            hidden
+          />
+        </section>
+
         <footer class="app-version">
           <p class="app-version__name">${APP_NAME}</p>
           <p class="app-version__number">Versão ${APP_VERSION}</p>
@@ -70,6 +179,94 @@ export const configuracaoPage = {
 
     button.addEventListener('click', () => {
       sync(toggleTheme());
+    });
+
+    // --- Backup: exportar e importar ---------------------------------
+
+    const exportButton = container.querySelector('#btn-exportar');
+    const importButton = container.querySelector('#btn-importar');
+    const fileInput = container.querySelector('#backup-file');
+    const backupStatus = container.querySelector('#backup-status');
+
+    function atualizarContagem() {
+      const total = listCandidatos().length;
+      backupStatus.textContent = `${plural(total, 'candidato salvo', 'candidatos salvos')} neste aparelho`;
+    }
+
+    exportButton.addEventListener('click', async () => {
+      const backup = buildBackup();
+
+      if (backup.candidatos.length === 0) {
+        showAlert({
+          type: 'warning',
+          title: 'Nada para exportar',
+          message: 'Nenhum candidato cadastrado ainda.',
+        });
+        return;
+      }
+
+      const nome = backupFileName();
+
+      try {
+        await salvarArquivo(JSON.stringify(backup, null, 2), nome);
+        logger.info('backup', `Backup exportado (${backup.candidatos.length} candidatos)`);
+        showAlert({
+          type: 'success',
+          title: 'Backup exportado',
+          message: `${plural(backup.candidatos.length, 'candidato salvo', 'candidatos salvos')} em ${nome}.`,
+        });
+      } catch (error) {
+        // O usuário fechar o diálogo de salvar/compartilhar não é erro.
+        if (error?.name === 'AbortError') {
+          return;
+        }
+        logger.error('backup', 'Falha ao exportar candidatos', error);
+        showAlert({
+          type: 'error',
+          title: 'Não foi possível exportar',
+          message: 'Tente novamente. Se persistir, use outro navegador.',
+        });
+      }
+    });
+
+    importButton.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', async () => {
+      const arquivo = fileInput.files?.[0];
+      if (!arquivo) {
+        return;
+      }
+
+      try {
+        const resultado = importCandidatos(JSON.parse(await arquivo.text()));
+
+        if (!resultado) {
+          showAlert({
+            type: 'error',
+            title: 'Arquivo não reconhecido',
+            message: 'Selecione um arquivo de backup exportado pelo HireCash.',
+          });
+          return;
+        }
+
+        atualizarContagem();
+        logger.info('backup', 'Backup importado', resultado);
+        showAlert({
+          type: 'success',
+          title: 'Backup importado',
+          message: `${plural(resultado.novos, 'candidato novo', 'candidatos novos')} e ${plural(resultado.atualizados, 'atualizado', 'atualizados')}.`,
+        });
+      } catch (error) {
+        logger.error('backup', 'Falha ao importar candidatos', error);
+        showAlert({
+          type: 'error',
+          title: 'Arquivo inválido',
+          message: 'Não foi possível ler este arquivo. Verifique se é o backup correto.',
+        });
+      } finally {
+        // Zera para permitir importar o mesmo arquivo de novo em seguida.
+        fileInput.value = '';
+      }
     });
   },
 };

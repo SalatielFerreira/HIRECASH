@@ -10,6 +10,30 @@
   background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
   color: var(--color-text-inverse);
   box-shadow: var(--shadow-md);
+
+  /* As facetas sao recortadas na borda da barra. */
+  overflow: hidden;
+}
+
+/*
+ * Padrao facetado de fundo: um leque de triangulos em preto e branco
+ * translucidos por cima do gradiente roxo. Como sao apenas camadas de luz
+ * e sombra, a cor vem sempre de --color-primary — mudar a cor de marca
+ * muda o padrao junto, sem tocar no SVG.
+ */
+.topbar__facets {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Emblema e titulo ficam acima das facetas. */
+.topbar__badge,
+.topbar__title {
+  position: relative;
+  z-index: 1;
 }
 
 .topbar__badge {
@@ -19,7 +43,8 @@
   width: 34px;
   height: 34px;
   border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(2px);
   flex-shrink: 0;
 }
 

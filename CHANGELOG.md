@@ -7,6 +7,14 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.6.1] - 2026-09-03
+
+### Alterado
+
+- **Barra superior com fundo facetado**: leque de facetas angulares partindo de um ponto abaixo da barra, no estilo de fundo geométrico "low poly" pedido. As facetas são apenas camadas de preto e branco translúcidos sobre o gradiente roxo existente (`--color-primary` → `--color-primary-dark`), então o padrão continua na cor de marca atual e acompanha qualquer mudança dela sem precisar mexer no SVG. O canto superior esquerdo ficou mais escuro, o que também melhorou o contraste do título sobre o fundo.
+- Emblema da barra superior com leve desfoque de fundo (`backdrop-filter`) e opacidade um pouco maior, para não se perder sobre as facetas.
+- `CACHE_VERSION` do service worker: `hirecash-v8` → `hirecash-v9`.
+
 ## [0.6.0] - 2026-09-03
 
 ### Adicionado

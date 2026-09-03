@@ -1,5 +1,5 @@
 import { showAlert } from '../components/alert.js';
-import { addCandidato, listCandidatos } from '../services/candidatos.service.js';
+import { addCandidato, listCandidatos, updateCandidato } from '../services/candidatos.service.js';
 
 const ICON_CANDIDATO =
   '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>';
@@ -39,6 +39,42 @@ const STATUS_CANDIDATO_BADGE = {
   Aprovado: 'success',
 };
 
+/**
+ * Fonte única dos campos do candidato: o formulário do modal, as colunas da
+ * tabela e o editor inline são todos derivados daqui, para que as opções
+ * disponíveis na edição sejam sempre as mesmas do cadastro.
+ *
+ * - `label`  rótulo no formulário
+ * - `header` cabeçalho na tabela (quando difere do rótulo)
+ * - `type`   text | select | textarea | currency | link
+ * - `badges` mapa valor → variante de badge (colore a célula na tabela)
+ */
+const FIELDS = [
+  { key: 'vaga', label: 'Vaga', type: 'text', required: true },
+  {
+    key: 'statusVaga',
+    label: 'Status da vaga',
+    type: 'select',
+    options: STATUS_VAGA_OPTIONS,
+    badges: STATUS_VAGA_BADGE,
+  },
+  { key: 'nome', label: 'Nome do candidato', header: 'Candidato', type: 'text', required: true },
+  { key: 'linkedin', label: 'LinkedIn', type: 'link', placeholder: 'linkedin.com/in/...' },
+  { key: 'pretensao', label: 'Pretensão salarial', type: 'currency', placeholder: 'R$ 0,00' },
+  { key: 'localizacao', label: 'Localização', type: 'text', placeholder: 'Cidade/UF' },
+  { key: 'modalidade', label: 'Modalidade', type: 'select', options: MODALIDADE_OPTIONS },
+  { key: 'fonte', label: 'Fonte', type: 'select', options: FONTE_OPTIONS },
+  { key: 'etapa', label: 'Etapa', type: 'select', options: ETAPA_OPTIONS },
+  {
+    key: 'statusCandidato',
+    label: 'Status do candidato',
+    type: 'select',
+    options: STATUS_CANDIDATO_OPTIONS,
+    badges: STATUS_CANDIDATO_BADGE,
+  },
+  { key: 'observacao', label: 'Observação', type: 'textarea', full: true },
+];
+
 function escapeHtml(value) {
   return String(value ?? '')
     .replaceAll('&', '&amp;')
@@ -46,10 +82,6 @@ function escapeHtml(value) {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#39;');
-}
-
-function selectOptions(options) {
-  return options.map((option) => `<option value="${option}">${option}</option>`).join('');
 }
 
 function formatCurrency(cents) {
@@ -60,26 +92,100 @@ function badge(text, variant) {
   return `<span class="badge badge--${variant}">${escapeHtml(text)}</span>`;
 }
 
-function candidatoRow(candidato) {
-  const linkedinCell = candidato.linkedin
-    ? `<a href="${escapeHtml(candidato.linkedin)}" target="_blank" rel="noopener noreferrer">Perfil</a>`
-    : '—';
+function attachCurrencyMask(input) {
+  input.addEventListener('input', () => {
+    const digits = input.value.replace(/\D/g, '');
+    input.value = digits ? formatCurrency(parseInt(digits, 10)) : '';
+  });
+}
 
-  return `
-    <tr>
-      <td>${escapeHtml(candidato.vaga)}</td>
-      <td>${badge(candidato.statusVaga, STATUS_VAGA_BADGE[candidato.statusVaga] || 'neutral')}</td>
-      <td>${escapeHtml(candidato.nome)}</td>
-      <td>${linkedinCell}</td>
-      <td>${candidato.pretensao ? formatCurrency(candidato.pretensao) : '—'}</td>
-      <td>${escapeHtml(candidato.localizacao) || '—'}</td>
-      <td>${escapeHtml(candidato.modalidade)}</td>
-      <td>${escapeHtml(candidato.fonte)}</td>
-      <td>${escapeHtml(candidato.etapa)}</td>
-      <td>${badge(candidato.statusCandidato, STATUS_CANDIDATO_BADGE[candidato.statusCandidato] || 'neutral')}</td>
-      <td>${escapeHtml(candidato.observacao) || '—'}</td>
-    </tr>
-  `;
+/** Converte o valor cru de um controle no valor armazenado do candidato. */
+function parseValue(field, raw) {
+  if (field.type === 'currency') {
+    const digits = String(raw ?? '').replace(/\D/g, '');
+    return digits ? parseInt(digits, 10) : 0;
+  }
+
+  if (field.type === 'select') {
+    return raw;
+  }
+
+  const value = String(raw ?? '').trim();
+  if (field.type === 'link' && value && !/^https?:\/\//i.test(value)) {
+    return `https://${value}`;
+  }
+  return value;
+}
+
+/** Valor exibido dentro do controle de edição (input/select/textarea). */
+function inputValue(field, candidato) {
+  const value = candidato[field.key];
+  if (field.type === 'currency') {
+    return value ? formatCurrency(value) : '';
+  }
+  return value ?? '';
+}
+
+const EMPTY_CELL = '<span class="cell-empty">—</span>';
+
+/** Conteúdo de leitura de uma célula da tabela. */
+function cellContent(field, candidato) {
+  const value = candidato[field.key];
+
+  if (field.badges) {
+    return badge(value, field.badges[value] || 'neutral');
+  }
+
+  if (field.type === 'link') {
+    return value
+      ? `<a href="${escapeHtml(value)}" target="_blank" rel="noopener noreferrer">Perfil</a>`
+      : EMPTY_CELL;
+  }
+
+  if (field.type === 'currency') {
+    return value ? formatCurrency(value) : EMPTY_CELL;
+  }
+
+  return escapeHtml(value) || EMPTY_CELL;
+}
+
+/** Controle de edição inline de uma célula, no mesmo formato do cadastro. */
+function editorHtml(field, candidato) {
+  const value = candidato[field.key];
+
+  if (field.type === 'select') {
+    const options = field.options
+      .map(
+        (option) =>
+          `<option value="${escapeHtml(option)}"${option === value ? ' selected' : ''}>${escapeHtml(option)}</option>`
+      )
+      .join('');
+    return `<select class="cell-editor" aria-label="${escapeHtml(field.label)}">${options}</select>`;
+  }
+
+  if (field.type === 'textarea') {
+    return `<textarea class="cell-editor" rows="2" aria-label="${escapeHtml(field.label)}">${escapeHtml(value)}</textarea>`;
+  }
+
+  const attrs = [
+    'type="text"',
+    'class="cell-editor"',
+    `aria-label="${escapeHtml(field.label)}"`,
+    `value="${escapeHtml(inputValue(field, candidato))}"`,
+    field.placeholder ? `placeholder="${escapeHtml(field.placeholder)}"` : '',
+    field.type === 'currency' ? 'inputmode="numeric"' : '',
+  ].filter(Boolean);
+
+  return `<input ${attrs.join(' ')} />`;
+}
+
+function candidatoRow(candidato) {
+  const cells = FIELDS.map(
+    (field) =>
+      `<td class="data-table__cell" data-id="${escapeHtml(candidato.id)}" data-field="${field.key}" tabindex="0">${cellContent(field, candidato)}</td>`
+  ).join('');
+
+  return `<tr>${cells}</tr>`;
 }
 
 function renderTable(candidatos) {
@@ -88,20 +194,10 @@ function renderTable(candidatos) {
       <table class="data-table">
         <thead>
           <tr>
-            <th>Vaga</th>
-            <th>Status da vaga</th>
-            <th>Candidato</th>
-            <th>LinkedIn</th>
-            <th>Pretensão salarial</th>
-            <th>Localização</th>
-            <th>Modalidade</th>
-            <th>Fonte</th>
-            <th>Etapa</th>
-            <th>Status do candidato</th>
-            <th>Observação</th>
+            ${FIELDS.map((field) => `<th>${escapeHtml(field.header || field.label)}</th>`).join('')}
           </tr>
         </thead>
-        <tbody>
+        <tbody id="candidatos-tbody">
           ${candidatos.map(candidatoRow).join('')}
         </tbody>
       </table>
@@ -119,6 +215,37 @@ function renderEmptyState() {
   `;
 }
 
+function modalField(field) {
+  const id = `f-${field.key}`;
+  let control;
+
+  if (field.type === 'select') {
+    const options = field.options
+      .map((option) => `<option value="${escapeHtml(option)}">${escapeHtml(option)}</option>`)
+      .join('');
+    control = `<select id="${id}" name="${field.key}">${options}</select>`;
+  } else if (field.type === 'textarea') {
+    control = `<textarea id="${id}" name="${field.key}" rows="3"></textarea>`;
+  } else {
+    const attrs = [
+      'type="text"',
+      `id="${id}"`,
+      `name="${field.key}"`,
+      field.required ? 'required' : '',
+      field.placeholder ? `placeholder="${escapeHtml(field.placeholder)}"` : '',
+      field.type === 'currency' ? 'inputmode="numeric"' : '',
+    ].filter(Boolean);
+    control = `<input ${attrs.join(' ')} />`;
+  }
+
+  return `
+    <div class="field${field.full ? ' field--full' : ''}">
+      <label for="${id}">${escapeHtml(field.label)}</label>
+      ${control}
+    </div>
+  `;
+}
+
 function renderModal() {
   return `
     <div class="modal-overlay" id="candidato-modal-overlay">
@@ -133,71 +260,7 @@ function renderModal() {
         <form id="candidato-form" class="modal__form" novalidate>
           <div class="modal__body">
             <div class="form-grid">
-              <div class="field">
-                <label for="f-vaga">Vaga</label>
-                <input type="text" id="f-vaga" name="vaga" required />
-              </div>
-
-              <div class="field">
-                <label for="f-status-vaga">Status da vaga</label>
-                <select id="f-status-vaga" name="statusVaga">${selectOptions(STATUS_VAGA_OPTIONS)}</select>
-              </div>
-
-              <div class="field">
-                <label for="f-nome">Nome do candidato</label>
-                <input type="text" id="f-nome" name="nome" required />
-              </div>
-
-              <div class="field">
-                <label for="f-linkedin">LinkedIn</label>
-                <input
-                  type="text"
-                  id="f-linkedin"
-                  name="linkedin"
-                  placeholder="linkedin.com/in/..."
-                />
-              </div>
-
-              <div class="field">
-                <label for="f-pretensao">Pretensão salarial</label>
-                <input
-                  type="text"
-                  id="f-pretensao"
-                  name="pretensao"
-                  inputmode="numeric"
-                  placeholder="R$ 0,00"
-                />
-              </div>
-
-              <div class="field">
-                <label for="f-localizacao">Localização</label>
-                <input type="text" id="f-localizacao" name="localizacao" placeholder="Cidade/UF" />
-              </div>
-
-              <div class="field">
-                <label for="f-modalidade">Modalidade</label>
-                <select id="f-modalidade" name="modalidade">${selectOptions(MODALIDADE_OPTIONS)}</select>
-              </div>
-
-              <div class="field">
-                <label for="f-fonte">Fonte</label>
-                <select id="f-fonte" name="fonte">${selectOptions(FONTE_OPTIONS)}</select>
-              </div>
-
-              <div class="field">
-                <label for="f-etapa">Etapa</label>
-                <select id="f-etapa" name="etapa">${selectOptions(ETAPA_OPTIONS)}</select>
-              </div>
-
-              <div class="field">
-                <label for="f-status-candidato">Status do candidato</label>
-                <select id="f-status-candidato" name="statusCandidato">${selectOptions(STATUS_CANDIDATO_OPTIONS)}</select>
-              </div>
-
-              <div class="field field--full">
-                <label for="f-observacao">Observação</label>
-                <textarea id="f-observacao" name="observacao" rows="3"></textarea>
-              </div>
+              ${FIELDS.map(modalField).join('')}
             </div>
           </div>
 
@@ -221,7 +284,10 @@ export const candidatoPage = {
         <header class="page-header page-header--with-action">
           <div>
             <h1>Candidato</h1>
-            <p class="text-muted">Cadastro e acompanhamento de candidatos.</p>
+            <p class="text-muted">
+              Cadastro e acompanhamento de candidatos.
+              ${candidatos.length > 0 ? 'Clique em qualquer campo da tabela para editar.' : ''}
+            </p>
           </div>
           <button type="button" class="icon-button" id="btn-add-candidato" aria-label="Adicionar candidato">
             ${ICON_PLUS}
@@ -239,7 +305,6 @@ export const candidatoPage = {
     const openButton = container.querySelector('#btn-add-candidato');
     const closeButton = container.querySelector('#candidato-modal-close');
     const form = container.querySelector('#candidato-form');
-    const pretensaoInput = container.querySelector('#f-pretensao');
 
     let lastFocused = null;
 
@@ -289,9 +354,11 @@ export const candidatoPage = {
     openButton.addEventListener('click', openModal);
     closeButton.addEventListener('click', closeModal);
 
-    pretensaoInput.addEventListener('input', () => {
-      const digits = pretensaoInput.value.replace(/\D/g, '');
-      pretensaoInput.value = digits ? formatCurrency(parseInt(digits, 10)) : '';
+    FIELDS.filter((field) => field.type === 'currency').forEach((field) => {
+      const input = container.querySelector(`#f-${field.key}`);
+      if (input) {
+        attachCurrencyMask(input);
+      }
     });
 
     form.addEventListener('submit', (event) => {
@@ -301,26 +368,10 @@ export const candidatoPage = {
       }
 
       const data = new FormData(form);
-      let linkedin = (data.get('linkedin') || '').toString().trim();
-      if (linkedin && !/^https?:\/\//i.test(linkedin)) {
-        linkedin = `https://${linkedin}`;
-      }
-
-      const pretensaoDigits = pretensaoInput.value.replace(/\D/g, '');
-
-      const candidato = {
-        vaga: (data.get('vaga') || '').toString().trim(),
-        statusVaga: data.get('statusVaga'),
-        nome: (data.get('nome') || '').toString().trim(),
-        linkedin,
-        pretensao: pretensaoDigits ? parseInt(pretensaoDigits, 10) : 0,
-        localizacao: (data.get('localizacao') || '').toString().trim(),
-        modalidade: data.get('modalidade'),
-        fonte: data.get('fonte'),
-        etapa: data.get('etapa'),
-        statusCandidato: data.get('statusCandidato'),
-        observacao: (data.get('observacao') || '').toString().trim(),
-      };
+      const candidato = {};
+      FIELDS.forEach((field) => {
+        candidato[field.key] = parseValue(field, data.get(field.key));
+      });
 
       addCandidato(candidato);
       closeModal();
@@ -333,6 +384,119 @@ export const candidatoPage = {
       // Re-renderiza a página para exibir a nova linha na tabela.
       container.innerHTML = candidatoPage.render();
       candidatoPage.init(container);
+    });
+
+    // ---------------------------------------------------------------
+    // Edição inline: clicar em uma célula troca o texto pelo mesmo tipo
+    // de controle usado no cadastro (input, select ou textarea).
+    // Enter ou sair do campo salva; Esc cancela.
+    // ---------------------------------------------------------------
+
+    const tbody = container.querySelector('#candidatos-tbody');
+    if (!tbody) {
+      return;
+    }
+
+    let editing = null;
+
+    function finishEdit(save) {
+      if (!editing) {
+        return;
+      }
+
+      const { cell, field, candidato } = editing;
+      const editor = cell.querySelector('.cell-editor');
+
+      // Zera antes de mexer no DOM: o blur disparado pela troca de
+      // conteúdo abaixo cai neste guarda e não reentra.
+      editing = null;
+
+      let atualizado = candidato;
+
+      if (save && editor) {
+        const novo = parseValue(field, editor.value);
+
+        if (field.required && !novo) {
+          showAlert({
+            type: 'error',
+            title: 'Campo obrigatório',
+            message: `${field.label} não pode ficar em branco.`,
+          });
+        } else if (novo !== candidato[field.key]) {
+          atualizado = updateCandidato(candidato.id, { [field.key]: novo }) || candidato;
+        }
+      }
+
+      cell.classList.remove('is-editing');
+      cell.innerHTML = cellContent(field, atualizado);
+    }
+
+    function startEdit(cell) {
+      if (editing) {
+        if (editing.cell === cell) {
+          return;
+        }
+        finishEdit(true);
+      }
+
+      const field = FIELDS.find((item) => item.key === cell.dataset.field);
+      const candidato = listCandidatos().find((item) => item.id === cell.dataset.id);
+      if (!field || !candidato) {
+        return;
+      }
+
+      editing = { cell, field, candidato };
+      cell.classList.add('is-editing');
+      cell.innerHTML = editorHtml(field, candidato);
+
+      const editor = cell.querySelector('.cell-editor');
+      editor.focus();
+      editor.select?.();
+
+      if (field.type === 'currency') {
+        attachCurrencyMask(editor);
+      }
+
+      if (field.type === 'select') {
+        editor.addEventListener('change', () => finishEdit(true));
+      }
+
+      editor.addEventListener('blur', () => finishEdit(true));
+
+      editor.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          finishEdit(false);
+          cell.focus();
+        } else if (event.key === 'Enter' && !(field.type === 'textarea' && event.shiftKey)) {
+          // No textarea, Shift+Enter continua quebrando linha.
+          event.preventDefault();
+          finishEdit(true);
+          cell.focus();
+        }
+      });
+    }
+
+    tbody.addEventListener('click', (event) => {
+      // O link do LinkedIn abre o perfil; a edição sai pelo resto da célula.
+      if (event.target.closest('a')) {
+        return;
+      }
+      const cell = event.target.closest('.data-table__cell');
+      if (cell && !cell.classList.contains('is-editing')) {
+        startEdit(cell);
+      }
+    });
+
+    tbody.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ') {
+        return;
+      }
+      const cell = event.target.closest?.('.data-table__cell');
+      if (cell && event.target === cell) {
+        event.preventDefault();
+        startEdit(cell);
+      }
     });
   },
 };

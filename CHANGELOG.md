@@ -7,6 +7,24 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.4.0] - 2026-09-03
+
+### Adicionado
+
+- **Edição inline na tabela de candidatos**: clicar em qualquer célula troca o texto pelo mesmo tipo de controle usado no cadastro — campo de texto onde o cadastro tem texto, lista de opções onde o cadastro tem lista (status da vaga, modalidade, fonte, etapa, status do candidato) e área de texto na observação. A pretensão salarial mantém a máscara R$ durante a edição. Não é mais preciso apagar e recadastrar um candidato para corrigir um dado.
+  - **Salvar**: `Enter` ou sair do campo (clicar em outro lugar). Nas listas de opções, escolher a opção já salva.
+  - **Cancelar**: `Esc` — o valor anterior volta.
+  - **Observação**: `Shift+Enter` quebra linha; `Enter` sozinho salva.
+  - **Obrigatórios**: Vaga e Nome do candidato não podem ficar em branco — tentar apagar mostra um alerta e restaura o valor anterior.
+  - **Teclado**: as células entram na navegação por `Tab` e abrem para edição com `Enter` ou barra de espaço.
+  - Na coluna LinkedIn, clicar no link "Perfil" continua abrindo o perfil; a edição sai pelo resto da célula.
+- `updateCandidato(id, patch)` em `candidatos.service.js`, que grava a alteração no `localStorage` e registra `atualizadoEm`.
+
+### Alterado
+
+- Os campos do candidato passaram a ser declarados em uma lista única (`FIELDS`) em `candidato.js`. O formulário do modal, as colunas da tabela e o editor inline são todos derivados dela — assim as opções oferecidas na edição são sempre exatamente as mesmas do cadastro, e um campo novo entra nos três lugares de uma vez.
+- O subtítulo da página Candidato passa a indicar "Clique em qualquer campo da tabela para editar" quando já existe candidato cadastrado.
+
 ## [0.3.1] - 2026-08-22
 
 ### Corrigido

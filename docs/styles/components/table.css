@@ -53,6 +53,69 @@
   }
 }
 
+/* ---------------------------------------------------------------
+ * Célula editável: clicar troca o texto por um controle de edição
+ * (input, select ou textarea), no mesmo formato do formulário.
+ * --------------------------------------------------------------- */
+
+.data-table__cell {
+  cursor: pointer;
+}
+
+.data-table__cell:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+.data-table__cell.is-editing {
+  padding: 4px 6px;
+  cursor: auto;
+  background: var(--color-surface);
+}
+
+.cell-empty {
+  color: var(--color-text-secondary);
+}
+
+.cell-editor {
+  width: 100%;
+  padding: 5px 9px;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.cell-editor:focus {
+  outline: none;
+}
+
+textarea.cell-editor {
+  min-width: 200px;
+  resize: vertical;
+}
+
+select.cell-editor {
+  appearance: none;
+  padding-right: 30px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 15px;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme='light']) select.cell-editor {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  }
+}
+
+html[data-theme='dark'] select.cell-editor {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+}
+
 .badge {
   display: inline-flex;
   align-items: center;

@@ -17,3 +17,24 @@ export function addCandidato(candidato) {
   storage.set(KEY, candidatos);
   return novo;
 }
+
+/**
+ * Atualiza um candidato existente com os campos informados em `patch`.
+ * Retorna o candidato já atualizado, ou `null` se o id não existir.
+ */
+export function updateCandidato(id, patch) {
+  const candidatos = listCandidatos();
+  const index = candidatos.findIndex((candidato) => candidato.id === id);
+  if (index === -1) {
+    return null;
+  }
+
+  const atualizado = {
+    ...candidatos[index],
+    ...patch,
+    atualizadoEm: new Date().toISOString(),
+  };
+  candidatos[index] = atualizado;
+  storage.set(KEY, candidatos);
+  return atualizado;
+}

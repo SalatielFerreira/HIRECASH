@@ -27,6 +27,7 @@ Sem login — o app abre direto no Dashboard e pode ser instalado como aplicativ
 - **Atualização com aviso**: uma nova versão publicada não troca o app sozinha — um banner "Atualização disponível" avisa o usuário, e só recarrega quando ele confirma.
 - **Alertas centralizados**: caixas de alerta (toast) posicionadas entre o topo e o meio da tela, com variações de sucesso, erro, aviso e informação.
 - **Cadastro de candidatos**: botão + na página Candidato abre um modal (só fecha pelo X) com o formulário completo; ao salvar, o candidato aparece como uma linha em uma tabela estilo planilha, persistida em `localStorage`.
+- **Edição direto na tabela**: clicar em qualquer célula abre o mesmo tipo de controle do cadastro — texto onde é texto, lista de opções onde é lista, área de texto na observação. `Enter` (ou sair do campo) salva, `Esc` cancela. Os campos do candidato são declarados uma única vez em `FIELDS` (`docs/scripts/pages/candidato.js`), de onde saem o formulário, as colunas e o editor inline — então as opções nunca divergem entre cadastro e edição.
 - **Layout de tela cheia e responsivo**: o app ocupa a tela inteira em qualquer aparelho (celular, tablet, computador), sem molduras — importante para telas com bastante dado, como a tabela de candidatos.
 - **Versão visível**: nome do app e número da versão aparecem centralizados no rodapé da página de Configuração, atualizados a cada entrega (veja [Versionamento](#versionamento)).
 

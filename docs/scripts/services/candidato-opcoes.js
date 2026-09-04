@@ -13,6 +13,9 @@ export const MODALIDADE_OPTIONS = ['Presencial', 'Remoto', 'Híbrido'];
 
 export const FONTE_OPTIONS = ['Gupy', 'Indicação', 'LinkedIn'];
 
+/** Fonte que não gera comissão — indicação fica fora da página de Comissão. */
+export const FONTE_INDICACAO = 'Indicação';
+
 /**
  * Etapas que o usuário pode escolher na lista.
  *

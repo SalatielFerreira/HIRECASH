@@ -2,7 +2,7 @@ import { showAlert } from '../components/alert.js';
 import { criarTabelaCandidatos, ordenarPorContratacao } from '../components/candidatos-table.js';
 import { showConfirm } from '../components/confirm.js';
 import { darBaixa, listCandidatos } from '../services/candidatos.service.js';
-import { STATUS_CONTRATADO } from '../services/candidato-opcoes.js';
+import { FONTE_INDICACAO, STATUS_CONTRATADO } from '../services/candidato-opcoes.js';
 
 const ICON_COMISSAO =
   '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="7.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/><path d="M6 18 18 6"/></svg>';
@@ -48,12 +48,18 @@ const tabela = criarTabelaCandidatos({
 });
 
 /**
- * A página lista apenas quem já está com o status "Contratado", das
- * contratações mais recentes para as mais antigas.
+ * A página lista quem está com o status "Contratado", das contratações
+ * mais recentes para as mais antigas.
+ *
+ * Candidatos vindos de indicação ficam de fora: indicação não gera
+ * comissão, então nunca aparecem aqui, mesmo contratados.
  */
 function listarContratados() {
   return ordenarPorContratacao(
-    listCandidatos().filter((candidato) => candidato.statusCandidato === STATUS_CONTRATADO)
+    listCandidatos().filter(
+      (candidato) =>
+        candidato.statusCandidato === STATUS_CONTRATADO && candidato.fonte !== FONTE_INDICACAO
+    )
   );
 }
 
@@ -65,6 +71,8 @@ function renderEmptyState() {
       <p class="text-muted">
         Assim que um candidato ficar com o status "Contratado" na página
         Candidato, ele aparece aqui para lançar a contratação e o nível.
+        Candidatos com fonte "Indicação" não entram nesta lista, porque
+        indicação não gera comissão.
       </p>
     </section>
   `;
@@ -81,7 +89,7 @@ export const comissaoPage = {
         <header class="page-header">
           <h1>Comissão</h1>
           <p class="text-muted">
-            Candidatos contratados.
+            Candidatos contratados, exceto indicações.
             ${contratados.length > 0 ? 'Preencha a contratação e o nível para calcular a comissão.' : ''}
           </p>
         </header>

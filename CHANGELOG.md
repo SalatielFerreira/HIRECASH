@@ -7,6 +7,14 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.12.0] - 2026-09-04
+
+### Alterado
+
+- **Candidatos com fonte "Indicação" não entram na página de Comissão**, mesmo contratados — indicação não gera comissão. A regra é avaliada na hora de montar a lista, então mudar a fonte de um candidato já contratado tira ou traz ele de volta na mesma hora.
+- A exceção ficou visível na tela: o subtítulo da página passou a ser "Candidatos contratados, exceto indicações", e o texto de lista vazia explica o motivo. Sem isso, um contratado por indicação que não aparecesse na lista pareceria defeito — ainda mais porque a coluna Fonte não é exibida nesta página.
+- `CACHE_VERSION` do service worker: `hirecash-v17` → `hirecash-v18`.
+
 ## [0.11.0] - 2026-09-04
 
 ### Alterado

@@ -7,6 +7,21 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.10.0] - 2026-09-04
+
+### Adicionado
+
+- **Botão "Baixa" na página de Comissão**, em azul, no fim de cada linha (depois da coluna Comissão) — para o caso do candidato contratado sair antes de fechar os meses da comissão. Abre uma telinha de confirmação; ao confirmar, o candidato sai da lista de Comissão e, na página Candidato, o status passa a **"Sem interesse"** e a etapa a **"Inativo"**. Contratação, nível e o resto do cadastro continuam salvos.
+  - Ele sai da lista por consequência do status deixar de ser "Contratado", sem precisar de um campo separado de "baixa" — então recontratar o candidato depois traz ele de volta, com a etapa voltando a "Em atividade".
+- Componente de confirmação reutilizável (`components/confirm.js`): `await showConfirm({...})` devolve `true`/`false`. Diferente do modal de cadastro, fecha ao cancelar, ao clicar fora e com `Esc` — não há nada digitado para se perder, e uma pergunta de confirmação precisa ser fácil de recusar. O foco começa no botão de cancelar, para o caminho seguro ser o que fica sob o `Enter`.
+- Variantes `.btn--info` (botão azul) e `.btn-acao` (botão compacto dentro da linha da tabela), além do suporte a uma coluna de ação no componente de tabela.
+
+### Alterado
+
+- **"Em atividade" saiu da lista de opções do campo Etapa**, junto com o novo "Inativo". As duas são etapas que o app atribui sozinho — "Em atividade" ao virar "Contratado", "Inativo" ao dar baixa — e não opções para escolher à mão.
+- **O editor de lista passou a preservar um valor que não está entre as opções.** Era necessário por causa da mudança acima: um candidato com etapa "Em atividade" abriria o select sem esse valor, o campo cairia em outra opção e salvar trocaria o dado sem o usuário pedir. Agora o valor atual entra no select mesmo fora da lista, então ele aparece corretamente e nada muda sem uma escolha explícita.
+- `CACHE_VERSION` do service worker: `hirecash-v14` → `hirecash-v15`.
+
 ## [0.9.0] - 2026-09-04
 
 ### Adicionado

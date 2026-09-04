@@ -115,6 +115,22 @@
   flex-shrink: 0;
 }
 
+/* Diálogo de confirmação: mais estreito, e sem corpo rolável porque o
+   texto é curto. */
+.modal--confirm {
+  max-width: 440px;
+}
+
+.modal--confirm .modal__body p {
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+.modal__footer--split {
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
 @keyframes modal-overlay-in {
   from {
     opacity: 0;

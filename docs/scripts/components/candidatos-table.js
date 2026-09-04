@@ -188,12 +188,25 @@ function editorHtml(field, candidato) {
 
   if (field.type === 'select') {
     const vazia = `<option value=""${value ? '' : ' selected'}>—</option>`;
+
+    // Valores atribuídos pelo app ("Em atividade", "Inativo") não estão
+    // na lista de opções. Sem incluir o valor atual, o select abriria em
+    // outra opção e salvar trocaria o dado sem o usuário pedir.
+    const foraDaLista = value && !field.options.includes(value);
+    const atual = foraDaLista
+      ? `<option value="${escapeHtml(value)}" selected>${escapeHtml(value)}</option>`
+      : '';
+
     const options = field.options.map(
       (option) =>
         `<option value="${escapeHtml(option)}"${option === value ? ' selected' : ''}>` +
         `${escapeHtml(option)}</option>`
     );
-    return `<select class="cell-editor" aria-label="${rotulo}">${vazia}${options.join('')}</select>`;
+
+    return (
+      `<select class="cell-editor" aria-label="${rotulo}">` +
+      `${vazia}${atual}${options.join('')}</select>`
+    );
   }
 
   if (field.type === 'textarea') {
@@ -224,8 +237,11 @@ function editorHtml(field, candidato) {
  * @param {string[]} config.colunas      chaves de CAMPOS, na ordem das colunas
  * @param {string[]} [config.editaveis]  chaves que podem ser editadas na célula
  * @param {string} [config.placeholderBusca]
+ * @param {Object} [config.acao]         coluna de botão no fim da linha:
+ *   `{ header, rotulo, icone, classe }`. O que o botão faz é passado em
+ *   `init(container, { onAcao })`, porque depende da página.
  */
-export function criarTabelaCandidatos({ colunas, editaveis = [], placeholderBusca }) {
+export function criarTabelaCandidatos({ colunas, editaveis = [], placeholderBusca, acao }) {
   const campos = colunas.map(campo);
   const podeEditar = new Set(editaveis);
   const busca = placeholderBusca || 'Buscar por vaga ou candidato';
@@ -240,13 +256,27 @@ export function criarTabelaCandidatos({ colunas, editaveis = [], placeholderBusc
     );
   }
 
+  function acaoHtml(candidato) {
+    if (!acao) {
+      return '';
+    }
+    const rotulo = escapeHtml(acao.rotulo);
+    return (
+      `<td class="data-table__acao">` +
+      `<button type="button" class="btn-acao ${acao.classe || ''}" data-acao` +
+      ` data-id="${escapeHtml(candidato.id)}" title="${rotulo}">` +
+      `${acao.icone}<span>${rotulo}</span></button></td>`
+    );
+  }
+
   return {
     render(candidatos) {
       const linhas = candidatos
         .map(
           (candidato) =>
             `<tr data-busca="${escapeHtml(textoBusca(candidato))}">` +
-            `${campos.map((field) => cellHtml(field, candidato)).join('')}</tr>`
+            `${campos.map((field) => cellHtml(field, candidato)).join('')}` +
+            `${acaoHtml(candidato)}</tr>`
         )
         .join('');
 
@@ -268,6 +298,7 @@ export function criarTabelaCandidatos({ colunas, editaveis = [], placeholderBusc
             <thead>
               <tr>
                 ${campos.map((field) => `<th>${escapeHtml(field.header || field.label)}</th>`).join('')}
+                ${acao ? `<th class="data-table__acao">${escapeHtml(acao.header || '')}</th>` : ''}
               </tr>
             </thead>
             <tbody id="candidatos-tbody">${linhas}</tbody>
@@ -278,10 +309,23 @@ export function criarTabelaCandidatos({ colunas, editaveis = [], placeholderBusc
       `;
     },
 
-    init(container) {
+    init(container, { onAcao } = {}) {
       const tbody = container.querySelector('#candidatos-tbody');
       if (!tbody) {
         return;
+      }
+
+      if (acao && onAcao) {
+        tbody.addEventListener('click', (event) => {
+          const botao = event.target.closest('[data-acao]');
+          if (!botao) {
+            return;
+          }
+          const candidato = listCandidatos().find((item) => item.id === botao.dataset.id);
+          if (candidato) {
+            onAcao(candidato);
+          }
+        });
       }
 
       // --- Busca -----------------------------------------------------

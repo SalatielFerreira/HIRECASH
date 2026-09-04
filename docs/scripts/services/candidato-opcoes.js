@@ -13,13 +13,14 @@ export const MODALIDADE_OPTIONS = ['Presencial', 'Remoto', 'Híbrido'];
 
 export const FONTE_OPTIONS = ['Gupy', 'Indicação', 'LinkedIn'];
 
-export const ETAPA_OPTIONS = [
-  'Em abordagem',
-  'Entrevista RH',
-  'Entrevista técnica',
-  'Contratação',
-  'Em atividade',
-];
+/**
+ * Etapas que o usuário pode escolher na lista.
+ *
+ * "Em atividade" e "Inativo" ficam fora de propósito: são valores que o
+ * app atribui sozinho (ver `ETAPA_EM_ATIVIDADE` e `ETAPA_INATIVO`), não
+ * opções para escolher à mão.
+ */
+export const ETAPA_OPTIONS = ['Em abordagem', 'Entrevista RH', 'Entrevista técnica', 'Contratação'];
 
 export const STATUS_CANDIDATO_OPTIONS = [
   'Standby',
@@ -34,5 +35,13 @@ export const STATUS_CANDIDATO_OPTIONS = [
 /** Status que marca o candidato como contratado — é o que a página de Comissão lista. */
 export const STATUS_CONTRATADO = 'Contratado';
 
-/** Etapa preenchida automaticamente quando o status vira "Contratado". */
+/** Status atribuído ao candidato ao dar baixa. */
+export const STATUS_SEM_INTERESSE = 'Sem interesse';
+
+/**
+ * Etapas atribuídas pelo app, nunca escolhidas na lista:
+ * - "Em atividade" quando o status vira "Contratado";
+ * - "Inativo" quando é dada baixa no candidato.
+ */
 export const ETAPA_EM_ATIVIDADE = 'Em atividade';
+export const ETAPA_INATIVO = 'Inativo';

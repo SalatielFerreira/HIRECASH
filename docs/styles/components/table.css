@@ -107,17 +107,25 @@
   color: var(--color-text-secondary);
 }
 
-/* Parcelas da comissão, uma por linha dentro da célula. */
+/*
+ * Parcelas da comissão: uma linha por parcela, em três colunas
+ * (rótulo P1/P2, data e valor) que se alinham entre as linhas.
+ */
 .parcelas {
-  display: inline-flex;
-  flex-direction: column;
-  gap: 2px;
+  display: inline-grid;
+  grid-template-columns: auto auto auto;
+  gap: 3px var(--space-2);
+  align-items: baseline;
 }
 
-.parcela {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-2);
+.parcela__rotulo {
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
 }
 
 .parcela__data {
@@ -127,6 +135,7 @@
 
 .parcela__valor {
   font-weight: 600;
+  text-align: right;
 }
 
 /* ---------------------------------------------------------------

@@ -49,24 +49,28 @@ function badge(text, variant) {
   return `<span class="badge badge--${variant}">${escapeHtml(text)}</span>`;
 }
 
-/** Parcelas da comissão, uma por linha dentro da célula. */
+/**
+ * Parcelas da comissão, uma por linha dentro da célula, rotuladas P1 e
+ * P2. Os três pedaços de cada linha (rótulo, data e valor) são filhos
+ * diretos de uma grade de três colunas, então ficam alinhados entre as
+ * linhas sem depender de largura fixa.
+ */
 function renderComissao(candidato) {
   const parcelas = calcularParcelas(candidato.contratacao, candidato.nivel);
   if (parcelas.length === 0) {
     return VAZIO;
   }
 
-  const linhas = parcelas
+  const celulas = parcelas
     .map(
-      (parcela) =>
-        `<span class="parcela">` +
+      (parcela, indice) =>
+        `<span class="parcela__rotulo">P${indice + 1}</span>` +
         `<span class="parcela__data">${formatDate(parcela.data)}</span>` +
-        `<span class="parcela__valor">${formatCurrency(parcela.valor)}</span>` +
-        `</span>`
+        `<span class="parcela__valor">${formatCurrency(parcela.valor)}</span>`
     )
     .join('');
 
-  return `<span class="parcelas">${linhas}</span>`;
+  return `<span class="parcelas">${celulas}</span>`;
 }
 
 /**

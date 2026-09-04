@@ -7,6 +7,14 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.8.1] - 2026-09-04
+
+### Alterado
+
+- **A coluna Comissão passou a mostrar sempre as duas parcelas, rotuladas P1 e P2**, com data e valor de cada uma. Antes, no N1 a segunda parcela era omitida por sair zerada (o total do N1 já é R$ 100,00), o que dava a impressão de que a segunda parcela não estava sendo calculada. Agora as duas linhas aparecem em todos os níveis — no N1, a P2 fica em R$ 0,00 — para a leitura da coluna ser sempre igual.
+- Rótulo, data e valor de cada parcela viraram filhos diretos de uma grade de três colunas, então ficam alinhados entre as linhas sem depender de largura fixa.
+- `CACHE_VERSION` do service worker: `hirecash-v12` → `hirecash-v13`.
+
 ## [0.8.0] - 2026-09-04
 
 ### Adicionado
@@ -14,7 +22,7 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 - **Página de Comissão** com a mesma estrutura da de Candidato — busca por vaga ou candidato, tabela estilo planilha, ordenada por vaga — porém **sem** o botão de adicionar, e listando **somente candidatos com status "Aprovado"**. Enquanto não houver nenhum aprovado, a página explica que o candidato aparece ali assim que o status mudar na página Candidato.
   - Colunas do cadastro: Vaga, Candidato, LinkedIn, Pretensão salarial, Modalidade e Status do candidato. Ficaram de fora Status da vaga, Localização, Fonte, Etapa e Observação.
   - **Contratação** (data) e **Nível** (N1 a N4) são os únicos campos editáveis nesta página — os dados do cadastro se alteram na página Candidato.
-  - **Comissão** é calculada, não digitada: no dia 15 do mês seguinte à contratação entram R$ 100,00 e, no dia 15 do mês seguinte a esse, o restante do valor do nível (N1 R$ 100,00 · N2 R$ 300,00 · N3 R$ 500,00 · N4 R$ 700,00). A célula mostra as duas parcelas com data e valor, e se atualiza na hora ao mudar a contratação ou o nível. No N1 o total já é R$ 100,00, então a segunda parcela seria de zero e é omitida — o candidato recebe tudo de uma vez.
+  - **Comissão** é calculada, não digitada: no dia 15 do mês seguinte à contratação entram R$ 100,00 e, no dia 15 do mês seguinte a esse, o restante do valor do nível (N1 R$ 100,00 · N2 R$ 300,00 · N3 R$ 500,00 · N4 R$ 700,00). A célula mostra as duas parcelas com data e valor, e se atualiza na hora ao mudar a contratação ou o nível. (Na 0.8.1 as parcelas passaram a ser rotuladas P1/P2 e a segunda deixou de ser omitida no N1.)
 - Tipos de campo `date` (com data exibida como DD/MM/AAAA) e `computed` (só leitura, calculado a partir de outros campos) na tabela.
 
 ### Alterado

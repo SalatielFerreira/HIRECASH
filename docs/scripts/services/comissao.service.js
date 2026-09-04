@@ -23,13 +23,14 @@ function diaQuinze(ano, mes) {
 }
 
 /**
- * Parcelas da comissão a partir da data de contratação e do nível:
+ * As duas parcelas da comissão, a partir da data de contratação e do nível:
  *
- * - dia 15 do mês seguinte à contratação → R$ 100,00;
- * - dia 15 do mês seguinte a esse → o restante do valor do nível.
+ * - P1: dia 15 do mês seguinte à contratação → R$ 100,00;
+ * - P2: dia 15 do mês seguinte a esse → o restante do valor do nível.
  *
- * No N1 o total é exatamente R$ 100,00, então a segunda parcela seria de
- * zero e é omitida — o candidato recebe tudo de uma vez.
+ * Sempre devolve as duas, mesmo no N1, em que o total já é R$ 100,00 e a
+ * segunda sai zerada — as duas linhas aparecem na tabela de propósito,
+ * para a leitura da coluna ser sempre igual.
  *
  * Retorna `[]` quando ainda falta a contratação ou o nível.
  */
@@ -44,12 +45,8 @@ export function calcularParcelas(contratacao, nivel) {
     return [];
   }
 
-  const parcelas = [{ data: diaQuinze(ano, mes + 1), valor: PRIMEIRA_PARCELA }];
-
-  const restante = total - PRIMEIRA_PARCELA;
-  if (restante > 0) {
-    parcelas.push({ data: diaQuinze(ano, mes + 2), valor: restante });
-  }
-
-  return parcelas;
+  return [
+    { data: diaQuinze(ano, mes + 1), valor: PRIMEIRA_PARCELA },
+    { data: diaQuinze(ano, mes + 2), valor: total - PRIMEIRA_PARCELA },
+  ];
 }

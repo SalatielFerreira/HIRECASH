@@ -1,5 +1,6 @@
 import { storage } from './storage.service.js';
 import { APP_VERSION } from '../version.js';
+import { ETAPA_EM_ATIVIDADE, STATUS_CONTRATADO } from './candidato-opcoes.js';
 
 const KEY = 'candidatos';
 
@@ -10,13 +11,31 @@ export function listCandidatos() {
   return storage.get(KEY, []);
 }
 
+/**
+ * Campos preenchidos automaticamente a partir de outros.
+ *
+ * Hoje há uma regra: pôr o status em "Contratado" coloca a etapa em
+ * "Em atividade". Fica aqui, no serviço, para valer tanto no cadastro
+ * pelo modal quanto na edição direto na tabela.
+ *
+ * A regra só age quando os dados recebidos mexem no status — assim, mudar
+ * a etapa à mão depois continua valendo, em vez de ser sobrescrito a cada
+ * gravação seguinte.
+ */
+function aplicarDerivados(dados) {
+  if (dados.statusCandidato === STATUS_CONTRATADO) {
+    return { ...dados, etapa: ETAPA_EM_ATIVIDADE };
+  }
+  return dados;
+}
+
 export function addCandidato(candidato) {
   const candidatos = listCandidatos();
-  const novo = {
+  const novo = aplicarDerivados({
     id: crypto.randomUUID(),
     criadoEm: new Date().toISOString(),
     ...candidato,
-  };
+  });
   candidatos.unshift(novo);
   storage.set(KEY, candidatos);
   return novo;
@@ -35,7 +54,7 @@ export function updateCandidato(id, patch) {
 
   const atualizado = {
     ...candidatos[index],
-    ...patch,
+    ...aplicarDerivados(patch),
     atualizadoEm: new Date().toISOString(),
   };
   candidatos[index] = atualizado;

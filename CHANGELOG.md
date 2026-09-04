@@ -7,6 +7,22 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.9.0] - 2026-09-04
+
+### Adicionado
+
+- Status **"Contratado"** na lista de Status do candidato, e etapa **"Em atividade"** na lista de Etapa.
+- **Escolher "Contratado" preenche a etapa como "Em atividade" automaticamente.** A regra fica em `candidatos.service.js`, ou seja, vale em qualquer caminho de gravação — cadastrar pelo modal ou editar direto na tabela. No modal, o campo Etapa também muda na tela no momento da escolha, para o usuário ver acontecer em vez de descobrir depois na tabela.
+- A regra só age quando a gravação mexe no status. Alterar a etapa à mão depois de contratado continua valendo, em vez de ser sobrescrita a cada gravação seguinte.
+
+### Alterado
+
+- **A página de Comissão passou a listar quem está com status "Contratado"**, e não mais "Aprovado". Candidatos apenas aprovados deixam de aparecer ali até serem efetivamente contratados. Se algum candidato já estava como "Aprovado" com contratação e nível preenchidos, ele sai da lista até o status virar "Contratado" — os dados continuam salvos.
+- Ao salvar uma edição inline, a linha inteira é redesenhada, não só a célula editada e a comissão. Era necessário porque uma alteração agora pode preencher outro campo por regra: sem isso, mudar o status para "Contratado" gravava a etapa certa mas a coluna Etapa continuaria mostrando o valor antigo até recarregar a página.
+- Opções das listas do cadastro extraídas para `services/candidato-opcoes.js`. A regra da etapa derivada mora no serviço de candidatos, e o componente de tabela já importa esse serviço — deixar as opções no componente fecharia um ciclo de imports.
+- Badge de "Contratado" usa a mesma variante verde de "Aprovado". As cores de badge do projeto são translúcidas de propósito, para se adaptarem sozinhas ao tema claro/escuro; o roxo da marca não tem contraste suficiente sobre o fundo escuro para virar uma variante nova sem criar cor específica por tema.
+- `CACHE_VERSION` do service worker: `hirecash-v13` → `hirecash-v14`.
+
 ## [0.8.1] - 2026-09-04
 
 ### Alterado

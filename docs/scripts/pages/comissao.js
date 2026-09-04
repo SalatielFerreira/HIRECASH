@@ -1,5 +1,6 @@
 import { criarTabelaCandidatos, ordenarPorVaga } from '../components/candidatos-table.js';
 import { listCandidatos } from '../services/candidatos.service.js';
+import { STATUS_CONTRATADO } from '../services/candidato-opcoes.js';
 
 const ICON_COMISSAO =
   '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="7.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/><path d="M6 18 18 6"/></svg>';
@@ -33,10 +34,10 @@ const tabela = criarTabelaCandidatos({
   editaveis: EDITAVEIS,
 });
 
-/** A página lista apenas quem foi aprovado. */
-function listarAprovados() {
+/** A página lista apenas quem já está com o status "Contratado". */
+function listarContratados() {
   return ordenarPorVaga(
-    listCandidatos().filter((candidato) => candidato.statusCandidato === 'Aprovado')
+    listCandidatos().filter((candidato) => candidato.statusCandidato === STATUS_CONTRATADO)
   );
 }
 
@@ -44,9 +45,9 @@ function renderEmptyState() {
   return `
     <section class="card empty-state">
       <span class="card__icon">${ICON_COMISSAO}</span>
-      <h2>Nenhum candidato aprovado</h2>
+      <h2>Nenhum candidato contratado</h2>
       <p class="text-muted">
-        Assim que um candidato ficar com o status "Aprovado" na página
+        Assim que um candidato ficar com o status "Contratado" na página
         Candidato, ele aparece aqui para lançar a contratação e o nível.
       </p>
     </section>
@@ -57,19 +58,19 @@ export const comissaoPage = {
   title: 'Comissão',
 
   render() {
-    const aprovados = listarAprovados();
+    const contratados = listarContratados();
 
     return `
       <div class="page-comissao page-enter">
         <header class="page-header">
           <h1>Comissão</h1>
           <p class="text-muted">
-            Candidatos aprovados.
-            ${aprovados.length > 0 ? 'Preencha a contratação e o nível para calcular a comissão.' : ''}
+            Candidatos contratados.
+            ${contratados.length > 0 ? 'Preencha a contratação e o nível para calcular a comissão.' : ''}
           </p>
         </header>
 
-        ${aprovados.length === 0 ? renderEmptyState() : tabela.render(aprovados)}
+        ${contratados.length === 0 ? renderEmptyState() : tabela.render(contratados)}
       </div>
     `;
   },

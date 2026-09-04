@@ -8,6 +8,7 @@ import {
   parseValue,
 } from '../components/candidatos-table.js';
 import { addCandidato, listCandidatos } from '../services/candidatos.service.js';
+import { ETAPA_EM_ATIVIDADE, STATUS_CONTRATADO } from '../services/candidato-opcoes.js';
 import { escapeHtml } from '../utils/format.js';
 
 const ICON_CANDIDATO =
@@ -195,6 +196,19 @@ export const candidatoPage = {
         attachCurrencyMask(input);
       }
     });
+
+    // A regra que deriva a etapa do status vive no serviço, então salvar
+    // já grava certo. Espelhar aqui é para o usuário ver o campo mudar
+    // enquanto preenche, em vez de descobrir só depois na tabela.
+    const statusSelect = container.querySelector('#f-statusCandidato');
+    const etapaSelect = container.querySelector('#f-etapa');
+    if (statusSelect && etapaSelect) {
+      statusSelect.addEventListener('change', () => {
+        if (statusSelect.value === STATUS_CONTRATADO) {
+          etapaSelect.value = ETAPA_EM_ATIVIDADE;
+        }
+      });
+    }
 
     form.addEventListener('submit', (event) => {
       event.preventDefault();

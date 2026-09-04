@@ -8,24 +8,17 @@
 import { showAlert } from './alert.js';
 import { listCandidatos, updateCandidato } from '../services/candidatos.service.js';
 import { calcularParcelas, NIVEL_OPTIONS } from '../services/comissao.service.js';
+import {
+  ETAPA_OPTIONS,
+  FONTE_OPTIONS,
+  MODALIDADE_OPTIONS,
+  STATUS_CANDIDATO_OPTIONS,
+  STATUS_VAGA_OPTIONS,
+} from '../services/candidato-opcoes.js';
 import { escapeHtml, formatCurrency, formatDate, normalizar } from '../utils/format.js';
 
 const ICON_SEARCH =
   '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
-
-const STATUS_VAGA_OPTIONS = ['Não publicada', 'Publicada', 'Congelada', 'Cancelada'];
-const MODALIDADE_OPTIONS = ['Presencial', 'Remoto', 'Híbrido'];
-const FONTE_OPTIONS = ['Gupy', 'Indicação', 'LinkedIn'];
-const ETAPA_OPTIONS = ['Em abordagem', 'Entrevista RH', 'Entrevista técnica', 'Contratação'];
-
-const STATUS_CANDIDATO_OPTIONS = [
-  'Standby',
-  'Sem retorno',
-  'Sem interesse',
-  'Agendado',
-  'Reprovado',
-  'Aprovado',
-];
 
 const STATUS_VAGA_BADGE = {
   'Não publicada': 'neutral',
@@ -41,6 +34,7 @@ const STATUS_CANDIDATO_BADGE = {
   Agendado: 'info',
   Reprovado: 'error',
   Aprovado: 'success',
+  Contratado: 'success',
 };
 
 const VAZIO = '<span class="cell-empty">—</span>';
@@ -234,7 +228,6 @@ function editorHtml(field, candidato) {
 export function criarTabelaCandidatos({ colunas, editaveis = [], placeholderBusca }) {
   const campos = colunas.map(campo);
   const podeEditar = new Set(editaveis);
-  const calculados = campos.filter((field) => field.type === 'computed');
   const busca = placeholderBusca || 'Buscar por vaga ou candidato';
 
   function cellHtml(field, candidato) {
@@ -355,9 +348,13 @@ export function criarTabelaCandidatos({ colunas, editaveis = [], placeholderBusc
           // — mover a linha embaixo do dedo do usuário seria pior.
           row.dataset.busca = textoBusca(atualizado);
 
-          // A comissão é calculada a partir de outros campos da mesma
-          // linha, então é redesenhada a cada alteração.
-          calculados.forEach((outro) => {
+          // Redesenha as outras células da linha. Além da comissão, que é
+          // calculada, uma alteração pode preencher outro campo por regra:
+          // pôr o status em "Contratado" põe a etapa em "Em atividade".
+          campos.forEach((outro) => {
+            if (outro.key === field.key) {
+              return;
+            }
             const alvo = row.querySelector(`[data-field="${outro.key}"]`);
             if (alvo) {
               alvo.innerHTML = cellContent(outro, atualizado);

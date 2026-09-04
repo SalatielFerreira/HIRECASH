@@ -5,7 +5,7 @@
  *
  * IMPORTANTE: incremente CACHE_VERSION a cada release para invalidar o cache antigo.
  */
-const CACHE_VERSION = 'hirecash-v11';
+const CACHE_VERSION = 'hirecash-v12';
 
 const APP_SHELL = [
   './',
@@ -40,14 +40,17 @@ const APP_SHELL = [
   './scripts/version.js',
   './scripts/components/alert.js',
   './scripts/components/banner.js',
+  './scripts/components/candidatos-table.js',
   './scripts/pages/dashboard.js',
   './scripts/pages/candidato.js',
   './scripts/pages/comissao.js',
   './scripts/pages/configuracao.js',
   './scripts/services/storage.service.js',
   './scripts/services/candidatos.service.js',
+  './scripts/services/comissao.service.js',
   './scripts/services/update.service.js',
   './scripts/services/install.service.js',
+  './scripts/utils/format.js',
   './scripts/utils/logger.js',
   './scripts/utils/theme.js',
   // Idem para os ícones: favicon e apple-touch saem do index.html, e os

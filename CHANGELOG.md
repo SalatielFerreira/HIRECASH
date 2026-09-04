@@ -7,6 +7,25 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.8.0] - 2026-09-04
+
+### Adicionado
+
+- **Página de Comissão** com a mesma estrutura da de Candidato — busca por vaga ou candidato, tabela estilo planilha, ordenada por vaga — porém **sem** o botão de adicionar, e listando **somente candidatos com status "Aprovado"**. Enquanto não houver nenhum aprovado, a página explica que o candidato aparece ali assim que o status mudar na página Candidato.
+  - Colunas do cadastro: Vaga, Candidato, LinkedIn, Pretensão salarial, Modalidade e Status do candidato. Ficaram de fora Status da vaga, Localização, Fonte, Etapa e Observação.
+  - **Contratação** (data) e **Nível** (N1 a N4) são os únicos campos editáveis nesta página — os dados do cadastro se alteram na página Candidato.
+  - **Comissão** é calculada, não digitada: no dia 15 do mês seguinte à contratação entram R$ 100,00 e, no dia 15 do mês seguinte a esse, o restante do valor do nível (N1 R$ 100,00 · N2 R$ 300,00 · N3 R$ 500,00 · N4 R$ 700,00). A célula mostra as duas parcelas com data e valor, e se atualiza na hora ao mudar a contratação ou o nível. No N1 o total já é R$ 100,00, então a segunda parcela seria de zero e é omitida — o candidato recebe tudo de uma vez.
+- Tipos de campo `date` (com data exibida como DD/MM/AAAA) e `computed` (só leitura, calculado a partir de outros campos) na tabela.
+
+### Alterado
+
+- **Ícone do app com faixas curvas em vez de retas.** As faixas agora são a mesma curva arqueada deslocada na horizontal, então saem paralelas entre si, atravessando o quadrado na diagonal.
+- **A tabela de candidatos virou um componente compartilhado** (`components/candidatos-table.js`). Candidato e Comissão mostram o mesmo cadastro com colunas e regras de edição diferentes; cada página agora só declara quais colunas quer e quais delas são editáveis, em vez de repetir a tabela, a busca e a edição inline. Evitou duplicar cerca de 250 linhas e mantém as duas páginas coerentes por construção.
+- Formatação de moeda, data e texto de busca extraídas para `utils/format.js`. A formatação de data é feita na mão porque `new Date('2026-09-15')` é lido como meia-noite em UTC, o que no fuso do Brasil cairia no dia 14 e mostraria toda data um dia atrás.
+- Página de Comissão passou para a largura de leitura de 1400px, como a de Candidato, por causa da tabela larga.
+- Barra de busca migrada de `pages/candidato.css` para `components/table.css`, agora que as duas páginas a usam. Só a célula marcada como editável recebe cursor e foco de edição (`.data-table__cell--editable`) — na Comissão a maioria das colunas é apenas leitura.
+- Novos módulos e ícones acrescentados ao `APP_SHELL`. `CACHE_VERSION`: `hirecash-v11` → `hirecash-v12`.
+
 ## [0.7.0] - 2026-09-04
 
 ### Alterado

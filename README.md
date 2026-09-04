@@ -28,8 +28,9 @@ Sem login — o app abre direto no Dashboard e pode ser instalado como aplicativ
 - **Alertas centralizados**: caixas de alerta (toast) posicionadas entre o topo e o meio da tela, com variações de sucesso, erro, aviso e informação.
 - **Cadastro de candidatos**: botão + na página Candidato abre um modal (só fecha pelo X) com o formulário completo; ao salvar, o candidato aparece como uma linha em uma tabela estilo planilha, persistida em `localStorage`.
 - **Lista ordenada e com busca**: a tabela vem em ordem alfabética pelo nome da **vaga** (desempate pelo nome do candidato), e a barra de busca acima dela filtra por vaga **ou** candidato, ignorando maiúsculas e acentos.
-- **Edição direto na tabela**: clicar em qualquer célula abre o mesmo tipo de controle do cadastro — texto onde é texto, lista de opções onde é lista, área de texto na observação. `Enter` (ou sair do campo) salva, `Esc` cancela. Os campos do candidato são declarados uma única vez em `FIELDS` (`docs/scripts/pages/candidato.js`), de onde saem o formulário, as colunas e o editor inline — então as opções nunca divergem entre cadastro e edição.
+- **Edição direto na tabela**: clicar em qualquer célula abre o mesmo tipo de controle do cadastro — texto onde é texto, lista de opções onde é lista, área de texto na observação. `Enter` (ou sair do campo) salva, `Esc` cancela. Os campos do candidato são declarados uma única vez em `CAMPOS` (`docs/scripts/components/candidatos-table.js`), de onde saem o formulário de cadastro, os cabeçalhos das colunas e o editor inline das duas páginas — então as opções nunca divergem entre cadastro e edição.
 - **Layout de tela cheia e responsivo**: o app ocupa a tela inteira em qualquer aparelho (celular, tablet, computador), sem molduras — importante para telas com bastante dado, como a tabela de candidatos.
+- **Comissão**: a página lista somente os candidatos com status **Aprovado**, na mesma estrutura da de Candidato (busca + tabela), sem botão de adicionar. Ali se lança a **Contratação** (data) e o **Nível** (N1–N4); a **Comissão** é calculada — R$ 100,00 no dia 15 do mês seguinte à contratação e o restante do valor do nível no dia 15 do mês seguinte a esse (N1 R$ 100 · N2 R$ 300 · N3 R$ 500 · N4 R$ 700).
 - **Backup dos candidatos**: em Configuração, botões de **Exportar** (folha de compartilhamento no celular, "Salvar como" no computador) e **Importar** (explorador de arquivos), gerando um `.json`. Como os dados moram no `localStorage` do navegador, esse arquivo é a rede de segurança contra limpar os dados do navegador ou trocar de aparelho. A importação nunca apaga: casa pelo `id`, atualizando quem já existe e acrescentando o resto.
 - **Versão visível**: nome do app e número da versão aparecem centralizados no rodapé da página de Configuração, atualizados a cada entrega (veja [Versionamento](#versionamento)).
 
@@ -56,10 +57,10 @@ HIRECASH/
 │   └── scripts/
 │       ├── app.js                 # ponto de entrada
 │       ├── router.js              # roteamento por hash (#/dashboard...)
-│       ├── components/            # alert.js (showAlert), banner.js (showBanner)
+│       ├── components/            # alert.js, banner.js, candidatos-table.js (tabela compartilhada)
 │       ├── pages/                 # dashboard.js, candidato.js, comissao.js, configuracao.js
-│       ├── services/              # storage, candidatos, update (atualização), install (instalar)
-│       ├── utils/                 # logger.js, theme.js (tema claro/escuro)
+│       ├── services/              # storage, candidatos, comissao, update (atualização), install
+│       ├── utils/                 # logger.js, theme.js (tema), format.js (moeda/data/busca)
 │       └── version.js             # nome + versão exibidos em Configuração
 ├── scripts/                       # scripts Node de apoio (não vão para produção)
 │   └── generate-icons.js

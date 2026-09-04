@@ -77,15 +77,15 @@ body {
 
 /* Largura de leitura confortável para páginas de cartões/texto. */
 .page-dashboard,
-.page-comissao,
 .page-configuracao {
   max-width: 720px;
   margin-inline: auto;
 }
 
-/* A página de Candidato tem uma tabela larga (11 colunas) e por isso
-   ganha bem mais espaço antes de também centralizar em telas enormes. */
-.page-candidato {
+/* Candidato e Comissão têm tabelas largas (11 e 9 colunas) e por isso
+   ganham bem mais espaço antes de também centralizar em telas enormes. */
+.page-candidato,
+.page-comissao {
   max-width: 1400px;
   margin-inline: auto;
 }

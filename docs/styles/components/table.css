@@ -53,16 +53,92 @@
   }
 }
 
+.search-bar {
+  position: relative;
+  margin-bottom: var(--space-3);
+}
+
+.search-bar__icon {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  color: var(--color-text-secondary);
+  pointer-events: none;
+}
+
+.search-bar__icon svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+}
+
+.search-bar__input {
+  width: 100%;
+  padding: 11px 14px 11px 42px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+
+  /* 16px evita o zoom automático do Safari no iPhone ao focar o campo. */
+  font-size: 16px;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.search-bar__input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.search-bar__input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+.search-empty {
+  margin-top: var(--space-4);
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+/* Parcelas da comissão, uma por linha dentro da célula. */
+.parcelas {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.parcela {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.parcela__data {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.parcela__valor {
+  font-weight: 600;
+}
+
 /* ---------------------------------------------------------------
  * Célula editável: clicar troca o texto por um controle de edição
  * (input, select ou textarea), no mesmo formato do formulário.
  * --------------------------------------------------------------- */
 
-.data-table__cell {
+.data-table__cell--editable {
   cursor: pointer;
 }
 
-.data-table__cell:focus-visible {
+.data-table__cell--editable:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: -2px;
 }
@@ -90,6 +166,10 @@
 
 .cell-editor:focus {
   outline: none;
+}
+
+input[type='date'].cell-editor {
+  min-width: 150px;
 }
 
 textarea.cell-editor {

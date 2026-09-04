@@ -3,6 +3,7 @@
  * Uso: npm run generate:icons
  */
 import { mkdir } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import sharp from 'sharp';
@@ -11,7 +12,23 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ICONS_DIR = path.join(__dirname, '..', 'docs', 'icons');
 const SOURCE_SVG = path.join(ICONS_DIR, 'icon.svg');
 
-const MASKABLE_SAFE_ZONE = 0.8; // ícone ocupa 80% da tela, deixando margem de segurança
+/**
+ * Variante de sangria total (cantos retos) do SVG mestre.
+ *
+ * Os ícones "maskable" (Android) e o apple-touch-icon são recortados pelo
+ * próprio sistema — Android em círculo/squircle, iOS em superelipse. Se o
+ * arquivo já vier com o canto arredondado, sobra um anel de fundo liso em
+ * volta do desenho depois do recorte. Servindo o quadrado inteiro, as
+ * facetas vão até a borda e quem arredonda é o sistema.
+ *
+ * A marca (maleta + moeda) ocupa só os 40% centrais do SVG, então já cabe
+ * folgada na zona segura do maskable (círculo de 80%): o canto mais
+ * distante dela fica a 136px do centro, contra um limite de 204px. Por
+ * isso ela não precisa ser reduzida.
+ */
+function readFullBleedSvg() {
+  return readFileSync(SOURCE_SVG, 'utf8').replace('rx="112"', 'rx="0"');
+}
 
 async function generateStandardIcon(size) {
   const outFile = path.join(ICONS_DIR, `icon-${size}.png`);
@@ -21,26 +38,13 @@ async function generateStandardIcon(size) {
 
 async function generateMaskableIcon(size) {
   const outFile = path.join(ICONS_DIR, `icon-maskable-${size}.png`);
-  const inner = Math.round(size * MASKABLE_SAFE_ZONE);
-  const iconBuffer = await sharp(SOURCE_SVG).resize(inner, inner).png().toBuffer();
-
-  await sharp({
-    create: {
-      width: size,
-      height: size,
-      channels: 4,
-      background: '#4338CA',
-    },
-  })
-    .composite([{ input: iconBuffer, gravity: 'center' }])
-    .png()
-    .toFile(outFile);
+  await sharp(Buffer.from(readFullBleedSvg())).resize(size, size).png().toFile(outFile);
   console.log(`  ✔ icon-maskable-${size}.png`);
 }
 
 async function generateAppleTouchIcon() {
   const outFile = path.join(ICONS_DIR, 'apple-touch-icon.png');
-  await sharp(SOURCE_SVG).resize(180, 180).flatten({ background: '#4338CA' }).png().toFile(outFile);
+  await sharp(Buffer.from(readFullBleedSvg())).resize(180, 180).png().toFile(outFile);
   console.log('  ✔ apple-touch-icon.png');
 }
 

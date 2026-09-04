@@ -5,7 +5,7 @@
  *
  * IMPORTANTE: incremente CACHE_VERSION a cada release para invalidar o cache antigo.
  */
-const CACHE_VERSION = 'hirecash-v10';
+const CACHE_VERSION = 'hirecash-v11';
 
 const APP_SHELL = [
   './',
@@ -50,7 +50,15 @@ const APP_SHELL = [
   './scripts/services/install.service.js',
   './scripts/utils/logger.js',
   './scripts/utils/theme.js',
+  // Idem para os ícones: favicon e apple-touch saem do index.html, e os
+  // 192/512 do manifest — todos referenciados por caminho próprio.
   './icons/icon.svg',
+  './icons/favicon-32.png',
+  './icons/apple-touch-icon.png',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/icon-maskable-192.png',
+  './icons/icon-maskable-512.png',
 ];
 
 // IMPORTANTE: sem self.skipWaiting() aqui de propósito. Numa atualização

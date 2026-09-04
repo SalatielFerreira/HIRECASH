@@ -7,6 +7,15 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.7.0] - 2026-09-04
+
+### Alterado
+
+- **Ícone do app com o mesmo fundo facetado da barra superior**: cacos diagonais em tons de roxo, de larguras irregulares, cruzados por facetas na diagonal oposta. Vale para os dois lugares pedidos — o ícone da aba do navegador e o do app instalado (Android, iOS e desktop) — porque todos saem do mesmo `docs/icons/icon.svg`. A maleta e a moeda continuam por cima, sem mudança. Como na barra superior, as facetas são só camadas de preto e branco translúcidos sobre o gradiente roxo, então acompanham a cor de marca do gradiente.
+- **Ícones `maskable` e `apple-touch` agora em sangria total.** Eles são recortados pelo próprio sistema (Android em círculo/squircle, iOS em superelipse); como o arquivo vinha com o canto já arredondado e composto sobre um roxo chapado, sobrava um anel de fundo liso em volta do desenho depois do recorte — o que ficaria bem visível agora que o fundo é facetado. Passaram a usar o SVG com canto reto ocupando o quadrado inteiro, e quem arredonda é o sistema. A marca não precisou encolher: ela ocupa só os 40% centrais, e seu canto mais distante fica a 136px do centro contra um limite de 204px da zona segura do maskable.
+- Ícones acrescentados ao `APP_SHELL` do service worker, pelo mesmo motivo dos CSS na 0.6.2 — favicon e apple-touch são referenciados pelo `index.html`, e os 192/512 pelo manifest, cada um como uma requisição própria.
+- `CACHE_VERSION` do service worker: `hirecash-v10` → `hirecash-v11`.
+
 ## [0.6.2] - 2026-09-03
 
 ### Corrigido

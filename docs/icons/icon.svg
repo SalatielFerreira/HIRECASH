@@ -4,9 +4,41 @@
       <stop offset="0" stop-color="#6366F1"/>
       <stop offset="1" stop-color="#4338CA"/>
     </linearGradient>
+    <clipPath id="rounded">
+      <rect width="512" height="512" rx="112"/>
+    </clipPath>
   </defs>
 
-  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <!--
+    Fundo facetado, mesma ideia da barra superior do app: as facetas nao
+    tem cor propria, sao so camadas de preto e branco translucidos sobre o
+    gradiente roxo — e por isso saem como tons de roxo. Trocar a cor de
+    marca no gradiente muda o icone inteiro junto.
+
+    Gerado por scripts/generate-icons.js a partir deste arquivo; ao mexer
+    aqui, rode "npm run generate:icons" e commite os PNGs.
+  -->
+  <g clip-path="url(#rounded)">
+    <rect width="512" height="512" fill="url(#bg)"/>
+    <path d="M-600 0H-470L42 512H-88Z" fill="#000" opacity="0.2"/>
+    <path d="M-470 0H-250L262 512H42Z" fill="#000" opacity="0.09"/>
+    <path d="M-250 0H-215L297 512H262Z" fill="#fff" opacity="0.13"/>
+    <path d="M-215 0H-120L392 512H297Z" fill="#000" opacity="0.05"/>
+    <path d="M-120 0H-95L417 512H392Z" fill="#fff" opacity="0.16"/>
+    <path d="M-95 0H30L542 512H417Z" fill="#000" opacity="0.13"/>
+    <path d="M30 0H60L572 512H542Z" fill="#fff" opacity="0.1"/>
+    <path d="M60 0H175L687 512H572Z" fill="#000" opacity="0.04"/>
+    <path d="M175 0H205L717 512H687Z" fill="#fff" opacity="0.15"/>
+    <path d="M205 0H330L842 512H717Z" fill="#000" opacity="0.15"/>
+    <path d="M330 0H355L867 512H842Z" fill="#fff" opacity="0.12"/>
+    <path d="M355 0H470L982 512H867Z" fill="#000" opacity="0.08"/>
+    <path d="M470 0H620L1132 512H982Z" fill="#000" opacity="0.24"/>
+    <path d="M-200 0H120L-392 512H-712Z" fill="#fff" opacity="0.05"/>
+    <path d="M340 0H520L8 512H-172Z" fill="#000" opacity="0.06"/>
+    <path d="M700 0H1100L588 512H188Z" fill="#fff" opacity="0.04"/>
+    <path d="M512 0v220L180 0Z" fill="#000" opacity="0.09"/>
+    <path d="M0 512V310l300 202Z" fill="#fff" opacity="0.07"/>
+  </g>
 
   <!-- Maleta (hire) -->
   <path d="M176 208h160a24 24 0 0 1 24 24v128a24 24 0 0 1-24 24H176a24 24 0 0 1-24-24V232a24 24 0 0 1 24-24z"

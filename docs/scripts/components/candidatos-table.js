@@ -122,6 +122,37 @@ export function ordenarPorVaga(candidatos) {
   );
 }
 
+/**
+ * Lista ordenada pela data de contratação, da mais recente para a mais
+ * antiga.
+ *
+ * As datas são comparadas como texto: em "AAAA-MM-DD" a ordem alfabética
+ * já é a ordem cronológica, então não é preciso converter para `Date` —
+ * e assim não há fuso horário envolvido.
+ *
+ * Quem ainda não tem data vai para o topo, e não para o fim: é um
+ * contratado recém-marcado, à espera do preenchimento — deixá-lo no fim
+ * da lista o esconderia justamente quando precisa de atenção. Empates
+ * desempatam pelo nome da vaga.
+ */
+export function ordenarPorContratacao(candidatos) {
+  return [...candidatos].sort((a, b) => {
+    const dataA = a.contratacao || '';
+    const dataB = b.contratacao || '';
+
+    if (dataA === dataB) {
+      return collator.compare(a.vaga || '', b.vaga || '');
+    }
+    if (!dataA) {
+      return -1;
+    }
+    if (!dataB) {
+      return 1;
+    }
+    return dataB.localeCompare(dataA);
+  });
+}
+
 /** Texto que a barra de busca compara: vaga + nome do candidato. */
 function textoBusca(candidato) {
   return normalizar(`${candidato.vaga || ''} ${candidato.nome || ''}`);

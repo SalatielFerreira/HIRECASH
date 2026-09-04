@@ -1,5 +1,5 @@
 import { showAlert } from '../components/alert.js';
-import { criarTabelaCandidatos, ordenarPorVaga } from '../components/candidatos-table.js';
+import { criarTabelaCandidatos, ordenarPorContratacao } from '../components/candidatos-table.js';
 import { showConfirm } from '../components/confirm.js';
 import { darBaixa, listCandidatos } from '../services/candidatos.service.js';
 import { STATUS_CONTRATADO } from '../services/candidato-opcoes.js';
@@ -47,9 +47,12 @@ const tabela = criarTabelaCandidatos({
   },
 });
 
-/** A página lista apenas quem já está com o status "Contratado". */
+/**
+ * A página lista apenas quem já está com o status "Contratado", das
+ * contratações mais recentes para as mais antigas.
+ */
 function listarContratados() {
-  return ordenarPorVaga(
+  return ordenarPorContratacao(
     listCandidatos().filter((candidato) => candidato.statusCandidato === STATUS_CONTRATADO)
   );
 }

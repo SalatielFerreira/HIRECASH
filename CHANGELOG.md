@@ -7,6 +7,15 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.11.0] - 2026-09-04
+
+### Alterado
+
+- **A lista da página de Comissão passou a ser ordenada pela data de contratação**, das mais recentes no topo para as mais antigas no fim (antes era por nome da vaga, como a página Candidato). Empates na mesma data desempatam pelo nome da vaga.
+- **Contratados sem data ainda preenchida ficam no topo**, e não no fim. São candidatos recém-marcados como "Contratado", à espera do lançamento da contratação e do nível — deixá-los no fim da lista os esconderia justamente quando precisam de atenção.
+- A ordem é aplicada a cada renderização da página: alterar a data de uma linha não a move de lugar na hora, mesma escolha já usada na página Candidato para não puxar a linha embaixo do dedo do usuário no meio da edição.
+- `CACHE_VERSION` do service worker: `hirecash-v16` → `hirecash-v17`.
+
 ## [0.10.1] - 2026-09-04
 
 ### Alterado

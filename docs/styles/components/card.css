@@ -69,11 +69,6 @@
   color: var(--color-text-inverse);
 }
 
-.btn--info {
-  background: var(--color-info);
-  color: var(--color-text-inverse);
-}
-
 .btn-row {
   display: flex;
   flex-wrap: wrap;
@@ -91,10 +86,6 @@
   }
 
   .btn--accent:hover {
-    opacity: 0.92;
-  }
-
-  .btn--info:hover {
     opacity: 0.92;
   }
 }

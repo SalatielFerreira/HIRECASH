@@ -40,9 +40,10 @@ const tabela = criarTabelaCandidatos({
   editaveis: EDITAVEIS,
   acao: {
     header: 'Baixa',
-    rotulo: 'Baixa',
+    rotulo: 'Dar baixa',
     icone: ICON_BAIXA,
-    classe: 'btn-acao--info',
+    // Mesmo estilo do botão de adicionar candidato: redondo, 40px, roxo.
+    classe: 'icon-button',
   },
 });
 
@@ -95,10 +96,9 @@ export const comissaoPage = {
           message:
             `Dar baixa em ${candidato.nome} tira o candidato desta lista e, ` +
             'na página Candidato, passa o status para "Sem interesse" e a ' +
-            'etapa para "Inativo". A contratação, o nível e o restante do ' +
+            'etapa para "Baixa". A contratação, o nível e o restante do ' +
             'cadastro continuam salvos.',
           confirmLabel: 'Dar baixa',
-          confirmClass: 'btn--info',
         });
 
         if (!confirmado) {

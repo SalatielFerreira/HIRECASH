@@ -1,8 +1,8 @@
 import { storage } from './storage.service.js';
 import { APP_VERSION } from '../version.js';
 import {
+  ETAPA_BAIXA,
   ETAPA_EM_ATIVIDADE,
-  ETAPA_INATIVO,
   STATUS_CONTRATADO,
   STATUS_SEM_INTERESSE,
 } from './candidato-opcoes.js';
@@ -70,7 +70,7 @@ export function updateCandidato(id, patch) {
 /**
  * Dá baixa em um candidato contratado que saiu antes de fechar os meses
  * da comissão: o status volta para "Sem interesse" e a etapa passa a
- * "Inativo". Como a página de Comissão lista somente quem está
+ * "Baixa". Como a página de Comissão lista somente quem está
  * "Contratado", ele sai da lista por consequência disso — sem precisar de
  * um campo separado de "baixa".
  *
@@ -79,7 +79,7 @@ export function updateCandidato(id, patch) {
 export function darBaixa(id) {
   return updateCandidato(id, {
     statusCandidato: STATUS_SEM_INTERESSE,
-    etapa: ETAPA_INATIVO,
+    etapa: ETAPA_BAIXA,
   });
 }
 

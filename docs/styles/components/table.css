@@ -113,42 +113,6 @@
   text-align: center;
 }
 
-.btn-acao {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: var(--radius-sm);
-  color: var(--color-text-inverse);
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-  transition:
-    transform var(--transition-fast),
-    opacity var(--transition-fast);
-}
-
-.btn-acao svg {
-  width: 15px;
-  height: 15px;
-  stroke: currentColor;
-  flex-shrink: 0;
-}
-
-.btn-acao:active {
-  transform: scale(0.96);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .btn-acao:hover {
-    opacity: 0.9;
-  }
-}
-
-.btn-acao--info {
-  background: var(--color-info);
-}
-
 /*
  * Parcelas da comissão: uma linha por parcela, em três colunas
  * (rótulo P1/P2, data e valor) que se alinham entre as linhas.

@@ -7,18 +7,28 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.10.1] - 2026-09-04
+
+### Alterado
+
+- **Botão de baixa no mesmo estilo do botão de adicionar candidato**: redondo, 40px, roxo. Passou a usar a própria classe `.icon-button` do botão `+`, em vez de valores repetidos — então os dois continuam iguais se o estilo mudar. O ícone de saída foi mantido, e o botão ficou só com o ícone: o nome da ação está no cabeçalho da coluna ("Baixa"), com `title` e `aria-label` no botão.
+- O botão de confirmar na telinha de baixa voltou ao roxo padrão, para acompanhar o botão que a abre.
+- **A etapa atribuída na baixa passou de "Inativo" para "Baixa"**, para casar com o nome do botão e da coluna. Segue fora das opções escolhíveis. Candidatos que receberam baixa antes desta versão continuam com "Inativo" gravado — o editor de lista preserva valor fora das opções, então o valor antigo continua aparecendo certo; para atualizar, basta dar baixa de novo.
+- Removidos `.btn-acao`, `.btn-acao--info` e `.btn--info`, que ficaram sem uso.
+- `CACHE_VERSION` do service worker: `hirecash-v15` → `hirecash-v16`.
+
 ## [0.10.0] - 2026-09-04
 
 ### Adicionado
 
-- **Botão "Baixa" na página de Comissão**, em azul, no fim de cada linha (depois da coluna Comissão) — para o caso do candidato contratado sair antes de fechar os meses da comissão. Abre uma telinha de confirmação; ao confirmar, o candidato sai da lista de Comissão e, na página Candidato, o status passa a **"Sem interesse"** e a etapa a **"Inativo"**. Contratação, nível e o resto do cadastro continuam salvos.
+- **Botão "Baixa" na página de Comissão**, no fim de cada linha (depois da coluna Comissão) — para o caso do candidato contratado sair antes de fechar os meses da comissão. Abre uma telinha de confirmação; ao confirmar, o candidato sai da lista de Comissão e, na página Candidato, o status passa a **"Sem interesse"** e a etapa a **"Baixa"**. Contratação, nível e o resto do cadastro continuam salvos.
   - Ele sai da lista por consequência do status deixar de ser "Contratado", sem precisar de um campo separado de "baixa" — então recontratar o candidato depois traz ele de volta, com a etapa voltando a "Em atividade".
 - Componente de confirmação reutilizável (`components/confirm.js`): `await showConfirm({...})` devolve `true`/`false`. Diferente do modal de cadastro, fecha ao cancelar, ao clicar fora e com `Esc` — não há nada digitado para se perder, e uma pergunta de confirmação precisa ser fácil de recusar. O foco começa no botão de cancelar, para o caminho seguro ser o que fica sob o `Enter`.
-- Variantes `.btn--info` (botão azul) e `.btn-acao` (botão compacto dentro da linha da tabela), além do suporte a uma coluna de ação no componente de tabela.
+- Suporte a uma coluna de ação no fim da linha, no componente de tabela. (Na 0.10.1 o botão passou a usar a classe `.icon-button`, a mesma do botão de adicionar candidato.)
 
 ### Alterado
 
-- **"Em atividade" saiu da lista de opções do campo Etapa**, junto com o novo "Inativo". As duas são etapas que o app atribui sozinho — "Em atividade" ao virar "Contratado", "Inativo" ao dar baixa — e não opções para escolher à mão.
+- **"Em atividade" saiu da lista de opções do campo Etapa**, junto com o novo "Baixa". As duas são etapas que o app atribui sozinho — "Em atividade" ao virar "Contratado", "Baixa" ao dar baixa — e não opções para escolher à mão.
 - **O editor de lista passou a preservar um valor que não está entre as opções.** Era necessário por causa da mudança acima: um candidato com etapa "Em atividade" abriria o select sem esse valor, o campo cairia em outra opção e salvar trocaria o dado sem o usuário pedir. Agora o valor atual entra no select mesmo fora da lista, então ele aparece corretamente e nada muda sem uma escolha explícita.
 - `CACHE_VERSION` do service worker: `hirecash-v14` → `hirecash-v15`.
 

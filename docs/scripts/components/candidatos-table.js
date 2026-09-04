@@ -189,7 +189,7 @@ function editorHtml(field, candidato) {
   if (field.type === 'select') {
     const vazia = `<option value=""${value ? '' : ' selected'}>—</option>`;
 
-    // Valores atribuídos pelo app ("Em atividade", "Inativo") não estão
+    // Valores atribuídos pelo app ("Em atividade", "Baixa") não estão
     // na lista de opções. Sem incluir o valor atual, o select abriria em
     // outra opção e salvar trocaria o dado sem o usuário pedir.
     const foraDaLista = value && !field.options.includes(value);
@@ -260,12 +260,15 @@ export function criarTabelaCandidatos({ colunas, editaveis = [], placeholderBusc
     if (!acao) {
       return '';
     }
+
+    // Só o ícone: o nome da ação fica no cabeçalho da coluna, e o botão
+    // se identifica por `title`/`aria-label`.
     const rotulo = escapeHtml(acao.rotulo);
     return (
       `<td class="data-table__acao">` +
-      `<button type="button" class="btn-acao ${acao.classe || ''}" data-acao` +
-      ` data-id="${escapeHtml(candidato.id)}" title="${rotulo}">` +
-      `${acao.icone}<span>${rotulo}</span></button></td>`
+      `<button type="button" class="${escapeHtml(acao.classe || 'icon-button')}" data-acao` +
+      ` data-id="${escapeHtml(candidato.id)}" title="${rotulo}" aria-label="${rotulo}">` +
+      `${acao.icone}</button></td>`
     );
   }
 

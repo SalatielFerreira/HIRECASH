@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.20.0] - 2026-09-05
+
+### Alterado
+
+- **Cores fixas para Status da vaga, Etapa e Status do candidato**: cada badge passou a usar uma cor sólida e exclusiva por valor (com texto branco), em vez das cinco variantes genéricas de antes. Etapa, que antes aparecia como texto simples, agora também ganhou badge colorido. "Contratação" (etapa) ganhou um tom ciano próprio, e "Baixa" (etapa) e "Encerrada" (vaga) usam o mesmo cinza escuro por serem estados encerrados/automáticos.
+
 ## [0.19.0] - 2026-09-05
 
 ### Alterado

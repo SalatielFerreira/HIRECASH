@@ -350,27 +350,56 @@ html[data-theme='dark'] select.cell-editor {
   white-space: nowrap;
 }
 
-.badge--success {
-  background: var(--color-success-bg);
-  color: var(--color-success);
+/* Cor sólida + texto branco por valor exato (pedido do usuário), não um
+   conjunto pequeno de variantes semânticas — por isso os nomes são de
+   cor, não de significado. Fixas nos dois temas de propósito: são a
+   mesma cor de marca em qualquer fundo, como o roxo do topbar. */
+.badge--verde {
+  background: #16a34a;
+  color: #ffffff;
 }
 
-.badge--warning {
-  background: var(--color-warning-bg);
-  color: var(--color-warning);
+.badge--azul {
+  background: #2563eb;
+  color: #ffffff;
 }
 
-.badge--error {
-  background: var(--color-error-bg);
-  color: var(--color-error);
+.badge--vermelho {
+  background: #dc2626;
+  color: #ffffff;
 }
 
-.badge--info {
-  background: var(--color-info-bg);
-  color: var(--color-info);
+.badge--laranja {
+  background: #ea580c;
+  color: #ffffff;
 }
 
-.badge--neutral {
-  background: var(--color-border);
-  color: var(--color-text-secondary);
+.badge--roxo {
+  background: #7c3aed;
+  color: #ffffff;
+}
+
+.badge--ciano {
+  background: #0891b2;
+  color: #ffffff;
+}
+
+.badge--ambar {
+  background: #f59e0b;
+  color: #ffffff;
+}
+
+.badge--marrom {
+  background: #92400e;
+  color: #ffffff;
+}
+
+.badge--cinza-claro {
+  background: #9ca3af;
+  color: #ffffff;
+}
+
+.badge--cinza-escuro {
+  background: #4b5563;
+  color: #ffffff;
 }

@@ -10,6 +10,8 @@ import { chaveVaga, listCandidatos, updateCandidato } from '../services/candidat
 import { calcularParcelas, NIVEL_OPTIONS } from '../services/comissao.service.js';
 import { resolverVagaPorCodigo } from '../services/vagas.service.js';
 import {
+  ETAPA_BAIXA,
+  ETAPA_EM_ATIVIDADE,
   ETAPA_OPTIONS,
   FONTE_OPTIONS,
   MODALIDADE_OPTIONS,
@@ -28,22 +30,33 @@ const ICON_FILTER =
 const ICON_CALENDAR =
   '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
 
+// Cor por valor exato (não por significado semântico) — pedido do
+// usuário, com uma paleta fixa de tons reaproveitados entre os campos.
 const STATUS_VAGA_BADGE = {
-  'Não publicada': 'neutral',
-  Publicada: 'success',
-  Congelada: 'info',
-  Cancelada: 'error',
-  [STATUS_VAGA_ENCERRADA]: 'neutral',
+  'Não publicada': 'cinza-claro',
+  Publicada: 'verde',
+  Congelada: 'azul',
+  Cancelada: 'vermelho',
+  [STATUS_VAGA_ENCERRADA]: 'cinza-escuro',
+};
+
+const ETAPA_BADGE = {
+  'Em abordagem': 'laranja',
+  'Entrevista RH': 'azul',
+  'Entrevista técnica': 'roxo',
+  Contratação: 'ciano',
+  [ETAPA_EM_ATIVIDADE]: 'verde',
+  [ETAPA_BAIXA]: 'cinza-escuro',
 };
 
 const STATUS_CANDIDATO_BADGE = {
-  Standby: 'warning',
-  'Sem retorno': 'neutral',
-  'Sem interesse': 'neutral',
-  Agendado: 'info',
-  Reprovado: 'error',
-  Aprovado: 'success',
-  Contratado: 'success',
+  Standby: 'ambar',
+  'Sem retorno': 'cinza-claro',
+  'Sem interesse': 'marrom',
+  Agendado: 'azul',
+  Reprovado: 'vermelho',
+  Aprovado: 'verde',
+  Contratado: 'verde',
 };
 
 const VAZIO = '<span class="cell-empty">—</span>';
@@ -107,7 +120,7 @@ export const CAMPOS = {
   localizacao: { label: 'Localização', type: 'text', placeholder: 'Cidade/UF' },
   modalidade: { label: 'Modalidade', type: 'select', options: MODALIDADE_OPTIONS },
   fonte: { label: 'Fonte', type: 'select', options: FONTE_OPTIONS },
-  etapa: { label: 'Etapa', type: 'select', options: ETAPA_OPTIONS },
+  etapa: { label: 'Etapa', type: 'select', options: ETAPA_OPTIONS, badges: ETAPA_BADGE },
   statusCandidato: {
     label: 'Status do candidato',
     type: 'select',
@@ -249,7 +262,7 @@ function cellContent(field, candidato) {
   const value = candidato[field.key];
 
   if (field.badges) {
-    return value ? badge(value, field.badges[value] || 'neutral') : VAZIO;
+    return value ? badge(value, field.badges[value] || 'cinza-claro') : VAZIO;
   }
 
   if (field.type === 'link') {

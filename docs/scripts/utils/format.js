@@ -28,6 +28,21 @@ export function formatDate(iso) {
   return ano && mes && dia ? `${dia}/${mes}/${ano}` : '';
 }
 
+/** "AAAA-MM" → "Outubro de 2026". */
+export function formatMesAno(anoMes) {
+  const [ano, mes] = String(anoMes ?? '')
+    .split('-')
+    .map(Number);
+  if (!ano || !mes) {
+    return '';
+  }
+  const texto = new Date(ano, mes - 1, 1).toLocaleDateString('pt-BR', {
+    month: 'long',
+    year: 'numeric',
+  });
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
 /** Minúsculas e sem acento, para a busca casar "Analista" com "analista". */
 export function normalizar(texto) {
   return String(texto ?? '')

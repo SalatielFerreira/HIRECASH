@@ -1,6 +1,8 @@
 /**
  * Regra de comissão por candidato contratado.
  */
+import { listCandidatos } from './candidatos.service.js';
+import { FONTE_INDICACAO, STATUS_CONTRATADO } from './candidato-opcoes.js';
 
 /** Valor total da comissão por nível, em centavos. */
 export const VALOR_POR_NIVEL = {
@@ -49,4 +51,47 @@ export function calcularParcelas(contratacao, nivel) {
     { data: diaQuinze(ano, mes + 1), valor: PRIMEIRA_PARCELA },
     { data: diaQuinze(ano, mes + 2), valor: total - PRIMEIRA_PARCELA },
   ];
+}
+
+/** Data local em "AAAA-MM-DD" — evita o mesmo problema de fuso do `diaQuinze`. */
+function paraIso(data) {
+  const ano = data.getFullYear();
+  const mes = String(data.getMonth() + 1).padStart(2, '0');
+  const dia = String(data.getDate()).padStart(2, '0');
+  return `${ano}-${mes}-${dia}`;
+}
+
+/**
+ * Soma, mês a mês, as parcelas de comissão de todos os candidatos
+ * contratados (fora indicação, que não gera comissão) que ainda não
+ * venceram — o que já passou não ajuda a planejar o que vem pela frente,
+ * então fica de fora. É o que a Dashboard mostra como previsão.
+ *
+ * Devolve do mês mais próximo pro mais distante, pulando meses sem
+ * nenhuma parcela futura: `[{ mes: "AAAA-MM", total: <centavos> }, ...]`.
+ */
+export function previsaoMensal(hoje = new Date()) {
+  const hojeIso = paraIso(hoje);
+  const porMes = new Map();
+
+  listCandidatos()
+    .filter(
+      (candidato) =>
+        candidato.statusCandidato === STATUS_CONTRATADO && candidato.fonte !== FONTE_INDICACAO
+    )
+    .forEach((candidato) => {
+      calcularParcelas(candidato.contratacao, candidato.nivel).forEach((parcela) => {
+        // Parcela zerada (P2 do N1) não é dinheiro esperado — não faz
+        // sentido aparecer como se fosse mês de recebimento.
+        if (parcela.data < hojeIso || parcela.valor <= 0) {
+          return;
+        }
+        const mes = parcela.data.slice(0, 7);
+        porMes.set(mes, (porMes.get(mes) || 0) + parcela.valor);
+      });
+    });
+
+  return [...porMes.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([mes, total]) => ({ mes, total }));
 }

@@ -1,3 +1,35 @@
 .page-dashboard .card__icon {
   background: var(--color-primary);
 }
+
+.previsao-lista {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--space-3);
+}
+
+.previsao-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.previsao-item:last-child {
+  border-bottom: none;
+}
+
+.previsao-item__mes {
+  font-size: 13.5px;
+  color: var(--color-text-primary);
+}
+
+.previsao-item__valor {
+  font-weight: 700;
+  color: var(--color-success);
+}
+
+.previsao-vazia {
+  margin-top: var(--space-3);
+}

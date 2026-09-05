@@ -1,7 +1,39 @@
 import { showAlert } from '../components/alert.js';
+import { previsaoMensal } from '../services/comissao.service.js';
+import { formatCurrency, formatMesAno } from '../utils/format.js';
 
-const ICON_DASHBOARD =
-  '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>';
+const ICON_PREVISAO =
+  '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M15 9.5c0-1.4-1.3-2.5-3-2.5s-3 1.1-3 2.5 1.3 2 3 2.5 3 1.1 3 2.5-1.3 2.5-3 2.5-3-1.1-3-2.5"/></svg>';
+
+/** Linha "Mês de ano · R$ valor" da lista de previsão. */
+function previsaoItemHtml({ mes, total }) {
+  return (
+    `<li class="previsao-item">` +
+    `<span class="previsao-item__mes">${formatMesAno(mes)}</span>` +
+    `<span class="previsao-item__valor">${formatCurrency(total)}</span>` +
+    `</li>`
+  );
+}
+
+function previsaoComissaoHtml() {
+  const meses = previsaoMensal();
+
+  const corpo =
+    meses.length === 0
+      ? '<p class="text-muted previsao-vazia">Nenhuma comissão prevista pelos próximos meses.</p>'
+      : `<ul class="previsao-lista">${meses.map(previsaoItemHtml).join('')}</ul>`;
+
+  return `
+    <section class="card">
+      <div class="card__header">
+        <span class="card__icon">${ICON_PREVISAO}</span>
+        <h2>Comissão prevista</h2>
+      </div>
+      <p class="text-muted">Quanto ainda vai entrar, mês a mês, a partir de hoje.</p>
+      ${corpo}
+    </section>
+  `;
+}
 
 export const dashboardPage = {
   title: 'Dashboard',
@@ -14,15 +46,7 @@ export const dashboardPage = {
           <p class="text-muted">Visão geral do HireCash.</p>
         </header>
 
-        <section class="card">
-          <div class="card__header">
-            <span class="card__icon">${ICON_DASHBOARD}</span>
-            <h2>Em construção</h2>
-          </div>
-          <p>
-            Os indicadores e resumos do painel serão definidos nos próximos passos.
-          </p>
-        </section>
+        ${previsaoComissaoHtml()}
 
         <section class="card">
           <h2>Componente de alerta</h2>

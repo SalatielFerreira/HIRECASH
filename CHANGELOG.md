@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.22.0] - 2026-09-05
+
+### Adicionado
+
+- **Comissão prevista na Dashboard**: novo card que soma, mês a mês, as parcelas (P1/P2) de todos os candidatos contratados que ainda não venceram — o que já passou não aparece, só o que falta receber a partir de hoje.
+
 ## [0.21.1] - 2026-09-05
 
 ### Removido

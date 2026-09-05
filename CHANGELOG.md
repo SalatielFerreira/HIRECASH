@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.24.0] - 2026-09-05
+
+### Alterado
+
+- **Barra de rolagem discreta e de acordo com o tema**: tanto a que rola a página (cima/baixo) quanto a da tabela de candidatos (lados) trocaram a barra grossa e sempre cinza do sistema por uma versão mais fina, com cantos arredondados e a cor combinando com o tema claro/escuro. Vale só para navegadores de computador — no celular, principalmente iPhone, o sistema já usa uma barra flutuante que não dá pra personalizar.
+
 ## [0.23.1] - 2026-09-05
 
 ### Removido

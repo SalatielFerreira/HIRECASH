@@ -4,6 +4,32 @@
   border-radius: var(--radius-lg);
   background: var(--color-surface);
   -webkit-overflow-scrolling: touch;
+
+  /* Barra de rolagem discreta e de acordo com o tema — mesmo ajuste do
+     scroll vertical da página (ver .app-content em main.css). */
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-text-secondary) 45%, transparent) transparent;
+}
+
+.data-table-scroll::-webkit-scrollbar {
+  height: 10px;
+}
+
+.data-table-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.data-table-scroll::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--color-text-secondary) 45%, transparent);
+  border: 2px solid transparent;
+  border-radius: var(--radius-full);
+  background-clip: padding-box;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .data-table-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-text-secondary);
+  }
 }
 
 .data-table {

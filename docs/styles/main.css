@@ -53,6 +53,36 @@ body {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding: var(--space-5) var(--space-5) var(--space-6);
+
+  /*
+   * Barra de rolagem discreta e de acordo com o tema, em vez da barra
+   * grossa e sempre cinza do sistema (igual em claro e escuro). Firefox
+   * usa scrollbar-color/scrollbar-width; os demais navegadores, os
+   * pseudo-elementos ::-webkit-scrollbar-* logo abaixo.
+   */
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-text-secondary) 45%, transparent) transparent;
+}
+
+.app-content::-webkit-scrollbar {
+  width: 10px;
+}
+
+.app-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.app-content::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--color-text-secondary) 45%, transparent);
+  border: 2px solid transparent;
+  border-radius: var(--radius-full);
+  background-clip: padding-box;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .app-content::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-text-secondary);
+  }
 }
 
 .app-content.no-scroll {

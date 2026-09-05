@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.21.1] - 2026-09-05
+
+### Removido
+
+- **"Contratação" saiu das opções de Etapa** (cadastro e edição). Candidatos que já tinham esse valor continuam mostrando normalmente até serem reeditados.
+
 ## [0.21.0] - 2026-09-05
 
 ### Alterado

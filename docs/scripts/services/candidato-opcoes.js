@@ -35,7 +35,7 @@ export const FONTE_INDICACAO = 'Indicação';
  * atribui sozinho (ver `ETAPA_EM_ATIVIDADE` e `ETAPA_BAIXA`), não opções
  * para escolher à mão.
  */
-export const ETAPA_OPTIONS = ['Em abordagem', 'Entrevista RH', 'Entrevista técnica', 'Contratação'];
+export const ETAPA_OPTIONS = ['Em abordagem', 'Entrevista RH', 'Entrevista técnica'];
 
 export const STATUS_CANDIDATO_OPTIONS = [
   'Standby',

@@ -6,6 +6,7 @@
   position: relative;
   z-index: var(--z-bottomnav);
   display: flex;
+  flex-shrink: 0;
   margin: 0 var(--space-3) calc(var(--space-3) + var(--safe-bottom));
   background: var(--color-surface);
   border-radius: var(--radius-lg);

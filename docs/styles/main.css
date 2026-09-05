@@ -42,7 +42,14 @@ body {
 }
 
 .app-content {
-  flex: 1 1 auto;
+  /* Base 0 (não "auto"): com "auto" o flexbox usa a altura natural do
+     conteúdo como base do cálculo de encolhimento, e como topbar/rodapé
+     têm a mesma prioridade de encolher, uma página mais alta que a tela
+     (como Configuração numa janela baixa) encolhia os três juntos em vez
+     de só rolar por dentro. Com base 0 e min-height 0, é só esta área
+     que cede espaço — topbar e rodapé (flex-shrink: 0) ficam fixos. */
+  flex: 1 1 0;
+  min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding: var(--space-5) var(--space-5) var(--space-6);

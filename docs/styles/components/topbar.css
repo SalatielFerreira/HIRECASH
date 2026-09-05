@@ -3,6 +3,7 @@
   top: 0;
   z-index: var(--z-topbar);
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   gap: var(--space-3);
   height: calc(var(--topbar-height) + var(--safe-top));

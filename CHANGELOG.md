@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.18.1] - 2026-09-05
+
+### Corrigido
+
+- **Barra superior e rodapé encolhendo em páginas mais altas que a janela** (principalmente a Configuração, em janelas mais baixas): como nenhum dos dois tinha `flex-shrink: 0`, o navegador os encolhia junto com a área de conteúdo sempre que a página passava da altura da tela — os ícones chegavam a ficar achatados. Agora só a área de conteúdo cede espaço e rola por dentro; a barra superior e o rodapé mantêm sempre o tamanho certo.
+
 ## [0.18.0] - 2026-09-05
 
 ### Adicionado

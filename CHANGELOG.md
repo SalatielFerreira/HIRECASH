@@ -7,6 +7,20 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.15.0] - 2026-09-05
+
+### Adicionado
+
+- **Filtro por campo na página Candidato**: botão (ícone de funil) na frente da barra de busca abre um painel com dois selects — primeiro escolhe o **campo** (entre os que têm uma lista fixa de opções: Status da vaga, Modalidade, Fonte, Etapa, Status do candidato), depois o **valor** daquele campo. A tabela filtra na hora, combinando com o texto da busca quando os dois estão em uso. O botão fica destacado (roxo) enquanto um filtro está ativo, e "Limpar filtro" reseta os dois selects.
+
+### Corrigido
+
+- **Dar baixa não muda mais o Status da vaga.** Antes, como a baixa tira o candidato de "Contratado", a mesma regra que reabre a vaga quando ninguém mais está contratado entrava em ação e voltava o status para "Publicada" sozinha. Agora a baixa é reconhecida como uma exceção (pela etapa "Baixa"): a vaga fica exatamente como estava até alguém mexer nela de propósito — um novo contratado a fecha de novo, ou o Status da vaga é reaberto à mão.
+
+### Alterado
+
+- Ícone do botão "Adicionar vaga" trocado para a mesma maleta do emblema na barra superior (sem o "+" no meio, que só existia nesse botão antes).
+
 ## [0.14.0] - 2026-09-05
 
 ### Alterado

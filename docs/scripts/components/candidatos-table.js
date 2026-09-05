@@ -22,6 +22,9 @@ import { escapeHtml, formatCurrency, formatDate, normalizar } from '../utils/for
 const ICON_SEARCH =
   '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
 
+const ICON_FILTER =
+  '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3Z"/></svg>';
+
 const STATUS_VAGA_BADGE = {
   'Não publicada': 'neutral',
   Publicada: 'success',
@@ -286,20 +289,44 @@ function editorHtml(field, candidato) {
  * @param {Object} [config.acao]         coluna de botão no fim da linha:
  *   `{ header, rotulo, icone, classe }`. O que o botão faz é passado em
  *   `init(container, { onAcao })`, porque depende da página.
+ * @param {boolean} [config.filtro]      mostra o botão de filtro por
+ *   campo, ao lado da busca — um select para escolher o campo (entre os
+ *   de `colunas` que têm `options`, ex.: Status do candidato, Modalidade)
+ *   e outro para o valor daquele campo.
  */
-export function criarTabelaCandidatos({ colunas, editaveis = [], placeholderBusca, acao }) {
+export function criarTabelaCandidatos({
+  colunas,
+  editaveis = [],
+  placeholderBusca,
+  acao,
+  filtro = false,
+}) {
   const campos = colunas.map(campo);
   const podeEditar = new Set(editaveis);
   const busca = placeholderBusca || 'Buscar por vaga ou candidato';
+  const camposFiltraveis = filtro
+    ? campos.filter((field) => field.type === 'select' && field.options?.length > 0)
+    : [];
 
   function cellHtml(field, candidato) {
     const editavel = podeEditar.has(field.key);
     const classes = editavel ? 'data-table__cell data-table__cell--editable' : 'data-table__cell';
+    // Guarda o valor cru (não o HTML da badge) para o filtro por campo comparar.
+    const valorFiltro =
+      field.type === 'select' ? ` data-valor="${escapeHtml(candidato[field.key] ?? '')}"` : '';
 
     return (
-      `<td class="${classes}" data-id="${escapeHtml(candidato.id)}" data-field="${field.key}"` +
+      `<td class="${classes}" data-id="${escapeHtml(candidato.id)}" data-field="${field.key}"${valorFiltro}` +
       `${editavel ? ' tabindex="0"' : ''}>${cellContent(field, candidato)}</td>`
     );
+  }
+
+  /** Redesenha uma célula e mantém `data-valor` (usado pelo filtro) em dia. */
+  function refreshCell(cell, field, candidato) {
+    cell.innerHTML = cellContent(field, candidato);
+    if (field.type === 'select') {
+      cell.dataset.valor = candidato[field.key] ?? '';
+    }
   }
 
   function acaoHtml(candidato) {
@@ -329,18 +356,50 @@ export function criarTabelaCandidatos({ colunas, editaveis = [], placeholderBusc
         )
         .join('');
 
+      const filtroBotaoHtml =
+        camposFiltraveis.length > 0
+          ? `
+        <button type="button" class="icon-button icon-button--outline" id="btn-filtro" aria-label="Filtrar" title="Filtrar">
+          ${ICON_FILTER}
+        </button>`
+          : '';
+
+      const filtroPainelHtml =
+        camposFiltraveis.length > 0
+          ? `
+        <div class="filter-panel" id="filtro-painel" hidden>
+          <select id="filtro-campo" aria-label="Campo para filtrar">
+            <option value="">Filtrar por...</option>
+            ${camposFiltraveis
+              .map(
+                (field) =>
+                  `<option value="${field.key}">${escapeHtml(field.header || field.label)}</option>`
+              )
+              .join('')}
+          </select>
+          <select id="filtro-valor" aria-label="Valor do filtro" disabled>
+            <option value="">Selecione o campo</option>
+          </select>
+          <button type="button" class="filter-panel__limpar" id="filtro-limpar" hidden>Limpar filtro</button>
+        </div>`
+          : '';
+
       return `
-        <div class="search-bar">
-          <span class="search-bar__icon">${ICON_SEARCH}</span>
-          <input
-            type="search"
-            id="busca-candidato"
-            class="search-bar__input"
-            placeholder="${escapeHtml(busca)}"
-            aria-label="${escapeHtml(busca)}"
-            autocomplete="off"
-          />
+        <div class="search-row">
+          ${filtroBotaoHtml}
+          <div class="search-bar">
+            <span class="search-bar__icon">${ICON_SEARCH}</span>
+            <input
+              type="search"
+              id="busca-candidato"
+              class="search-bar__input"
+              placeholder="${escapeHtml(busca)}"
+              aria-label="${escapeHtml(busca)}"
+              autocomplete="off"
+            />
+          </div>
         </div>
+        ${filtroPainelHtml}
 
         <div class="data-table-scroll">
           <table class="data-table">
@@ -377,18 +436,30 @@ export function criarTabelaCandidatos({ colunas, editaveis = [], placeholderBusc
         });
       }
 
-      // --- Busca -----------------------------------------------------
-      // Filtra escondendo linhas, em vez de redesenhar a tabela, para não
-      // perder o foco (nem o texto) do campo a cada tecla digitada.
+      // --- Busca e filtro por campo -----------------------------------
+      // Escondem linhas, em vez de redesenhar a tabela, para não perder o
+      // foco (nem o texto digitado) a cada tecla ou troca de filtro.
       const searchInput = container.querySelector('#busca-candidato');
       const searchEmpty = container.querySelector('#busca-vazia');
+      const filtroBotao = container.querySelector('#btn-filtro');
+      const filtroPainel = container.querySelector('#filtro-painel');
+      const filtroCampoSelect = container.querySelector('#filtro-campo');
+      const filtroValorSelect = container.querySelector('#filtro-valor');
+      const filtroLimparBotao = container.querySelector('#filtro-limpar');
+
+      let filtroAtivo = null; // { campo, valor }
 
       function aplicarFiltro() {
         const termo = normalizar(searchInput.value.trim());
         let visiveis = 0;
 
         tbody.querySelectorAll('tr').forEach((row) => {
-          const casa = !termo || row.dataset.busca.includes(termo);
+          const casaBusca = !termo || row.dataset.busca.includes(termo);
+          const casaFiltro =
+            !filtroAtivo ||
+            row.querySelector(`[data-field="${filtroAtivo.campo}"]`)?.dataset.valor ===
+              filtroAtivo.valor;
+          const casa = casaBusca && casaFiltro;
           row.hidden = !casa;
           if (casa) {
             visiveis += 1;
@@ -399,6 +470,57 @@ export function criarTabelaCandidatos({ colunas, editaveis = [], placeholderBusc
       }
 
       searchInput.addEventListener('input', aplicarFiltro);
+
+      if (filtroBotao) {
+        filtroBotao.addEventListener('click', () => {
+          filtroPainel.hidden = !filtroPainel.hidden;
+        });
+
+        const limparValorDoFiltro = () => {
+          filtroValorSelect.innerHTML = '<option value="">Selecione o campo</option>';
+          filtroValorSelect.disabled = true;
+        };
+
+        const desativarFiltro = () => {
+          filtroAtivo = null;
+          filtroBotao.classList.remove('is-active');
+          filtroLimparBotao.hidden = true;
+        };
+
+        filtroCampoSelect.addEventListener('change', () => {
+          const field = camposFiltraveis.find((item) => item.key === filtroCampoSelect.value);
+          desativarFiltro();
+
+          if (!field) {
+            limparValorDoFiltro();
+            aplicarFiltro();
+            return;
+          }
+
+          const opcoesHtml = field.options
+            .map((opcao) => `<option value="${escapeHtml(opcao)}">${escapeHtml(opcao)}</option>`)
+            .join('');
+          filtroValorSelect.innerHTML = `<option value="">Selecione o valor</option>${opcoesHtml}`;
+          filtroValorSelect.disabled = false;
+          aplicarFiltro();
+        });
+
+        filtroValorSelect.addEventListener('change', () => {
+          const campo = filtroCampoSelect.value;
+          const valor = filtroValorSelect.value;
+          filtroAtivo = campo && valor ? { campo, valor } : null;
+          filtroBotao.classList.toggle('is-active', !!filtroAtivo);
+          filtroLimparBotao.hidden = !filtroAtivo;
+          aplicarFiltro();
+        });
+
+        filtroLimparBotao.addEventListener('click', () => {
+          filtroCampoSelect.value = '';
+          limparValorDoFiltro();
+          desativarFiltro();
+          aplicarFiltro();
+        });
+      }
 
       // --- Edição inline ---------------------------------------------
       let editing = null;
@@ -451,7 +573,7 @@ export function criarTabelaCandidatos({ colunas, editaveis = [], placeholderBusc
         }
 
         cell.classList.remove('is-editing');
-        cell.innerHTML = cellContent(field, atualizado);
+        refreshCell(cell, field, atualizado);
 
         const row = cell.closest('tr');
         if (row) {
@@ -469,7 +591,7 @@ export function criarTabelaCandidatos({ colunas, editaveis = [], placeholderBusc
             }
             const alvo = row.querySelector(`[data-field="${outro.key}"]`);
             if (alvo) {
-              alvo.innerHTML = cellContent(outro, atualizado);
+              refreshCell(alvo, outro, atualizado);
             }
           });
         }
@@ -498,7 +620,7 @@ export function criarTabelaCandidatos({ colunas, editaveis = [], placeholderBusc
               }
               const dadosOutro = todos.find((item) => item.id === celula.dataset.id);
               if (dadosOutro && vagasAfetadas.has(chaveVaga(dadosOutro))) {
-                celula.innerHTML = cellContent(campo('statusVaga'), dadosOutro);
+                refreshCell(celula, campo('statusVaga'), dadosOutro);
               }
             });
           }

@@ -129,6 +129,13 @@
   box-shadow: none;
 }
 
+/* Indica que um filtro está aplicado (ex.: botão de filtrar a tabela). */
+.icon-button--outline.is-active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
 @media (hover: hover) and (pointer: fine) {
   .icon-button--outline:hover {
     background: var(--color-bg);

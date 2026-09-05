@@ -32,10 +32,9 @@ const ICON_CLOSE =
 const ICON_CHECK =
   '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
 
-// Maleta com um "+" dentro, no lugar da alça — para diferenciar do "+"
-// simples de adicionar candidato.
+// Mesma maleta do emblema na barra superior (sem o "+" no meio).
 const ICON_VAGA =
-  '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M12 11v6M9 14h6"/></svg>';
+  '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 12h18"/></svg>';
 
 const ICON_EDIT =
   '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>';
@@ -61,7 +60,7 @@ const COLUNAS = [
   'observacao',
 ];
 
-const tabela = criarTabelaCandidatos({ colunas: COLUNAS, editaveis: COLUNAS });
+const tabela = criarTabelaCandidatos({ colunas: COLUNAS, editaveis: COLUNAS, filtro: true });
 
 function renderEmptyState() {
   return `

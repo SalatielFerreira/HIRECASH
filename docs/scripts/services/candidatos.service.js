@@ -51,8 +51,15 @@ export function chaveVaga(candidato) {
  * TODOS os candidatos que concorrem a ela — inclusive o próprio
  * contratado —, mesmo que o status da vaga de cada um tivesse sido
  * escolhido diferente antes. E se deixar de haver algum contratado
- * (editar o status de volta, ou dar baixa), a vaga reabre sozinha,
- * voltando a "Publicada".
+ * (editar o status de volta), a vaga reabre sozinha, voltando a
+ * "Publicada".
+ *
+ * A baixa é uma exceção de propósito: dar baixa também tira o candidato
+ * de "Contratado", mas não deve reabrir a vaga sozinha — ela fica como
+ * está até alguém mexer nela (um novo contratado a fecha de novo, ou o
+ * Status da vaga é reaberto à mão). Por isso, se algum candidato do
+ * grupo tiver saído por baixa (etapa "Baixa") e ninguém estiver
+ * contratado, o grupo inteiro fica como está, sem recálculo.
  *
  * "Encerrada" nunca é escolhida à mão — fica fora de
  * `STATUS_VAGA_OPTIONS` — e por isso só este recálculo grava esse valor.
@@ -65,23 +72,27 @@ function recalcularStatusVaga(candidatos, chave) {
     return candidatos;
   }
 
-  const algumContratado = candidatos.some(
-    (item) => chaveVaga(item) === alvo && item.statusCandidato === STATUS_CONTRATADO
-  );
+  const doGrupo = candidatos.filter((item) => chaveVaga(item) === alvo);
+  const algumContratado = doGrupo.some((item) => item.statusCandidato === STATUS_CONTRATADO);
 
-  return candidatos.map((item) => {
-    if (chaveVaga(item) !== alvo) {
-      return item;
-    }
-    if (algumContratado) {
-      return item.statusVaga === STATUS_VAGA_ENCERRADA
-        ? item
-        : { ...item, statusVaga: STATUS_VAGA_ENCERRADA };
-    }
-    return item.statusVaga === STATUS_VAGA_ENCERRADA
+  if (algumContratado) {
+    return candidatos.map((item) =>
+      chaveVaga(item) === alvo && item.statusVaga !== STATUS_VAGA_ENCERRADA
+        ? { ...item, statusVaga: STATUS_VAGA_ENCERRADA }
+        : item
+    );
+  }
+
+  const algumBaixado = doGrupo.some((item) => item.etapa === ETAPA_BAIXA);
+  if (algumBaixado) {
+    return candidatos;
+  }
+
+  return candidatos.map((item) =>
+    chaveVaga(item) === alvo && item.statusVaga === STATUS_VAGA_ENCERRADA
       ? { ...item, statusVaga: STATUS_VAGA_PUBLICADA }
-      : item;
-  });
+      : item
+  );
 }
 
 export function addCandidato(candidato) {

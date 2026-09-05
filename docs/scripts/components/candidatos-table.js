@@ -8,11 +8,13 @@
 import { showAlert } from './alert.js';
 import { listCandidatos, updateCandidato } from '../services/candidatos.service.js';
 import { calcularParcelas, NIVEL_OPTIONS } from '../services/comissao.service.js';
+import { listVagas } from '../services/vagas.service.js';
 import {
   ETAPA_OPTIONS,
   FONTE_OPTIONS,
   MODALIDADE_OPTIONS,
   STATUS_CANDIDATO_OPTIONS,
+  STATUS_VAGA_ENCERRADA,
   STATUS_VAGA_OPTIONS,
 } from '../services/candidato-opcoes.js';
 import { escapeHtml, formatCurrency, formatDate, normalizar } from '../utils/format.js';
@@ -25,6 +27,7 @@ const STATUS_VAGA_BADGE = {
   Publicada: 'success',
   Congelada: 'info',
   Cancelada: 'error',
+  [STATUS_VAGA_ENCERRADA]: 'neutral',
 };
 
 const STATUS_CANDIDATO_BADGE = {
@@ -74,10 +77,19 @@ function renderComissao(candidato) {
  * - `label`  rótulo no formulário
  * - `header` cabeçalho na tabela (quando difere do rótulo)
  * - `type`   text | select | textarea | currency | link | date | computed
+ * - `options` array de opções (select) — ou uma função que devolve o
+ *   array, para opções que mudam em tempo de execução (ver `vaga`, cujas
+ *   opções vêm do registro de vagas). Leia sempre por `resolveOptions()`.
  * - `badges` mapa valor → variante de badge (colore a célula)
  */
 export const CAMPOS = {
-  vaga: { label: 'Vaga', type: 'text', required: true },
+  vaga: {
+    label: 'Vaga',
+    type: 'select',
+    options: () => listVagas().map((item) => item.nome),
+    placeholder: 'Selecione a vaga',
+    required: true,
+  },
   statusVaga: {
     label: 'Status da vaga',
     type: 'select',
@@ -106,6 +118,11 @@ export const CAMPOS = {
 /** Campo com a chave embutida, para não precisar carregar as duas coisas. */
 export function campo(key) {
   return { key, ...CAMPOS[key] };
+}
+
+/** Opções de um campo select, chamando a função quando `options` for uma. */
+export function resolveOptions(field) {
+  return typeof field.options === 'function' ? field.options() : field.options;
 }
 
 /**
@@ -218,17 +235,19 @@ function editorHtml(field, candidato) {
   const rotulo = escapeHtml(field.label);
 
   if (field.type === 'select') {
+    const opcoes = resolveOptions(field);
     const vazia = `<option value=""${value ? '' : ' selected'}>—</option>`;
 
-    // Valores atribuídos pelo app ("Em atividade", "Baixa") não estão
-    // na lista de opções. Sem incluir o valor atual, o select abriria em
-    // outra opção e salvar trocaria o dado sem o usuário pedir.
-    const foraDaLista = value && !field.options.includes(value);
+    // Valores atribuídos pelo app ("Em atividade", "Baixa", "Encerrada")
+    // ou uma vaga já excluída do registro não estão na lista de opções.
+    // Sem incluir o valor atual, o select abriria em outra opção e salvar
+    // trocaria o dado sem o usuário pedir.
+    const foraDaLista = value && !opcoes.includes(value);
     const atual = foraDaLista
       ? `<option value="${escapeHtml(value)}" selected>${escapeHtml(value)}</option>`
       : '';
 
-    const options = field.options.map(
+    const options = opcoes.map(
       (option) =>
         `<option value="${escapeHtml(option)}"${option === value ? ' selected' : ''}>` +
         `${escapeHtml(option)}</option>`
@@ -438,6 +457,34 @@ export function criarTabelaCandidatos({ colunas, editaveis = [], placeholderBusc
               alvo.innerHTML = cellContent(outro, atualizado);
             }
           });
+        }
+
+        // Editar a vaga ou o status do candidato pode encerrar (ou
+        // reabrir) a vaga para OUTROS candidatos que concorrem a ela —
+        // atualiza a célula de status da vaga dessas outras linhas
+        // também, se estiverem nesta tabela.
+        if (
+          atualizado !== candidato &&
+          (field.key === 'vaga' || field.key === 'statusCandidato') &&
+          campos.some((item) => item.key === 'statusVaga')
+        ) {
+          const vagasAfetadas = new Set([candidato.vaga, atualizado.vaga].filter(Boolean));
+          if (vagasAfetadas.size > 0) {
+            const todos = listCandidatos();
+            tbody.querySelectorAll('tr').forEach((outraLinha) => {
+              if (outraLinha === row) {
+                return;
+              }
+              const celula = outraLinha.querySelector('[data-field="statusVaga"]');
+              if (!celula) {
+                return;
+              }
+              const dadosOutro = todos.find((item) => item.id === celula.dataset.id);
+              if (dadosOutro && vagasAfetadas.has(dadosOutro.vaga)) {
+                celula.innerHTML = cellContent(campo('statusVaga'), dadosOutro);
+              }
+            });
+          }
         }
 
         aplicarFiltro();

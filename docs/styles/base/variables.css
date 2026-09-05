@@ -58,12 +58,17 @@
   --transition-fast: 150ms ease;
   --transition-base: 240ms cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* Camadas */
+  /*
+   * Camadas. O alerta fica ACIMA do modal de propósito: o modal de Vagas
+   * fica aberto enquanto se cadastra várias vagas seguidas, e o retorno
+   * de cada ação (sucesso, nome duplicado) precisa aparecer mesmo com o
+   * modal ainda na tela.
+   */
   --z-topbar: 100;
   --z-bottomnav: 100;
   --z-banner: 900;
-  --z-alert: 1000;
   --z-modal: 2000;
+  --z-alert: 3000;
 }
 
 /*

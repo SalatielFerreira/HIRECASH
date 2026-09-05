@@ -5,6 +5,8 @@ import {
   ETAPA_EM_ATIVIDADE,
   STATUS_CONTRATADO,
   STATUS_SEM_INTERESSE,
+  STATUS_VAGA_ENCERRADA,
+  STATUS_VAGA_PUBLICADA,
 } from './candidato-opcoes.js';
 
 const KEY = 'candidatos';
@@ -34,16 +36,55 @@ function aplicarDerivados(dados) {
   return dados;
 }
 
+/**
+ * Quando um candidato de uma vaga é contratado, a vaga se encerra para
+ * TODOS os candidatos que concorrem a ela — inclusive o próprio
+ * contratado —, mesmo que o status da vaga de cada um tivesse sido
+ * escolhido diferente antes. E se deixar de haver algum contratado
+ * (editar o status de volta, ou dar baixa), a vaga reabre sozinha,
+ * voltando a "Publicada".
+ *
+ * "Encerrada" nunca é escolhida à mão — fica fora de
+ * `STATUS_VAGA_OPTIONS` — e por isso só este recálculo grava esse valor.
+ * Roda a cada gravação (aqui, não em cada tela), então vale tanto para o
+ * cadastro pelo modal quanto para a edição direto na tabela.
+ */
+function recalcularStatusVaga(candidatos, vagaNome) {
+  const nome = (vagaNome || '').trim();
+  if (!nome) {
+    return candidatos;
+  }
+
+  const algumContratado = candidatos.some(
+    (item) => (item.vaga || '').trim() === nome && item.statusCandidato === STATUS_CONTRATADO
+  );
+
+  return candidatos.map((item) => {
+    if ((item.vaga || '').trim() !== nome) {
+      return item;
+    }
+    if (algumContratado) {
+      return item.statusVaga === STATUS_VAGA_ENCERRADA
+        ? item
+        : { ...item, statusVaga: STATUS_VAGA_ENCERRADA };
+    }
+    return item.statusVaga === STATUS_VAGA_ENCERRADA
+      ? { ...item, statusVaga: STATUS_VAGA_PUBLICADA }
+      : item;
+  });
+}
+
 export function addCandidato(candidato) {
-  const candidatos = listCandidatos();
+  let candidatos = listCandidatos();
   const novo = aplicarDerivados({
     id: crypto.randomUUID(),
     criadoEm: new Date().toISOString(),
     ...candidato,
   });
   candidatos.unshift(novo);
+  candidatos = recalcularStatusVaga(candidatos, novo.vaga);
   storage.set(KEY, candidatos);
-  return novo;
+  return candidatos.find((item) => item.id === novo.id);
 }
 
 /**
@@ -57,14 +98,68 @@ export function updateCandidato(id, patch) {
     return null;
   }
 
+  const vagaAntiga = candidatos[index].vaga;
   const atualizado = {
     ...candidatos[index],
     ...aplicarDerivados(patch),
     atualizadoEm: new Date().toISOString(),
   };
   candidatos[index] = atualizado;
+
+  // Recalcula a vaga antiga (por exemplo: o candidato que a encerrava
+  // mudou de vaga, e ela pode precisar reabrir) e, se mudou de vaga, a
+  // nova também (pode encerrar na hora, se já houver um contratado nela).
+  let resultado = recalcularStatusVaga(candidatos, vagaAntiga);
+  if ((atualizado.vaga || '').trim() !== (vagaAntiga || '').trim()) {
+    resultado = recalcularStatusVaga(resultado, atualizado.vaga);
+  }
+
+  storage.set(KEY, resultado);
+  return resultado.find((item) => item.id === id);
+}
+
+/**
+ * Propaga o novo nome de uma vaga renomeada para todos os candidatos que
+ * usavam o nome antigo, e recalcula o status dela (chamado por
+ * `vagas.service.js`).
+ */
+export function renomearVagaEmCandidatos(nomeAntigo, nomeNovo) {
+  const antigo = (nomeAntigo || '').trim();
+  const novo = (nomeNovo || '').trim();
+  if (!antigo || !novo || antigo === novo) {
+    return;
+  }
+
+  let candidatos = listCandidatos().map((item) =>
+    (item.vaga || '').trim() === antigo ? { ...item, vaga: novo } : item
+  );
+  candidatos = recalcularStatusVaga(candidatos, novo);
   storage.set(KEY, candidatos);
-  return atualizado;
+}
+
+/**
+ * Recalcula o status de TODAS as vagas de uma vez. Roda a cada
+ * inicialização do app (ver `app.js`) — é idempotente e rápida (poucos
+ * candidatos, operações simples de array), então não tem problema
+ * rodar sempre.
+ *
+ * Existe para candidatos gravados antes desta regra existir: sem isso,
+ * um candidato já contratado antes desta versão só refletiria
+ * "Encerrada" nos colegas de vaga na próxima vez que algum deles fosse
+ * editado — em vez de aparecer certo assim que o app abre.
+ */
+export function recalcularTodasAsVagas() {
+  let candidatos = listCandidatos();
+  if (candidatos.length === 0) {
+    return;
+  }
+
+  const nomes = new Set(candidatos.map((item) => (item.vaga || '').trim()).filter(Boolean));
+  nomes.forEach((nome) => {
+    candidatos = recalcularStatusVaga(candidatos, nome);
+  });
+
+  storage.set(KEY, candidatos);
 }
 
 /**
@@ -125,11 +220,12 @@ export function importCandidatos(payload) {
     return null;
   }
 
-  const candidatos = listCandidatos();
+  let candidatos = listCandidatos();
   const indicePorId = new Map(candidatos.map((candidato, index) => [candidato.id, index]));
 
   let novos = 0;
   let atualizados = 0;
+  const vagasAfetadas = new Set();
 
   lista.forEach((item) => {
     // Candidatos vindos de fora (ou de um backup antigo, sem id) entram como novos.
@@ -145,6 +241,16 @@ export function importCandidatos(payload) {
       candidatos[index] = { ...candidatos[index], ...registro };
       atualizados += 1;
     }
+
+    if (registro.vaga) {
+      vagasAfetadas.add(registro.vaga.trim());
+    }
+  });
+
+  // Garante que o status de cada vaga afetada reflita os dados importados,
+  // mesmo que o arquivo trouxesse um valor de "Status da vaga" desatualizado.
+  vagasAfetadas.forEach((nome) => {
+    candidatos = recalcularStatusVaga(candidatos, nome);
   });
 
   storage.set(KEY, candidatos);

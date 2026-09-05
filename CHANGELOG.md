@@ -7,6 +7,19 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.13.0] - 2026-09-05
+
+### Adicionado
+
+- **Registro de vagas**, com um botão próprio ao lado do de adicionar candidato (ícone de maleta com "+", para diferenciar do "+" do candidato). Abre uma telinha no mesmo formato do cadastro de candidato — só fecha pelo X — com um campo para nome da vaga e a lista das já cadastradas logo abaixo, cada uma com **editar** (clique no lápis, mesmo controle da edição inline da tabela: Enter salva, Esc cancela) e **excluir** (pede confirmação; candidatos já cadastrados com essa vaga mantêm o nome salvo, só sai da lista de opções).
+- **O campo Vaga do cadastro de candidato passou de texto livre para uma lista das vagas cadastradas** — tanto no modal de adicionar quanto na edição inline da tabela. Sem nenhuma vaga cadastrada, o botão de adicionar candidato avisa para cadastrar uma vaga primeiro, em vez de abrir um formulário sem opção para escolher.
+- **Nova regra: a vaga se encerra sozinha quando um candidato é contratado.** Quando o status de um candidato passa a "Contratado", o Status da vaga de **todos** os candidatos que concorrem à mesma vaga passa a **"Encerrada"** — inclusive o próprio contratado. "Encerrada" fica de fora das opções de Status da vaga de propósito: é consequência do status do candidato, nunca uma escolha manual (mesmo caso de "Em atividade"/"Baixa" na Etapa). Se deixar de haver algum contratado (editar o status de volta, ou dar baixa), a vaga reabre sozinha, voltando a "Publicada" — para todos. A atualização aparece na hora nas outras linhas da tabela, sem precisar recarregar.
+  - Renomear uma vaga atualiza o nome em todos os candidatos que já a usavam. O recálculo também roda por inteiro a cada vez que o app abre (`recalcularTodasAsVagas`), para corrigir dados gravados antes desta regra existir — um candidato já contratado antes desta versão passa a refletir "Encerrada" nos colegas de vaga assim que o app é aberto, sem precisar editar nada primeiro.
+
+### Corrigido
+
+- Alertas (toasts) agora aparecem por cima de modais abertos — antes ficavam escondidos atrás. Não dava para perceber antes porque nenhum modal permanecia aberto enquanto uma ação gerava um alerta; o modal de Vagas é o primeiro caso (fica aberto para cadastrar várias vagas seguidas).
+
 ## [0.12.0] - 2026-09-04
 
 ### Alterado

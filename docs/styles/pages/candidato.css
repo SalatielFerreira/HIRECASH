@@ -1,3 +1,84 @@
 .page-candidato .card__icon {
   background: var(--color-info);
 }
+
+.vaga-form {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.vaga-form input {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.vaga-form input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+.vaga-form .btn {
+  flex-shrink: 0;
+}
+
+.vagas-vazio {
+  margin-top: var(--space-4);
+  text-align: center;
+}
+
+.vagas-list {
+  margin-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.vaga-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.vaga-item__nome {
+  flex: 1;
+  min-width: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  overflow-wrap: break-word;
+}
+
+.vaga-item__acoes {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.vaga-item__botao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+}
+
+.vaga-item__botao svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .vaga-item__botao:hover {
+    background: var(--color-bg);
+    color: var(--color-text-primary);
+  }
+}

@@ -2,6 +2,7 @@ import { logger } from './utils/logger.js';
 import { initRouter } from './router.js';
 import { initUpdateBanner } from './services/update.service.js';
 import { initInstallBanner } from './services/install.service.js';
+import { recalcularTodasAsVagas } from './services/candidatos.service.js';
 
 function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) {
@@ -23,6 +24,7 @@ function registerServiceWorker() {
 
 document.addEventListener('DOMContentLoaded', () => {
   logger.info('app', 'HireCash iniciado.');
+  recalcularTodasAsVagas();
   initRouter();
   registerServiceWorker();
   initInstallBanner();

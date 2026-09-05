@@ -5,7 +5,7 @@
  *
  * IMPORTANTE: incremente CACHE_VERSION a cada release para invalidar o cache antigo.
  */
-const CACHE_VERSION = 'hirecash-v18';
+const CACHE_VERSION = 'hirecash-v19';
 
 const APP_SHELL = [
   './',
@@ -50,6 +50,7 @@ const APP_SHELL = [
   './scripts/services/candidato-opcoes.js',
   './scripts/services/candidatos.service.js',
   './scripts/services/comissao.service.js',
+  './scripts/services/vagas.service.js',
   './scripts/services/update.service.js',
   './scripts/services/install.service.js',
   './scripts/utils/format.js',

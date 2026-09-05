@@ -9,6 +9,18 @@
 
 export const STATUS_VAGA_OPTIONS = ['Não publicada', 'Publicada', 'Congelada', 'Cancelada'];
 
+/** Para onde a vaga volta ao reabrir — ver STATUS_VAGA_ENCERRADA. */
+export const STATUS_VAGA_PUBLICADA = 'Publicada';
+
+/**
+ * Status atribuído automaticamente quando um candidato da mesma vaga é
+ * contratado. Fica fora de `STATUS_VAGA_OPTIONS` de propósito: é
+ * consequência do status do candidato (ver `candidatos.service.js`), não
+ * uma opção para escolher à mão — mesmo caso de "Em atividade"/"Baixa"
+ * na etapa.
+ */
+export const STATUS_VAGA_ENCERRADA = 'Encerrada';
+
 export const MODALIDADE_OPTIONS = ['Presencial', 'Remoto', 'Híbrido'];
 
 export const FONTE_OPTIONS = ['Gupy', 'Indicação', 'LinkedIn'];

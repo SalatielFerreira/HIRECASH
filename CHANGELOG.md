@@ -7,6 +7,18 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.15.2] - 2026-09-05
+
+### Alterado
+
+- **Painel de filtro mais caprichado**: rótulos "Campo" e "Valor" acima de cada select, seta customizada com espaço da borda (a seta nativa do navegador ficava colada na ponta) e "Limpar filtro" no estilo dos outros botões do app (contornado), alinhado com os selects.
+
+### Corrigido
+
+- **A seta nativa do select ficava colada na borda** — trocada por uma seta customizada com espaçamento, igual à usada nos outros campos do formulário.
+- **Select desabilitado ("Valor", antes de escolher um Campo) quase invisível**: o navegador esmaece campos desabilitados por padrão (opacidade ~70%), o que quase sumia com o fundo claro do painel. Agora mantém a caixa cheia à vista, usando o texto acinzentado para indicar que está desabilitado.
+- **Correção definitiva de um bug de raiz**: qualquer elemento com uma classe que define `display` (como `.btn`) ignorava o atributo `hidden` do HTML — foi isso que causava o painel sempre visível na 0.15.0 e o botão "Limpar filtro" aparecendo antes da hora nesta versão. Adicionada uma regra global (`[hidden] { display: none !important; }`) para o `hidden` sempre valer, em qualquer elemento do app, resolvendo os dois casos de uma vez.
+
 ## [0.15.1] - 2026-09-05
 
 ### Corrigido

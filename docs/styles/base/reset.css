@@ -62,3 +62,15 @@ ul,
 ol {
   list-style: none;
 }
+
+/*
+ * O atributo/propriedade `hidden` deve sempre esconder, mas o
+ * navegador aplica isso com baixa especificidade — qualquer classe com
+ * `display` (ex.: .btn, .filter-panel) vence e o elemento aparece
+ * mesmo "escondido". Este !important garante que `el.hidden = true`
+ * (ou o atributo `hidden` no HTML) sempre funcione, em qualquer
+ * elemento do app.
+ */
+[hidden] {
+  display: none !important;
+}

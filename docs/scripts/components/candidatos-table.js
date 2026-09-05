@@ -368,19 +368,32 @@ export function criarTabelaCandidatos({
         camposFiltraveis.length > 0
           ? `
         <div class="filter-panel" id="filtro-painel" hidden>
-          <select id="filtro-campo" aria-label="Campo para filtrar">
-            <option value="">Filtrar por...</option>
-            ${camposFiltraveis
-              .map(
-                (field) =>
-                  `<option value="${field.key}">${escapeHtml(field.header || field.label)}</option>`
-              )
-              .join('')}
-          </select>
-          <select id="filtro-valor" aria-label="Valor do filtro" disabled>
-            <option value="">Selecione o campo</option>
-          </select>
-          <button type="button" class="filter-panel__limpar" id="filtro-limpar" hidden>Limpar filtro</button>
+          <div class="filter-panel__campo">
+            <label for="filtro-campo">Campo</label>
+            <select id="filtro-campo">
+              <option value="">Selecione...</option>
+              ${camposFiltraveis
+                .map(
+                  (field) =>
+                    `<option value="${field.key}">${escapeHtml(field.header || field.label)}</option>`
+                )
+                .join('')}
+            </select>
+          </div>
+          <div class="filter-panel__campo">
+            <label for="filtro-valor">Valor</label>
+            <select id="filtro-valor" disabled>
+              <option value="">Selecione o campo</option>
+            </select>
+          </div>
+          <button
+            type="button"
+            class="btn btn--outline filter-panel__limpar"
+            id="filtro-limpar"
+            hidden
+          >
+            Limpar filtro
+          </button>
         </div>`
           : '';
 

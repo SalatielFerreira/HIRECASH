@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.18.0] - 2026-09-05
+
+### Adicionado
+
+- **Campo Contratação (página Comissão) agora aceita digitar a data toda**, além de escolher no calendário: um campo de texto com máscara automática (dd/mm/aaaa) fica lado a lado com o ícone de calendário, que abre o seletor nativo quando preferir clicar em vez de digitar. Uma data incompleta ou inexistente (ex.: 31/02) é recusada com um aviso, mantendo a data anterior.
+
 ## [0.17.0] - 2026-09-05
 
 ### Alterado

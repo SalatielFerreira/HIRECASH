@@ -25,6 +25,9 @@ const ICON_SEARCH =
 const ICON_FILTER =
   '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3Z"/></svg>';
 
+const ICON_CALENDAR =
+  '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
+
 const STATUS_VAGA_BADGE = {
   'Não publicada': 'neutral',
   Publicada: 'success',
@@ -179,6 +182,42 @@ export function attachCurrencyMask(input) {
   });
 }
 
+/** Vai inserindo as barras (dd/mm/aaaa) enquanto o usuário digita números. */
+export function attachDateMask(input) {
+  input.addEventListener('input', () => {
+    const digits = input.value.replace(/\D/g, '').slice(0, 8);
+    const partes = [digits.slice(0, 2), digits.slice(2, 4), digits.slice(4, 8)].filter(Boolean);
+    input.value = partes.join('/');
+  });
+}
+
+/**
+ * "dd/mm/aaaa" digitado (com ou sem barras) → "aaaa-mm-dd" para gravar.
+ * Campo vazio apaga a data. Qualquer texto que não feche em uma data real
+ * de 8 dígitos volta como veio, para quem chamou barrar com uma mensagem
+ * em vez de gravar um valor errado (ver uso em finishEdit).
+ */
+function parseDateDigitada(raw) {
+  const texto = String(raw ?? '').trim();
+  const digits = texto.replace(/\D/g, '');
+
+  if (!digits) {
+    return '';
+  }
+
+  if (digits.length === 8) {
+    const dia = Number(digits.slice(0, 2));
+    const mes = Number(digits.slice(2, 4));
+    const ano = Number(digits.slice(4, 8));
+    const data = new Date(ano, mes - 1, dia);
+    if (data.getFullYear() === ano && data.getMonth() === mes - 1 && data.getDate() === dia) {
+      return `${digits.slice(4, 8)}-${digits.slice(2, 4)}-${digits.slice(0, 2)}`;
+    }
+  }
+
+  return texto;
+}
+
 /** Converte o valor cru de um controle no valor armazenado do candidato. */
 export function parseValue(field, raw) {
   if (field.type === 'currency') {
@@ -186,7 +225,11 @@ export function parseValue(field, raw) {
     return digits ? parseInt(digits, 10) : 0;
   }
 
-  if (field.type === 'select' || field.type === 'date') {
+  if (field.type === 'date') {
+    return parseDateDigitada(raw);
+  }
+
+  if (field.type === 'select') {
     return raw ?? '';
   }
 
@@ -263,7 +306,17 @@ function editorHtml(field, candidato) {
   }
 
   if (field.type === 'date') {
-    return `<input type="date" class="cell-editor" aria-label="${rotulo}" value="${escapeHtml(value)}" />`;
+    // Além do calendário, o usuário pode digitar a data toda direto: o
+    // controle visível é texto (dd/mm/aaaa, com máscara automática) e o
+    // input nativo de data fica escondido, só para abrir o seletor.
+    return (
+      `<span class="date-editor">` +
+      `<input type="text" class="cell-editor date-editor__input" inputmode="numeric" ` +
+      `maxlength="10" placeholder="dd/mm/aaaa" aria-label="${rotulo}" value="${escapeHtml(formatDate(value))}" />` +
+      `<button type="button" class="date-editor__picker" tabindex="-1" aria-label="Abrir calendário">${ICON_CALENDAR}</button>` +
+      `<input type="date" class="date-editor__native" tabindex="-1" aria-hidden="true" value="${escapeHtml(value)}" />` +
+      `</span>`
+    );
   }
 
   const mostrado = field.type === 'currency' && value ? formatCurrency(value) : value;
@@ -580,6 +633,12 @@ export function criarTabelaCandidatos({
                   }) || candidato;
               }
             }
+          } else if (field.type === 'date' && novo && !/^\d{4}-\d{2}-\d{2}$/.test(novo)) {
+            showAlert({
+              type: 'error',
+              title: 'Data inválida',
+              message: 'Digite a data no formato dd/mm/aaaa.',
+            });
           } else if (novo !== candidato[field.key]) {
             atualizado = updateCandidato(candidato.id, { [field.key]: novo }) || candidato;
           }
@@ -671,7 +730,12 @@ export function criarTabelaCandidatos({
 
         // select() só faz sentido em campo de texto — num input de data o
         // Chrome lança InvalidStateError.
-        if (field.type === 'text' || field.type === 'link' || field.type === 'currency') {
+        if (
+          field.type === 'text' ||
+          field.type === 'link' ||
+          field.type === 'currency' ||
+          field.type === 'date'
+        ) {
           editor.select();
         }
 
@@ -679,8 +743,31 @@ export function criarTabelaCandidatos({
           attachCurrencyMask(editor);
         }
 
-        if (field.type === 'select' || field.type === 'date') {
+        if (field.type === 'select') {
           editor.addEventListener('change', () => finishEdit(true));
+        }
+
+        if (field.type === 'date') {
+          attachDateMask(editor);
+
+          const nativeInput = cell.querySelector('.date-editor__native');
+          const pickerButton = cell.querySelector('.date-editor__picker');
+
+          // Sem foco no botão: preserva o foco no campo de texto, senão o
+          // blur dispararia finishEdit antes de abrir o calendário.
+          pickerButton.addEventListener('mousedown', (event) => event.preventDefault());
+          pickerButton.addEventListener('click', () => {
+            if (typeof nativeInput.showPicker === 'function') {
+              nativeInput.showPicker();
+            } else {
+              nativeInput.click();
+            }
+          });
+
+          nativeInput.addEventListener('change', () => {
+            editor.value = formatDate(nativeInput.value);
+            finishEdit(true);
+          });
         }
 
         editor.addEventListener('blur', () => finishEdit(true));

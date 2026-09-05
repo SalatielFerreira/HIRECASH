@@ -268,8 +268,52 @@ html[data-theme='dark'] .filter-panel select {
   outline: none;
 }
 
-input[type='date'].cell-editor {
+/* Campo de data: texto (digitação livre) + botão de calendário, que abre
+   um input nativo escondido só para o seletor visual. */
+.date-editor {
+  position: relative;
+  display: inline-flex;
+  width: 100%;
   min-width: 150px;
+}
+
+.date-editor__input {
+  padding-right: 30px;
+}
+
+.date-editor__picker {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-sm);
+  transform: translateY(-50%);
+}
+
+.date-editor__picker svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .date-editor__picker:hover {
+    color: var(--color-primary);
+  }
+}
+
+.date-editor__native {
+  position: absolute;
+  inset: 0;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
 }
 
 textarea.cell-editor {

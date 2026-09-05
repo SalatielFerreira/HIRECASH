@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.23.0] - 2026-09-05
+
+### Adicionado
+
+- **Navegação entre campos editáveis com as setas do teclado**, como no Excel — nas páginas Candidato e Comissão: clique em uma célula para editar e use ←/→ para mover para o campo editável ao lado (pulando os que não são editáveis) e ↑/↓ para o mesmo campo do candidato de cima/baixo, pulando linhas escondidas pelo filtro. Em campo de texto, ←/→ só navegam quando o cursor já está na ponta do texto — no meio, continuam só movendo o cursor. Na Observação (texto com várias linhas), as setas nunca navegam, para não atrapalhar quem está escrevendo.
+
 ## [0.22.0] - 2026-09-05
 
 ### Adicionado

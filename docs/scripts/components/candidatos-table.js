@@ -680,6 +680,91 @@ export function criarTabelaCandidatos({
       // --- Edição inline ---------------------------------------------
       let editing = null;
 
+      /** Linha visível anterior/seguinte, pulando as escondidas pelo filtro. */
+      function linhaVisivel(row, direcao) {
+        let atual = direcao === 'up' ? row.previousElementSibling : row.nextElementSibling;
+        while (atual && atual.hidden) {
+          atual = direcao === 'up' ? atual.previousElementSibling : atual.nextElementSibling;
+        }
+        return atual;
+      }
+
+      /**
+       * Célula vizinha na direção pedida, para navegar entre campos
+       * editáveis com as setas do teclado (como no Excel). Cima/baixo
+       * ficam na mesma coluna, na linha visível anterior/seguinte;
+       * esquerda/direita pulam colunas não editáveis até achar a próxima
+       * que seja. Devolve `null` quando não há vizinha (borda da tabela).
+       */
+      function celulaVizinha(cell, field, direcao) {
+        const row = cell.closest('tr');
+        if (!row) {
+          return null;
+        }
+
+        if (direcao === 'up' || direcao === 'down') {
+          const alvo = linhaVisivel(row, direcao);
+          return alvo ? alvo.querySelector(`[data-field="${field.key}"]`) : null;
+        }
+
+        const indiceAtual = campos.findIndex((item) => item.key === field.key);
+        const passo = direcao === 'left' ? -1 : 1;
+        for (let i = indiceAtual + passo; i >= 0 && i < campos.length; i += passo) {
+          if (podeEditar.has(campos[i].key)) {
+            return row.querySelector(`[data-field="${campos[i].key}"]`);
+          }
+        }
+        return null;
+      }
+
+      const SETA_PARA_DIRECAO = {
+        ArrowUp: 'up',
+        ArrowDown: 'down',
+        ArrowLeft: 'left',
+        ArrowRight: 'right',
+      };
+
+      /**
+       * Navegação por seta entre campos editáveis, como no Excel: clica
+       * pra editar um campo e as setas movem pro campo do lado (pulando
+       * os não editáveis) ou pro mesmo campo do candidato de cima/baixo.
+       *
+       * Em campo de texto de uma linha só, esquerda/direita só navegam
+       * quando o cursor já está na ponta do texto (início/fim) — no meio
+       * do texto, a seta continua só movendo o cursor, como sempre. Em
+       * textarea (Observação) as setas nunca navegam, pra não atrapalhar
+       * quem está escrevendo um texto com várias linhas.
+       *
+       * @param {string|null} campoTexto valor atual do controle de texto,
+       *   para saber se o cursor está na ponta — `null` num select, onde
+       *   a posição do cursor não existe e as setas sempre navegam.
+       */
+      function navegarComSeta(event, field, cell, inputTexto) {
+        const direcao = SETA_PARA_DIRECAO[event.key];
+        if (!direcao || field.type === 'textarea') {
+          return;
+        }
+
+        if (inputTexto && (direcao === 'left' || direcao === 'right')) {
+          // Olha só a ponta relevante pra cada lado, não o intervalo
+          // inteiro: ao abrir a célula o texto vem todo selecionado (pra
+          // digitar por cima), o que conta como "na ponta" dos dois
+          // lados — senão a primeira seta ficaria presa sem navegar.
+          const noInicio = inputTexto.selectionStart === 0;
+          const noFim = inputTexto.selectionEnd === inputTexto.value.length;
+          if ((direcao === 'left' && !noInicio) || (direcao === 'right' && !noFim)) {
+            return;
+          }
+        }
+
+        event.preventDefault();
+        const alvo = celulaVizinha(cell, field, direcao);
+        if (alvo) {
+          finishEdit(true);
+          startEdit(alvo);
+        }
+      }
+
       function finishEdit(save) {
         if (!editing) {
           return;
@@ -885,6 +970,8 @@ export function criarTabelaCandidatos({
               event.preventDefault();
               finishEdit(false);
               cell.focus();
+            } else {
+              navegarComSeta(event, field, cell, null);
             }
           });
 
@@ -901,6 +988,12 @@ export function criarTabelaCandidatos({
           editor.addEventListener('blur', () => finishEdit(true));
         }
 
+        const ehCampoDeTexto =
+          field.type === 'text' ||
+          field.type === 'link' ||
+          field.type === 'currency' ||
+          field.type === 'date';
+
         editor.addEventListener('keydown', (event) => {
           if (event.key === 'Escape') {
             event.preventDefault();
@@ -911,6 +1004,8 @@ export function criarTabelaCandidatos({
             event.preventDefault();
             finishEdit(true);
             cell.focus();
+          } else {
+            navegarComSeta(event, field, cell, ehCampoDeTexto ? editor : null);
           }
         });
       }

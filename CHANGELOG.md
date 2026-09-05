@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.19.0] - 2026-09-05
+
+### Alterado
+
+- **Lista de vagas em ordem crescente pelo código**: os dígitos do começo do código (até 10) definem a ordem — "9" fica antes de "10", por exemplo, em vez da ordem de texto colocar "10" antes de "9". Código sem nenhum número no começo vai para o fim da lista.
+
 ## [0.18.1] - 2026-09-05
 
 ### Corrigido

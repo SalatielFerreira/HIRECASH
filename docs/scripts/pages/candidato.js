@@ -144,6 +144,24 @@ function renderModal() {
   `;
 }
 
+/**
+ * Chave numérica para ordenar a lista de vagas: os dígitos do começo do
+ * código (até 10, o bastante para não estourar a precisão de `Number`),
+ * lidos como número — "9" fica antes de "10", diferente da ordem de
+ * texto. Código sem nenhum dígito no começo vai para o fim da lista.
+ */
+function chaveOrdemVaga(vaga) {
+  const digitos = (vaga.codigo || '').match(/^\d+/)?.[0]?.slice(0, 10);
+  return digitos ? Number(digitos) : Infinity;
+}
+
+function vagasEmOrdem() {
+  return [...listVagas()].sort((a, b) => {
+    const diferenca = chaveOrdemVaga(a) - chaveOrdemVaga(b);
+    return diferenca !== 0 ? diferenca : a.codigo.localeCompare(b.codigo, 'pt-BR');
+  });
+}
+
 function vagaItemHtml(vaga) {
   return `
     <li class="vaga-item" data-id="${escapeHtml(vaga.id)}">
@@ -162,7 +180,7 @@ function vagaItemHtml(vaga) {
 }
 
 function vagasListaHtml() {
-  const vagas = listVagas();
+  const vagas = vagasEmOrdem();
   if (vagas.length === 0) {
     return '<p class="text-muted vagas-vazio">Nenhuma vaga cadastrada ainda.</p>';
   }

@@ -1,4 +1,3 @@
-import { showAlert } from '../components/alert.js';
 import { previsaoMensal } from '../services/comissao.service.js';
 import { formatCurrency, formatMesAno } from '../utils/format.js';
 
@@ -47,34 +46,7 @@ export const dashboardPage = {
         </header>
 
         ${previsaoComissaoHtml()}
-
-        <section class="card">
-          <h2>Componente de alerta</h2>
-          <p>Pré-visualize os estilos de alerta que serão usados no restante do app.</p>
-          <div class="btn-row">
-            <button type="button" class="btn btn--outline" data-demo-alert="success">Sucesso</button>
-            <button type="button" class="btn btn--outline" data-demo-alert="error">Erro</button>
-            <button type="button" class="btn btn--outline" data-demo-alert="warning">Aviso</button>
-            <button type="button" class="btn btn--outline" data-demo-alert="info">Informação</button>
-          </div>
-        </section>
       </div>
     `;
-  },
-
-  init(container) {
-    const DEMO_MESSAGES = {
-      success: { title: 'Tudo certo!', message: 'Ação concluída com sucesso.' },
-      error: { title: 'Algo deu errado', message: 'Não foi possível concluir a ação.' },
-      warning: { title: 'Atenção', message: 'Confira os dados antes de continuar.' },
-      info: { title: 'Você sabia?', message: 'Este é um alerta informativo.' },
-    };
-
-    container.querySelectorAll('[data-demo-alert]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const type = button.dataset.demoAlert;
-        showAlert({ type, ...DEMO_MESSAGES[type] });
-      });
-    });
   },
 };

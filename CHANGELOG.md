@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.23.1] - 2026-09-05
+
+### Removido
+
+- **Card de demonstração "Componente de alerta" saiu da Dashboard** — era só uma pré-visualização dos estilos de alerta usada durante o desenvolvimento inicial, sem função para o usuário final.
+
 ## [0.23.0] - 2026-09-05
 
 ### Adicionado

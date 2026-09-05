@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.17.0] - 2026-09-05
+
+### Alterado
+
+- **Barra de navegação inferior flutuante**, no estilo de apps como o do Boticário: descolada da borda da tela (com margem própria) e com cantos bem arredondados, em vez de uma barra reta grudada no rodapé. O banner que fica acima dela (atualização disponível / instalar app) ajustou a posição para continuar logo acima do novo rodapé flutuante.
+
 ## [0.16.0] - 2026-09-05
 
 ### Alterado

@@ -21,7 +21,7 @@ Sem login — o app abre direto no Dashboard e pode ser instalado como aplicativ
 ## Visão geral
 
 - **Sem autenticação**: o app abre direto no Dashboard.
-- **4 abas** na barra inferior, nesta ordem: **Candidato** → **Dashboard** (inicial) → **Comissão** → **Configuração**.
+- **4 abas** na barra inferior, nesta ordem: **Candidato** → **Dashboard** (inicial) → **Comissão** → **Configuração**. A barra flutua descolada da borda da tela, com cantos arredondados.
 - **Tema claro/escuro**: alternável manualmente em Configuração (ícones sol/lua), com persistência em `localStorage` e sem flash ao recarregar. A cor de marca (roxo) é a mesma nos dois temas — só fundo, superfícies e texto mudam.
 - **Instalável**: manifesto PWA + service worker com cache do app shell (funciona offline após o primeiro carregamento). Ao abrir o app sem ele estar instalado, aparece um banner "Instalar aplicativo" — prompt nativo no Android/desktop, instruções de "Adicionar à Tela de Início" no iPhone/iPad (o Safari não permite instalar por código).
 - **Atualização com aviso**: uma nova versão publicada não troca o app sozinha — um banner "Atualização disponível" avisa o usuário, e só recarrega quando ele confirma.

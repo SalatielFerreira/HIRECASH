@@ -6,7 +6,11 @@
 .banner-region {
   position: absolute;
   left: 50%;
-  bottom: calc(var(--bottomnav-height) + var(--safe-bottom) + var(--space-3));
+
+  /* O rodapé agora flutua com uma margem própria (space-3 + safe-bottom)
+     em vez de ficar grudado na borda — soma-se mais um space-3 para o
+     banner ficar acima do topo do rodapé, não da borda da tela. */
+  bottom: calc(var(--bottomnav-height) + var(--safe-bottom) + (var(--space-3) * 2));
   transform: translateX(-50%);
   z-index: var(--z-banner);
   display: flex;

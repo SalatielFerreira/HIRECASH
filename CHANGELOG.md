@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.15.1] - 2026-09-05
+
+### Corrigido
+
+- **Painel do filtro (0.15.0) ficava sempre visível**, mesmo com o atributo `hidden`: a regra `.filter-panel { display: flex }` tem mais especificidade que o estilo padrão do navegador para `[hidden]`, então vencia e mostrava o painel de qualquer jeito. Agora o `display: flex` só se aplica com `.filter-panel:not([hidden])`, e o botão de filtro volta a abrir/fechar o painel a cada clique.
+
 ## [0.15.0] - 2026-09-05
 
 ### Adicionado

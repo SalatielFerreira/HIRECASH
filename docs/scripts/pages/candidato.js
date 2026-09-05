@@ -4,9 +4,11 @@ import {
   CAMPOS,
   attachCurrencyMask,
   campo,
+  cidadeOptionsHtml,
   criarTabelaCandidatos,
   ordenarPorVaga,
   parseValue,
+  ufOptionsHtml,
 } from '../components/candidatos-table.js';
 import { addCandidato, listCandidatos } from '../services/candidatos.service.js';
 import {
@@ -92,6 +94,16 @@ function modalField(key) {
     control = `<select id="${id}" name="${key}"${field.required ? ' required' : ''}>${selectOptionsHtml(field)}</select>`;
   } else if (field.type === 'textarea') {
     control = `<textarea id="${id}" name="${key}" rows="3"></textarea>`;
+  } else if (field.type === 'localizacao') {
+    // Escolher estado e depois cidade, em vez de digitar livre — o
+    // select de cidade carrega o "name" do campo: o valor de cada opção
+    // já é "Cidade - UF" (ver cidadeOptionsHtml), então o FormData do
+    // formulário lê o texto certo sem precisar recompor nada no submit.
+    control =
+      `<div class="localizacao-campo">` +
+      `<select id="${id}-uf" aria-label="Estado">${ufOptionsHtml('')}</select>` +
+      `<select id="${id}" name="${key}" aria-label="Cidade" disabled>${cidadeOptionsHtml('')}</select>` +
+      `</div>`;
   } else {
     const attrs = [
       'type="text"',
@@ -329,6 +341,20 @@ export const candidatoPage = {
         attachCurrencyMask(input);
       }
     });
+
+    // Localização: a cidade só existe depois de escolher o estado.
+    const localizacaoUf = container.querySelector('#f-localizacao-uf');
+    const localizacaoCidade = container.querySelector('#f-localizacao');
+    if (localizacaoUf && localizacaoCidade) {
+      localizacaoUf.addEventListener('change', () => {
+        const uf = localizacaoUf.value;
+        localizacaoCidade.disabled = !uf;
+        localizacaoCidade.innerHTML = cidadeOptionsHtml(uf, '');
+        if (uf) {
+          localizacaoCidade.focus();
+        }
+      });
+    }
 
     // Dica ao vivo do campo Vaga: mostra o nome que o código digitado
     // resolve (ou avisa que o código não existe), antes mesmo de salvar.

@@ -70,6 +70,28 @@
   color: var(--color-text-secondary);
 }
 
+/* Localização: estado (largura fixa) + cidade (o resto do espaço). Os
+   dois selects já herdam a aparência de ".field select" acima. */
+.localizacao-campo {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.localizacao-campo select:first-child {
+  flex: 0 0 96px;
+}
+
+.localizacao-campo select:last-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.localizacao-campo select:disabled {
+  opacity: 1;
+  color: var(--color-text-secondary);
+  cursor: not-allowed;
+}
+
 /* Texto de apoio abaixo de um campo — ex.: o nome que um código resolve. */
 .field-hint {
   min-height: 14px;

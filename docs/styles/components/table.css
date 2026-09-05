@@ -403,3 +403,37 @@ html[data-theme='dark'] select.cell-editor {
   background: #4b5563;
   color: #ffffff;
 }
+
+/* Campo de localização: estado (largura fixa) + cidade (o resto do
+   espaço) — a cidade É o .cell-editor, o estado é só um controle auxiliar
+   ao lado, sem gravar nada sozinho. */
+.localizacao-editor {
+  display: inline-flex;
+  width: 100%;
+  min-width: 260px;
+  gap: 6px;
+}
+
+.localizacao-editor__uf {
+  flex: 0 0 90px;
+  padding: 5px 9px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.localizacao-editor__cidade {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* O navegador esmaece select desabilitado por padrão — quase some no
+   fundo claro da célula em edição (mesmo ajuste do painel de filtro). */
+.data-table .localizacao-editor select:disabled {
+  opacity: 1;
+  color: var(--color-text-secondary);
+  cursor: not-allowed;
+}

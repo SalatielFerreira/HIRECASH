@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.21.0] - 2026-09-05
+
+### Alterado
+
+- **Campo Localização virou estado + cidade** (cadastro e edição direto na tabela), em vez de texto livre: escolhe o estado, depois a cidade, e o que fica gravado/exibido é sempre "Cidade - UF" (ex.: "São José dos Campos - SP"). Lista completa dos municípios do Brasil (fonte: IBGE). Localização já preenchida antes desta mudança continua aparecendo normalmente até ser reeditada.
+
 ## [0.20.0] - 2026-09-05
 
 ### Alterado

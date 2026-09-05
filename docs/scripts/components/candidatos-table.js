@@ -6,9 +6,9 @@
  * cada página só declara quais colunas quer e quais delas são editáveis.
  */
 import { showAlert } from './alert.js';
-import { listCandidatos, updateCandidato } from '../services/candidatos.service.js';
+import { chaveVaga, listCandidatos, updateCandidato } from '../services/candidatos.service.js';
 import { calcularParcelas, NIVEL_OPTIONS } from '../services/comissao.service.js';
-import { listVagas } from '../services/vagas.service.js';
+import { resolverVagaPorCodigo } from '../services/vagas.service.js';
 import {
   ETAPA_OPTIONS,
   FONTE_OPTIONS,
@@ -77,19 +77,18 @@ function renderComissao(candidato) {
  * - `label`  rótulo no formulário
  * - `header` cabeçalho na tabela (quando difere do rótulo)
  * - `type`   text | select | textarea | currency | link | date | computed
- * - `options` array de opções (select) — ou uma função que devolve o
- *   array, para opções que mudam em tempo de execução (ver `vaga`, cujas
- *   opções vêm do registro de vagas). Leia sempre por `resolveOptions()`.
+ * - `options` array de opções (select)
  * - `badges` mapa valor → variante de badge (colore a célula)
+ *
+ * `vaga` é um caso especial, tratado à parte (ver `editorHtml` e o
+ * `finishEdit` de cada página): o que se digita é o CÓDIGO da vaga, e o
+ * que fica gravado/exibido em `candidato.vaga` é o NOME resolvido a
+ * partir dele (`candidato.vagaCodigo` guarda o código). Por isso o tipo
+ * aqui é só 'text' — a resolução não é genérica o bastante para entrar
+ * no catálogo.
  */
 export const CAMPOS = {
-  vaga: {
-    label: 'Vaga',
-    type: 'select',
-    options: () => listVagas().map((item) => item.nome),
-    placeholder: 'Selecione a vaga',
-    required: true,
-  },
+  vaga: { label: 'Vaga', type: 'text', placeholder: 'Código da vaga', required: true },
   statusVaga: {
     label: 'Status da vaga',
     type: 'select',
@@ -118,11 +117,6 @@ export const CAMPOS = {
 /** Campo com a chave embutida, para não precisar carregar as duas coisas. */
 export function campo(key) {
   return { key, ...CAMPOS[key] };
-}
-
-/** Opções de um campo select, chamando a função quando `options` for uma. */
-export function resolveOptions(field) {
-  return typeof field.options === 'function' ? field.options() : field.options;
 }
 
 /**
@@ -231,11 +225,13 @@ function cellContent(field, candidato) {
 
 /** Controle de edição inline, no mesmo formato do cadastro. */
 function editorHtml(field, candidato) {
-  const value = candidato[field.key] ?? '';
+  // Vaga é o único campo em que o valor editado (o código) é diferente
+  // do valor exibido/gravado em `candidato[field.key]` (o nome).
+  const value = field.key === 'vaga' ? (candidato.vagaCodigo ?? '') : (candidato[field.key] ?? '');
   const rotulo = escapeHtml(field.label);
 
   if (field.type === 'select') {
-    const opcoes = resolveOptions(field);
+    const opcoes = field.options;
     const vazia = `<option value=""${value ? '' : ' selected'}>—</option>`;
 
     // Valores atribuídos pelo app ("Em atividade", "Baixa", "Encerrada")
@@ -430,6 +426,25 @@ export function criarTabelaCandidatos({ colunas, editaveis = [], placeholderBusc
               title: 'Campo obrigatório',
               message: `${field.label} não pode ficar em branco.`,
             });
+          } else if (field.key === 'vaga') {
+            // O que se edita é o código; o que se grava/exibe é o nome
+            // resolvido a partir dele (ver CAMPOS.vaga).
+            if (novo !== (candidato.vagaCodigo || '')) {
+              const resolvido = resolverVagaPorCodigo(novo);
+              if (!resolvido.ok) {
+                showAlert({
+                  type: 'error',
+                  title: 'Código não encontrado',
+                  message: `Não existe vaga cadastrada com o código "${novo}".`,
+                });
+              } else {
+                atualizado =
+                  updateCandidato(candidato.id, {
+                    vaga: resolvido.vaga.nome,
+                    vagaCodigo: resolvido.vaga.codigo,
+                  }) || candidato;
+              }
+            }
           } else if (novo !== candidato[field.key]) {
             atualizado = updateCandidato(candidato.id, { [field.key]: novo }) || candidato;
           }
@@ -468,7 +483,9 @@ export function criarTabelaCandidatos({ colunas, editaveis = [], placeholderBusc
           (field.key === 'vaga' || field.key === 'statusCandidato') &&
           campos.some((item) => item.key === 'statusVaga')
         ) {
-          const vagasAfetadas = new Set([candidato.vaga, atualizado.vaga].filter(Boolean));
+          const vagasAfetadas = new Set(
+            [chaveVaga(candidato), chaveVaga(atualizado)].filter(Boolean)
+          );
           if (vagasAfetadas.size > 0) {
             const todos = listCandidatos();
             tbody.querySelectorAll('tr').forEach((outraLinha) => {
@@ -480,7 +497,7 @@ export function criarTabelaCandidatos({ colunas, editaveis = [], placeholderBusc
                 return;
               }
               const dadosOutro = todos.find((item) => item.id === celula.dataset.id);
-              if (dadosOutro && vagasAfetadas.has(dadosOutro.vaga)) {
+              if (dadosOutro && vagasAfetadas.has(chaveVaga(dadosOutro))) {
                 celula.innerHTML = cellContent(campo('statusVaga'), dadosOutro);
               }
             });

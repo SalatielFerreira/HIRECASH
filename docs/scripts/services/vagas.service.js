@@ -1,56 +1,80 @@
 /**
- * Registro de vagas: alimenta as opções do campo Vaga no cadastro de
- * candidato. Separado de `candidatos.service.js` porque tem seu próprio
- * ciclo de vida (cadastrar, renomear, excluir) independente de qualquer
- * candidato.
+ * Registro de vagas: código + nome. O código é a chave que se digita no
+ * cadastro de candidato (`resolverVagaPorCodigo`); o nome é só para
+ * leitura — é ele que aparece na tabela de candidatos.
+ *
+ * Separado de `candidatos.service.js` porque tem seu próprio ciclo de
+ * vida (cadastrar, editar, excluir) independente de qualquer candidato.
  */
 import { storage } from './storage.service.js';
-import { renomearVagaEmCandidatos } from './candidatos.service.js';
+import { sincronizarVagaEmCandidatos } from './candidatos.service.js';
 
 const KEY = 'vagas';
 
-function normalizarNome(nome) {
-  return (nome || '').trim();
+function limpar(texto) {
+  return (texto || '').trim();
 }
 
-function nomesIguais(a, b) {
-  return normalizarNome(a).toLowerCase() === normalizarNome(b).toLowerCase();
+function codigosIguais(a, b) {
+  return limpar(a).toLowerCase() === limpar(b).toLowerCase();
 }
 
 export function listVagas() {
   return storage.get(KEY, []);
 }
 
-/** Retorna a vaga criada, ou `null` se o nome for vazio ou já existir. */
-export function addVaga(nome) {
-  const nomeLimpo = normalizarNome(nome);
-  if (!nomeLimpo) {
+/** Vaga com esse código (sem diferenciar maiúsculas), ou `null`. */
+export function findVagaPorCodigo(codigo) {
+  const codigoLimpo = limpar(codigo);
+  if (!codigoLimpo) {
+    return null;
+  }
+  return listVagas().find((vaga) => codigosIguais(vaga.codigo, codigoLimpo)) || null;
+}
+
+/** `{ ok: true, vaga }` se o código existir, `{ ok: false }` se não. */
+export function resolverVagaPorCodigo(codigo) {
+  const vaga = findVagaPorCodigo(codigo);
+  return vaga ? { ok: true, vaga } : { ok: false };
+}
+
+/** Retorna a vaga criada, ou `null` se faltar código/nome ou o código já existir. */
+export function addVaga({ codigo, nome }) {
+  const codigoLimpo = limpar(codigo);
+  const nomeLimpo = limpar(nome);
+  if (!codigoLimpo || !nomeLimpo) {
     return null;
   }
 
   const vagas = listVagas();
-  if (vagas.some((vaga) => nomesIguais(vaga.nome, nomeLimpo))) {
+  if (vagas.some((vaga) => codigosIguais(vaga.codigo, codigoLimpo))) {
     return null;
   }
 
-  const nova = { id: crypto.randomUUID(), nome: nomeLimpo, criadoEm: new Date().toISOString() };
+  const nova = {
+    id: crypto.randomUUID(),
+    codigo: codigoLimpo,
+    nome: nomeLimpo,
+    criadoEm: new Date().toISOString(),
+  };
   vagas.push(nova);
   storage.set(KEY, vagas);
   return nova;
 }
 
 /**
- * Renomeia uma vaga já cadastrada. Retorna a vaga atualizada, `null` se o
- * id não existir, o nome for vazio, ou colidir com outra vaga já
- * cadastrada.
+ * Atualiza código e nome de uma vaga já cadastrada. Retorna a vaga
+ * atualizada, ou `null` se o id não existir, faltar código/nome, ou o
+ * novo código colidir com o de outra vaga.
  *
- * Propaga o novo nome para todos os candidatos que já usam o nome antigo
- * — sem isso, o campo Vaga desses candidatos ficaria com um valor "fora
- * da lista" (o nome antigo, que não existe mais no registro).
+ * Propaga a mudança para todos os candidatos que já usam essa vaga —
+ * sem isso, o campo Vaga desses candidatos continuaria mostrando o nome
+ * antigo, e um código renomeado deixaria de resolver para eles.
  */
-export function updateVaga(id, nome) {
-  const nomeLimpo = normalizarNome(nome);
-  if (!nomeLimpo) {
+export function updateVaga(id, { codigo, nome }) {
+  const codigoLimpo = limpar(codigo);
+  const nomeLimpo = limpar(nome);
+  if (!codigoLimpo || !nomeLimpo) {
     return null;
   }
 
@@ -60,16 +84,17 @@ export function updateVaga(id, nome) {
     return null;
   }
 
-  if (vagas.some((vaga) => vaga.id !== id && nomesIguais(vaga.nome, nomeLimpo))) {
+  if (vagas.some((vaga) => vaga.id !== id && codigosIguais(vaga.codigo, codigoLimpo))) {
     return null;
   }
 
-  const nomeAntigo = vagas[index].nome;
-  vagas[index] = { ...vagas[index], nome: nomeLimpo };
+  const codigoAntigo = vagas[index].codigo;
+  const mudou = codigoAntigo !== codigoLimpo || vagas[index].nome !== nomeLimpo;
+  vagas[index] = { ...vagas[index], codigo: codigoLimpo, nome: nomeLimpo };
   storage.set(KEY, vagas);
 
-  if (nomeAntigo !== nomeLimpo) {
-    renomearVagaEmCandidatos(nomeAntigo, nomeLimpo);
+  if (mudou) {
+    sincronizarVagaEmCandidatos(codigoAntigo, { codigo: codigoLimpo, nome: nomeLimpo });
   }
 
   return vagas[index];
@@ -77,9 +102,9 @@ export function updateVaga(id, nome) {
 
 /**
  * Remove uma vaga do registro. Candidatos já cadastrados com essa vaga
- * não são alterados — o campo deles preserva o nome (mesmo não estando
- * mais entre as opções), do mesmo jeito que já acontece com etapas
- * atribuídas automaticamente.
+ * não são alterados — o campo deles preserva o código e o nome (mesmo
+ * não estando mais no registro), do mesmo jeito que já acontece com
+ * etapas atribuídas automaticamente.
  */
 export function deleteVaga(id) {
   storage.set(

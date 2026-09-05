@@ -7,10 +7,16 @@ import {
   criarTabelaCandidatos,
   ordenarPorVaga,
   parseValue,
-  resolveOptions,
 } from '../components/candidatos-table.js';
 import { addCandidato, listCandidatos } from '../services/candidatos.service.js';
-import { addVaga, deleteVaga, listVagas, updateVaga } from '../services/vagas.service.js';
+import {
+  addVaga,
+  deleteVaga,
+  findVagaPorCodigo,
+  listVagas,
+  resolverVagaPorCodigo,
+  updateVaga,
+} from '../services/vagas.service.js';
 import { ETAPA_EM_ATIVIDADE, STATUS_CONTRATADO } from '../services/candidato-opcoes.js';
 import { escapeHtml } from '../utils/format.js';
 
@@ -22,6 +28,9 @@ const ICON_PLUS =
 
 const ICON_CLOSE =
   '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+
+const ICON_CHECK =
+  '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
 
 // Maleta com um "+" dentro, no lugar da alça — para diferenciar do "+"
 // simples de adicionar candidato.
@@ -69,7 +78,7 @@ function selectOptionsHtml(field) {
   const placeholderHtml = field.placeholder
     ? `<option value="" disabled selected>${escapeHtml(field.placeholder)}</option>`
     : '';
-  const optionsHtml = resolveOptions(field)
+  const optionsHtml = field.options
     .map((option) => `<option value="${escapeHtml(option)}">${escapeHtml(option)}</option>`)
     .join('');
   return placeholderHtml + optionsHtml;
@@ -96,10 +105,15 @@ function modalField(key) {
     control = `<input ${attrs.join(' ')} />`;
   }
 
+  // Dica ao vivo só existe no campo Vaga: mostra o nome que o código
+  // digitado resolve, para confirmar antes de salvar (ver init()).
+  const hintHtml = key === 'vaga' ? '<p class="field-hint" id="vaga-hint"></p>' : '';
+
   return `
     <div class="field${field.full ? ' field--full' : ''}">
       <label for="${id}">${escapeHtml(field.label)}</label>
       ${control}
+      ${hintHtml}
     </div>
   `;
 }
@@ -134,6 +148,7 @@ function renderModal() {
 function vagaItemHtml(vaga) {
   return `
     <li class="vaga-item" data-id="${escapeHtml(vaga.id)}">
+      <span class="vaga-item__codigo">${escapeHtml(vaga.codigo)}</span>
       <span class="vaga-item__nome">${escapeHtml(vaga.nome)}</span>
       <span class="vaga-item__acoes">
         <button type="button" class="vaga-item__botao" data-editar-vaga aria-label="Editar vaga" title="Editar">
@@ -168,6 +183,7 @@ function renderVagasModal() {
 
         <div class="modal__body">
           <form id="vaga-form" class="vaga-form">
+            <input type="text" id="f-codigo-vaga" name="codigo" placeholder="Código" required />
             <input type="text" id="f-nome-vaga" name="nome" placeholder="Nome da vaga" required />
             <button type="submit" class="btn btn--primary">Adicionar</button>
           </form>
@@ -249,7 +265,7 @@ export const candidatoPage = {
   },
 
   init(container) {
-    // --- Modal de candidato ---------------------------------------------
+    // --- Modal de candidato ----------------------------------------------
 
     const overlay = container.querySelector('#candidato-modal-overlay');
     const openButton = container.querySelector('#btn-add-candidato');
@@ -297,6 +313,32 @@ export const candidatoPage = {
       }
     });
 
+    // Dica ao vivo do campo Vaga: mostra o nome que o código digitado
+    // resolve (ou avisa que o código não existe), antes mesmo de salvar.
+    const vagaInput = container.querySelector('#f-vaga');
+    const vagaHint = container.querySelector('#vaga-hint');
+
+    function atualizarDicaVaga() {
+      const codigo = vagaInput.value.trim();
+      if (!codigo) {
+        vagaHint.textContent = '';
+        vagaHint.classList.remove('field-hint--erro');
+        return;
+      }
+      const vaga = findVagaPorCodigo(codigo);
+      if (vaga) {
+        vagaHint.textContent = `→ ${vaga.nome}`;
+        vagaHint.classList.remove('field-hint--erro');
+      } else {
+        vagaHint.textContent = 'Código não encontrado.';
+        vagaHint.classList.add('field-hint--erro');
+      }
+    }
+
+    if (vagaInput && vagaHint) {
+      vagaInput.addEventListener('input', atualizarDicaVaga);
+    }
+
     // A regra que deriva a etapa do status vive no serviço, então salvar
     // já grava certo. Espelhar aqui é para o usuário ver o campo mudar
     // enquanto preenche, em vez de descobrir só depois na tabela.
@@ -322,6 +364,20 @@ export const candidatoPage = {
         candidato[key] = parseValue(campo(key), data.get(key));
       });
 
+      // O que se digita em Vaga é o código; o que se grava/exibe é o nome
+      // resolvido a partir dele.
+      const resolvido = resolverVagaPorCodigo(candidato.vaga);
+      if (!resolvido.ok) {
+        showAlert({
+          type: 'error',
+          title: 'Código não encontrado',
+          message: `Não existe vaga cadastrada com o código "${candidato.vaga}". Cadastre-a no botão ao lado.`,
+        });
+        return;
+      }
+      candidato.vagaCodigo = resolvido.vaga.codigo;
+      candidato.vaga = resolvido.vaga.nome;
+
       addCandidato(candidato);
       closeModal();
       showAlert({
@@ -343,7 +399,8 @@ export const candidatoPage = {
     const openVagasButton = container.querySelector('#btn-add-vaga');
     const closeVagasButton = container.querySelector('#vagas-modal-close');
     const vagaForm = container.querySelector('#vaga-form');
-    const vagaInput = container.querySelector('#f-nome-vaga');
+    const codigoVagaInput = container.querySelector('#f-codigo-vaga');
+    const nomeVagaInput = container.querySelector('#f-nome-vaga');
     const vagasLista = container.querySelector('#vagas-lista');
     const vagasTrap = setupFocusTrap(vagasOverlay);
 
@@ -354,7 +411,7 @@ export const candidatoPage = {
       vagasOverlay.classList.add('is-open');
       container.classList.add('no-scroll');
       document.addEventListener('keydown', vagasTrap);
-      vagaInput.focus();
+      codigoVagaInput.focus();
     }
 
     // Mesmo funcionamento do modal de candidato: só fecha pelo "X". Ao
@@ -380,96 +437,132 @@ export const candidatoPage = {
 
     vagaForm.addEventListener('submit', (event) => {
       event.preventDefault();
-      const nome = vagaInput.value.trim();
-      if (!nome) {
+      const codigo = codigoVagaInput.value.trim();
+      const nome = nomeVagaInput.value.trim();
+      if (!codigo || !nome) {
         return;
       }
 
-      const nova = addVaga(nome);
+      const nova = addVaga({ codigo, nome });
       if (!nova) {
         showAlert({
           type: 'warning',
-          title: 'Vaga já existe',
-          message: `Já existe uma vaga chamada "${nome}".`,
+          title: 'Código já existe',
+          message: `Já existe uma vaga cadastrada com o código "${codigo}".`,
         });
         return;
       }
 
       vagaForm.reset();
       renderVagasLista();
-      vagaInput.focus();
+      codigoVagaInput.focus();
       showAlert({
         type: 'success',
         title: 'Vaga adicionada',
-        message: `"${nova.nome}" já pode ser escolhida no cadastro de candidato.`,
+        message: `Código "${nova.codigo}" já pode ser digitado no cadastro de candidato.`,
       });
     });
 
     function startEditVaga(item) {
+      const vaga = listVagas().find((candidata) => candidata.id === item.dataset.id);
+      if (!vaga) {
+        return;
+      }
+
+      const codigoSpan = item.querySelector('.vaga-item__codigo');
       const nomeSpan = item.querySelector('.vaga-item__nome');
-      const nomeAtual = nomeSpan.textContent;
+      const acoes = item.querySelector('.vaga-item__acoes');
 
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.className = 'cell-editor';
-      input.value = nomeAtual;
-      nomeSpan.replaceWith(input);
-      input.focus();
-      input.select();
+      const codigoInput = document.createElement('input');
+      codigoInput.type = 'text';
+      codigoInput.className = 'cell-editor vaga-item__codigo-editor';
+      codigoInput.value = vaga.codigo;
 
-      // Zera antes de mexer no DOM, mesmo padrão da edição inline da
-      // tabela: o blur disparado pela troca de conteúdo cai neste guarda
-      // e não reentra.
-      let done = false;
+      const nomeInput = document.createElement('input');
+      nomeInput.type = 'text';
+      nomeInput.className = 'cell-editor';
+      nomeInput.value = vaga.nome;
 
-      function finish(save) {
-        if (done) {
+      codigoSpan.replaceWith(codigoInput);
+      nomeSpan.replaceWith(nomeInput);
+
+      // Botões de ação viram salvar/cancelar explícitos enquanto edita —
+      // com dois campos, um blur não diz sozinho se a edição terminou
+      // (pode ser só um Tab pulando de um campo para o outro).
+      acoes.innerHTML = `
+        <button type="button" class="vaga-item__botao" data-salvar-vaga aria-label="Salvar" title="Salvar">
+          ${ICON_CHECK}
+        </button>
+        <button type="button" class="vaga-item__botao" data-cancelar-vaga aria-label="Cancelar" title="Cancelar">
+          ${ICON_CLOSE}
+        </button>
+      `;
+
+      codigoInput.focus();
+      codigoInput.select();
+
+      function salvar() {
+        const novoCodigo = codigoInput.value.trim();
+        const novoNome = nomeInput.value.trim();
+
+        if (!novoCodigo || !novoNome) {
+          showAlert({
+            type: 'error',
+            title: 'Campos obrigatórios',
+            message: 'Código e nome não podem ficar em branco.',
+          });
           return;
         }
-        done = true;
 
-        if (save) {
-          const novoNome = input.value.trim();
-          if (novoNome && novoNome !== nomeAtual) {
-            const atualizado = updateVaga(item.dataset.id, novoNome);
-            if (!atualizado) {
-              showAlert({
-                type: 'error',
-                title: 'Não foi possível renomear',
-                message: `Já existe uma vaga chamada "${novoNome}".`,
-              });
-              renderVagasLista();
-              return;
-            }
-            showAlert({
-              type: 'success',
-              title: 'Vaga renomeada',
-              message: `"${nomeAtual}" agora é "${novoNome}".`,
-            });
-          }
+        if (novoCodigo === vaga.codigo && novoNome === vaga.nome) {
+          renderVagasLista();
+          return;
         }
 
+        const atualizado = updateVaga(vaga.id, { codigo: novoCodigo, nome: novoNome });
+        if (!atualizado) {
+          showAlert({
+            type: 'error',
+            title: 'Não foi possível salvar',
+            message: `Já existe outra vaga com o código "${novoCodigo}".`,
+          });
+          return;
+        }
+
+        showAlert({
+          type: 'success',
+          title: 'Vaga atualizada',
+          message: `Código "${atualizado.codigo}" agora é "${atualizado.nome}".`,
+        });
         renderVagasLista();
       }
 
-      input.addEventListener('blur', () => finish(true));
-      input.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-          event.preventDefault();
-          finish(true);
-        } else if (event.key === 'Escape') {
-          event.preventDefault();
-          finish(false);
-        }
+      function cancelar() {
+        renderVagasLista();
+      }
+
+      acoes.querySelector('[data-salvar-vaga]').addEventListener('click', salvar);
+      acoes.querySelector('[data-cancelar-vaga]').addEventListener('click', cancelar);
+
+      [codigoInput, nomeInput].forEach((input) => {
+        input.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            salvar();
+          } else if (event.key === 'Escape') {
+            event.preventDefault();
+            cancelar();
+          }
+        });
       });
     }
 
-    async function excluirVaga(id, nome) {
+    async function excluirVaga(id, codigo, nome) {
       const confirmado = await showConfirm({
         title: 'Excluir vaga',
         message:
-          `Excluir "${nome}"? Candidatos já cadastrados com essa vaga continuam com o ` +
-          'nome salvo — ela só sai da lista de opções.',
+          `Excluir "${codigo} — ${nome}"? Candidatos já cadastrados com essa vaga continuam ` +
+          'com o nome salvo — ela só sai da lista de códigos aceitos.',
         confirmLabel: 'Excluir',
       });
 
@@ -482,7 +575,7 @@ export const candidatoPage = {
       showAlert({
         type: 'success',
         title: 'Vaga excluída',
-        message: `"${nome}" foi removida da lista de vagas.`,
+        message: `"${codigo} — ${nome}" foi removida da lista de vagas.`,
       });
     }
 
@@ -496,7 +589,9 @@ export const candidatoPage = {
       const excluirBotao = event.target.closest('[data-excluir-vaga]');
       if (excluirBotao) {
         const item = excluirBotao.closest('.vaga-item');
-        excluirVaga(item.dataset.id, item.querySelector('.vaga-item__nome')?.textContent || '');
+        const codigo = item.querySelector('.vaga-item__codigo')?.textContent || '';
+        const nome = item.querySelector('.vaga-item__nome')?.textContent || '';
+        excluirVaga(item.dataset.id, codigo, nome);
       }
     });
   },

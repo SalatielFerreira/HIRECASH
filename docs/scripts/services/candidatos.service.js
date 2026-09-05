@@ -37,6 +37,16 @@ function aplicarDerivados(dados) {
 }
 
 /**
+ * Chave que agrupa candidatos da mesma vaga: o código, quando o
+ * candidato já foi cadastrado com um (ver `vagas.service.js`); o nome,
+ * como reserva, para candidatos gravados antes do registro de vagas por
+ * código existir (aqueles só têm o nome digitado à mão).
+ */
+export function chaveVaga(candidato) {
+  return (candidato.vagaCodigo || candidato.vaga || '').trim();
+}
+
+/**
  * Quando um candidato de uma vaga é contratado, a vaga se encerra para
  * TODOS os candidatos que concorrem a ela — inclusive o próprio
  * contratado —, mesmo que o status da vaga de cada um tivesse sido
@@ -49,18 +59,18 @@ function aplicarDerivados(dados) {
  * Roda a cada gravação (aqui, não em cada tela), então vale tanto para o
  * cadastro pelo modal quanto para a edição direto na tabela.
  */
-function recalcularStatusVaga(candidatos, vagaNome) {
-  const nome = (vagaNome || '').trim();
-  if (!nome) {
+function recalcularStatusVaga(candidatos, chave) {
+  const alvo = (chave || '').trim();
+  if (!alvo) {
     return candidatos;
   }
 
   const algumContratado = candidatos.some(
-    (item) => (item.vaga || '').trim() === nome && item.statusCandidato === STATUS_CONTRATADO
+    (item) => chaveVaga(item) === alvo && item.statusCandidato === STATUS_CONTRATADO
   );
 
   return candidatos.map((item) => {
-    if ((item.vaga || '').trim() !== nome) {
+    if (chaveVaga(item) !== alvo) {
       return item;
     }
     if (algumContratado) {
@@ -82,7 +92,7 @@ export function addCandidato(candidato) {
     ...candidato,
   });
   candidatos.unshift(novo);
-  candidatos = recalcularStatusVaga(candidatos, novo.vaga);
+  candidatos = recalcularStatusVaga(candidatos, chaveVaga(novo));
   storage.set(KEY, candidatos);
   return candidatos.find((item) => item.id === novo.id);
 }
@@ -98,7 +108,7 @@ export function updateCandidato(id, patch) {
     return null;
   }
 
-  const vagaAntiga = candidatos[index].vaga;
+  const chaveAntiga = chaveVaga(candidatos[index]);
   const atualizado = {
     ...candidatos[index],
     ...aplicarDerivados(patch),
@@ -109,9 +119,10 @@ export function updateCandidato(id, patch) {
   // Recalcula a vaga antiga (por exemplo: o candidato que a encerrava
   // mudou de vaga, e ela pode precisar reabrir) e, se mudou de vaga, a
   // nova também (pode encerrar na hora, se já houver um contratado nela).
-  let resultado = recalcularStatusVaga(candidatos, vagaAntiga);
-  if ((atualizado.vaga || '').trim() !== (vagaAntiga || '').trim()) {
-    resultado = recalcularStatusVaga(resultado, atualizado.vaga);
+  const chaveNova = chaveVaga(atualizado);
+  let resultado = recalcularStatusVaga(candidatos, chaveAntiga);
+  if (chaveNova !== chaveAntiga) {
+    resultado = recalcularStatusVaga(resultado, chaveNova);
   }
 
   storage.set(KEY, resultado);
@@ -119,21 +130,23 @@ export function updateCandidato(id, patch) {
 }
 
 /**
- * Propaga o novo nome de uma vaga renomeada para todos os candidatos que
- * usavam o nome antigo, e recalcula o status dela (chamado por
+ * Propaga um código/nome de vaga editados para todos os candidatos que
+ * usavam o código antigo, e recalcula o status dela (chamado por
  * `vagas.service.js`).
  */
-export function renomearVagaEmCandidatos(nomeAntigo, nomeNovo) {
-  const antigo = (nomeAntigo || '').trim();
-  const novo = (nomeNovo || '').trim();
-  if (!antigo || !novo || antigo === novo) {
+export function sincronizarVagaEmCandidatos(codigoAntigo, { codigo, nome }) {
+  const antigo = (codigoAntigo || '').trim();
+  const novoCodigo = (codigo || '').trim();
+  if (!antigo || !novoCodigo) {
     return;
   }
 
   let candidatos = listCandidatos().map((item) =>
-    (item.vaga || '').trim() === antigo ? { ...item, vaga: novo } : item
+    (item.vagaCodigo || '').trim() === antigo
+      ? { ...item, vagaCodigo: novoCodigo, vaga: nome }
+      : item
   );
-  candidatos = recalcularStatusVaga(candidatos, novo);
+  candidatos = recalcularStatusVaga(candidatos, novoCodigo);
   storage.set(KEY, candidatos);
 }
 
@@ -154,9 +167,9 @@ export function recalcularTodasAsVagas() {
     return;
   }
 
-  const nomes = new Set(candidatos.map((item) => (item.vaga || '').trim()).filter(Boolean));
-  nomes.forEach((nome) => {
-    candidatos = recalcularStatusVaga(candidatos, nome);
+  const chaves = new Set(candidatos.map(chaveVaga).filter(Boolean));
+  chaves.forEach((chave) => {
+    candidatos = recalcularStatusVaga(candidatos, chave);
   });
 
   storage.set(KEY, candidatos);
@@ -242,15 +255,16 @@ export function importCandidatos(payload) {
       atualizados += 1;
     }
 
-    if (registro.vaga) {
-      vagasAfetadas.add(registro.vaga.trim());
+    const chave = chaveVaga(registro);
+    if (chave) {
+      vagasAfetadas.add(chave);
     }
   });
 
   // Garante que o status de cada vaga afetada reflita os dados importados,
   // mesmo que o arquivo trouxesse um valor de "Status da vaga" desatualizado.
-  vagasAfetadas.forEach((nome) => {
-    candidatos = recalcularStatusVaga(candidatos, nome);
+  vagasAfetadas.forEach((chave) => {
+    candidatos = recalcularStatusVaga(candidatos, chave);
   });
 
   storage.set(KEY, candidatos);

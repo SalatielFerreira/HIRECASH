@@ -7,6 +7,15 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.14.0] - 2026-09-05
+
+### Alterado
+
+- **Vaga passou a ter código além do nome.** No cadastro de vaga, dois campos: **Código** e **Nome da vaga**, lado a lado. A lista de vagas mostra os dois (o código como uma etiqueta, o nome ao lado); editar uma vaga agora edita os dois juntos.
+- **No cadastro de candidato, o campo Vaga voltou a ser digitado — mas agora é o CÓDIGO, não mais uma lista para escolher.** Ao digitar, aparece uma dica logo abaixo mostrando o nome para o qual aquele código resolve (ou avisando que o código não existe). Ao salvar, é o **nome** que fica gravado e aparece na tabela — o código nunca aparece na lista de candidatos, só serve para digitar mais rápido no cadastro. Um código que não exista bloqueia o salvamento, com aviso para cadastrar a vaga primeiro.
+- **A edição inline da coluna Vaga, na tabela, segue a mesma lógica**: clicar na célula abre um campo de texto com o código atual (não o nome) para digitar um novo; salvar resolve e grava o nome novamente.
+- Renomear o código ou o nome de uma vaga já cadastrada continua propagando para todos os candidatos que a usam — e a regra de encerrar/reabrir a vaga (ver 0.13.0) passou a agrupar pelo **código**, não mais pelo nome, para não se confundir caso duas vagas tenham nomes parecidos. Candidatos cadastrados antes de existir código (só com o nome digitado à mão) continuam funcionando: a regra cai de volta para o nome nesses casos.
+
 ## [0.13.0] - 2026-09-05
 
 ### Adicionado

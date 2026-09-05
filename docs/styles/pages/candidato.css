@@ -4,11 +4,11 @@
 
 .vaga-form {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
 }
 
 .vaga-form input {
-  flex: 1;
   padding: 10px 12px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
@@ -18,6 +18,16 @@
   font-size: 14px;
 }
 
+.vaga-form input[name='codigo'] {
+  flex: 1 1 90px;
+  min-width: 80px;
+}
+
+.vaga-form input[name='nome'] {
+  flex: 3 1 180px;
+  min-width: 140px;
+}
+
 .vaga-form input:focus {
   outline: none;
   border-color: var(--color-primary);
@@ -25,7 +35,7 @@
 }
 
 .vaga-form .btn {
-  flex-shrink: 0;
+  flex: 1 0 auto;
 }
 
 .vagas-vazio {
@@ -44,6 +54,25 @@
   gap: var(--space-2);
   padding: var(--space-3) 0;
   border-bottom: 1px solid var(--color-border);
+}
+
+.vaga-item__codigo {
+  flex-shrink: 0;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* Enquanto edita, o código continua estreito — só o nome cresce. */
+.vaga-item__codigo-editor {
+  flex: 0 0 110px;
+  width: auto;
 }
 
 .vaga-item__nome {

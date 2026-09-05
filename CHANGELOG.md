@@ -7,6 +7,13 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.16.0] - 2026-09-05
+
+### Alterado
+
+- **Editar o Status da vaga direto na tabela agora vale para todos os candidatos da mesma vaga (mesmo código)**, não só a linha editada — Status da vaga é uma característica da vaga, não do candidato específico. A regra automática de "Encerrada" continua tendo prioridade: se algum candidato do grupo estiver contratado, o valor força "Encerrada" mesmo por cima de uma escolha manual recente.
+- **Barra superior e ícone do app voltaram ao roxo liso**, sem o padrão facetado/de faixas do fundo — removido o SVG decorativo da barra e o padrão do `icon.svg`, mantendo só o gradiente roxo e a maleta com a moeda.
+
 ## [0.15.2] - 2026-09-05
 
 ### Alterado

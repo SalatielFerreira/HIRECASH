@@ -127,11 +127,26 @@ export function updateCandidato(id, patch) {
   };
   candidatos[index] = atualizado;
 
+  // Status da vaga é uma característica da vaga, não do candidato: uma
+  // edição manual (direto na tabela) vale para todos os candidatos que
+  // concorrem a ela, não só o editado. O recálculo abaixo ainda pode
+  // sobrepor esse valor para "Encerrada" se algum deles estiver
+  // contratado — isso continua automático, nunca escolhido à mão.
+  let candidatosComVaga = candidatos;
+  if ('statusVaga' in patch) {
+    const chave = chaveVaga(atualizado);
+    if (chave) {
+      candidatosComVaga = candidatos.map((item) =>
+        chaveVaga(item) === chave ? { ...item, statusVaga: atualizado.statusVaga } : item
+      );
+    }
+  }
+
   // Recalcula a vaga antiga (por exemplo: o candidato que a encerrava
   // mudou de vaga, e ela pode precisar reabrir) e, se mudou de vaga, a
   // nova também (pode encerrar na hora, se já houver um contratado nela).
   const chaveNova = chaveVaga(atualizado);
-  let resultado = recalcularStatusVaga(candidatos, chaveAntiga);
+  let resultado = recalcularStatusVaga(candidatosComVaga, chaveAntiga);
   if (chaveNova !== chaveAntiga) {
     resultado = recalcularStatusVaga(resultado, chaveNova);
   }

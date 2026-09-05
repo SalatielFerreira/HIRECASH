@@ -609,13 +609,13 @@ export function criarTabelaCandidatos({
           });
         }
 
-        // Editar a vaga ou o status do candidato pode encerrar (ou
-        // reabrir) a vaga para OUTROS candidatos que concorrem a ela —
-        // atualiza a célula de status da vaga dessas outras linhas
-        // também, se estiverem nesta tabela.
+        // Editar a vaga, o status do candidato ou o próprio status da
+        // vaga afeta OUTROS candidatos que concorrem a ela — atualiza a
+        // célula de status da vaga dessas outras linhas também, se
+        // estiverem nesta tabela.
         if (
           atualizado !== candidato &&
-          (field.key === 'vaga' || field.key === 'statusCandidato') &&
+          (field.key === 'vaga' || field.key === 'statusCandidato' || field.key === 'statusVaga') &&
           campos.some((item) => item.key === 'statusVaga')
         ) {
           const vagasAfetadas = new Set(

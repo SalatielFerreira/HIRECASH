@@ -12,6 +12,7 @@
 @import './pages/dashboard.css';
 @import './pages/candidato.css';
 @import './pages/comissao.css';
+@import './pages/relatorio.css';
 @import './pages/configuracao.css';
 
 html,
@@ -114,6 +115,7 @@ body {
 
 /* Largura de leitura confortável para páginas de cartões/texto. */
 .page-dashboard,
+.page-relatorio,
 .page-configuracao {
   max-width: 720px;
   margin-inline: auto;

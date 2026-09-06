@@ -174,7 +174,7 @@ function rotuloParaValor(field, valor) {
  * uma opção. Campo de texto livre usa só os valores realmente em uso,
  * em ordem alfabética (ou numérica, em Pretensão salarial).
  */
-function valoresDisponiveisDoCampo(field) {
+export function valoresDisponiveisDoCampo(field) {
   const rotulos = new Map();
 
   function registrar(valor) {
@@ -219,6 +219,51 @@ function valoresDisponiveisDoCampo(field) {
   }
 
   return chaves.map((valor) => ({ valor, rotulo: rotulos.get(valor) }));
+}
+
+/**
+ * Bloco de um campo dentro da coluna de filtro: um select pra
+ * acrescentar um valor (os já escolhidos somem da lista) e as flags dos
+ * valores escolhidos, cada uma com um X pra remover. Reaproveitado pela
+ * página de Relatório, que usa a mesma escolha de campo + valores para
+ * decidir quem entra na exportação.
+ */
+export function filtroCampoHtml(field, selecionados) {
+  const chave = escapeHtml(field.key);
+  const todos = valoresDisponiveisDoCampo(field);
+  const restantes = todos.filter((item) => !selecionados.has(item.valor));
+  const escolhidos = todos.filter((item) => selecionados.has(item.valor));
+  const semOpcoes = restantes.length === 0;
+
+  const opcoesHtml = restantes
+    .map((item, indice) => `<option value="${indice}">${escapeHtml(item.rotulo)}</option>`)
+    .join('');
+
+  const flagsHtml = escolhidos
+    .map(
+      (item) =>
+        `<span class="filtro-flag">${escapeHtml(item.rotulo)}` +
+        `<button type="button" class="filtro-flag__remover" data-campo="${chave}" ` +
+        `data-valor="${escapeHtml(item.valor)}" aria-label="Remover ${escapeHtml(item.rotulo)}">` +
+        `${ICON_CLOSE}</button></span>`
+    )
+    .join('');
+
+  return `
+    <div class="filtro-campo">
+      <label for="filtro-campo-${chave}">${escapeHtml(field.header || field.label)}</label>
+      <select
+        id="filtro-campo-${chave}"
+        class="filtro-campo__select"
+        data-campo="${chave}"
+        ${semOpcoes ? 'disabled' : ''}
+      >
+        <option value="">${semOpcoes && escolhidos.length === 0 ? 'Nenhum valor cadastrado' : 'Adicionar filtro...'}</option>
+        ${opcoesHtml}
+      </select>
+      ${flagsHtml ? `<div class="filtro-campo__flags">${flagsHtml}</div>` : ''}
+    </div>
+  `;
 }
 
 /** Lista ordenada pelo nome da vaga; empate desempata pelo nome do candidato. */
@@ -559,49 +604,6 @@ export function criarTabelaCandidatos({
       ` data-id="${escapeHtml(candidato.id)}" title="${rotulo}" aria-label="${rotulo}">` +
       `${acao.icone}</button></td>`
     );
-  }
-
-  /**
-   * Bloco de um campo dentro da coluna de filtro: um select pra
-   * acrescentar um valor (os já escolhidos somem da lista) e as flags
-   * dos valores escolhidos, cada uma com um X pra remover.
-   */
-  function filtroCampoHtml(field, selecionados) {
-    const chave = escapeHtml(field.key);
-    const todos = valoresDisponiveisDoCampo(field);
-    const restantes = todos.filter((item) => !selecionados.has(item.valor));
-    const escolhidos = todos.filter((item) => selecionados.has(item.valor));
-    const semOpcoes = restantes.length === 0;
-
-    const opcoesHtml = restantes
-      .map((item, indice) => `<option value="${indice}">${escapeHtml(item.rotulo)}</option>`)
-      .join('');
-
-    const flagsHtml = escolhidos
-      .map(
-        (item) =>
-          `<span class="filtro-flag">${escapeHtml(item.rotulo)}` +
-          `<button type="button" class="filtro-flag__remover" data-campo="${chave}" ` +
-          `data-valor="${escapeHtml(item.valor)}" aria-label="Remover ${escapeHtml(item.rotulo)}">` +
-          `${ICON_CLOSE}</button></span>`
-      )
-      .join('');
-
-    return `
-      <div class="filtro-campo">
-        <label for="filtro-campo-${chave}">${escapeHtml(field.header || field.label)}</label>
-        <select
-          id="filtro-campo-${chave}"
-          class="filtro-campo__select"
-          data-campo="${chave}"
-          ${semOpcoes ? 'disabled' : ''}
-        >
-          <option value="">${semOpcoes && escolhidos.length === 0 ? 'Nenhum valor cadastrado' : 'Adicionar filtro...'}</option>
-          ${opcoesHtml}
-        </select>
-        ${flagsHtml ? `<div class="filtro-campo__flags">${flagsHtml}</div>` : ''}
-      </div>
-    `;
   }
 
   /** Corpo da coluna de filtro inteiro, a partir do rascunho atual. */

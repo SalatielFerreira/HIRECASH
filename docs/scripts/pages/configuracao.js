@@ -2,6 +2,7 @@ import { getTheme, toggleTheme } from '../utils/theme.js';
 import { showAlert } from '../components/alert.js';
 import { buildBackup, importCandidatos, listCandidatos } from '../services/candidatos.service.js';
 import { logger } from '../utils/logger.js';
+import { salvarArquivo } from '../utils/arquivo.js';
 import { APP_NAME, APP_VERSION } from '../version.js';
 
 const ICON_CONFIG =
@@ -28,54 +29,6 @@ function backupFileName() {
 
 function plural(quantidade, singular, pluralForma) {
   return `${quantidade} ${quantidade === 1 ? singular : pluralForma}`;
-}
-
-/** Em aparelho de toque preferimos o compartilhamento nativo do sistema. */
-function isTouchDevice() {
-  return window.matchMedia('(pointer: coarse)').matches;
-}
-
-/**
- * Salva o backup usando o melhor recurso disponível no aparelho:
- * 1. celular/tablet → folha de compartilhamento do sistema;
- * 2. navegador com File System Access (Chrome/Edge) → diálogo "Salvar como";
- * 3. demais → download direto na pasta padrão.
- *
- * Retorna `false` quando o usuário cancela, para não exibir alerta de sucesso.
- */
-async function salvarArquivo(conteudo, nome) {
-  const arquivo = new File([conteudo], nome, { type: 'application/json' });
-
-  if (isTouchDevice() && navigator.canShare?.({ files: [arquivo] })) {
-    await navigator.share({ files: [arquivo], title: nome });
-    return true;
-  }
-
-  if (typeof window.showSaveFilePicker === 'function') {
-    const handle = await window.showSaveFilePicker({
-      suggestedName: nome,
-      types: [
-        {
-          description: 'Backup HireCash',
-          accept: { 'application/json': ['.json'] },
-        },
-      ],
-    });
-    const writable = await handle.createWritable();
-    await writable.write(conteudo);
-    await writable.close();
-    return true;
-  }
-
-  const url = URL.createObjectURL(new Blob([conteudo], { type: 'application/json' }));
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = nome;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
-  return true;
 }
 
 export const configuracaoPage = {
@@ -208,7 +161,10 @@ export const configuracaoPage = {
       const nome = backupFileName();
 
       try {
-        await salvarArquivo(JSON.stringify(backup, null, 2), nome);
+        await salvarArquivo(JSON.stringify(backup, null, 2), nome, {
+          mime: 'application/json',
+          descricao: 'Backup HireCash',
+        });
         logger.info('backup', `Backup exportado (${backup.candidatos.length} candidatos)`);
         showAlert({
           type: 'success',

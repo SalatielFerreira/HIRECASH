@@ -1,0 +1,15 @@
+.page-relatorio .card__icon {
+  background: var(--color-primary);
+}
+
+.page-relatorio .card > p {
+  margin-bottom: var(--space-4);
+}
+
+.relatorio-rodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+}

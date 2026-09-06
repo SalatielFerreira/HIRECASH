@@ -7,6 +7,16 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.26.0] - 2026-09-06
+
+### Adicionado
+
+- **Nova página Relatório**, quinta aba da barra inferior (entre Comissão e Configuração): escolhe os filtros (mesmo campo + valores da coluna de filtro do Candidato) e clica em "Gerar Excel" para baixar um `.csv` com os candidatos encontrados — abre direto no Excel, com acentuação correta e já formatado como no app (moeda, data). Traz também Observação, Contratação, Nível e uma coluna de Comissão total (soma das duas parcelas), que não aparecem no filtro mas fazem parte da exportação. Uma contagem ao lado do botão mostra quantos candidatos serão exportados antes de gerar o arquivo.
+
+### Alterado
+
+- `salvarArquivo` (usado para baixar o backup) virou uma função compartilhada em `utils/arquivo.js`, reaproveitada agora também pelo Relatório.
+
 ## [0.25.0] - 2026-09-05
 
 ### Alterado

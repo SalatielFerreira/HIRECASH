@@ -125,7 +125,7 @@
 .icon-button--outline {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  color: var(--color-primary-fg);
+  color: var(--color-primary);
   box-shadow: none;
 }
 

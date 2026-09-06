@@ -48,7 +48,7 @@
   margin: auto;
   width: 16px;
   height: 16px;
-  color: var(--color-primary-fg);
+  color: var(--color-primary);
   opacity: 1;
   transition: opacity var(--transition-fast);
 }

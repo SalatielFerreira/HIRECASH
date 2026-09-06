@@ -8,7 +8,7 @@
   gap: var(--space-3);
   height: calc(var(--topbar-height) + var(--safe-top));
   padding: var(--safe-top) var(--space-5) 0;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  background: linear-gradient(135deg, var(--color-topbar), var(--color-topbar-dark));
   color: var(--color-text-inverse);
   box-shadow: var(--shadow-md);
 }

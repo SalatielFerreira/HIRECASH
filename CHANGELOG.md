@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.32.0] - 2026-09-06
+
+### Alterado
+
+- **Roxo da marca volta a ser o original (#4F46E5)** em botões, badges de destaque, ícone do app e cor de foco — o #1E093C escuro da entrega anterior fica só na barra superior (agora com uma variável própria, `--color-topbar`). A distinção `--color-primary-fg` criada pra contornar o contraste do tom escuro no tema escuro deixou de ser necessária e foi removida.
+
 ## [0.31.1] - 2026-09-06
 
 ### Alterado

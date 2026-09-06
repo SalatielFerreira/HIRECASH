@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.34.0] - 2026-09-06
+
+### Alterado
+
+- **Ícone do app troca o "S" desenhado pelo "S" de verdade usado na barra superior** (o mesmo recorte da arte original, embutido no `icon.svg`), com o fundo no roxo escuro da barra superior (`#1E093C` → `#15062A`) em vez do roxo claro de antes.
+
 ## [0.33.0] - 2026-09-06
 
 ### Alterado

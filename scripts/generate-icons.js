@@ -21,10 +21,10 @@ const SOURCE_SVG = path.join(ICONS_DIR, 'icon.svg');
  * volta do desenho depois do recorte. Servindo o quadrado inteiro, as
  * facetas vão até a borda e quem arredonda é o sistema.
  *
- * A marca (maleta + moeda) ocupa só os 40% centrais do SVG, então já cabe
- * folgada na zona segura do maskable (círculo de 80%): o canto mais
- * distante dela fica a 136px do centro, contra um limite de 204px. Por
- * isso ela não precisa ser reduzida.
+ * O "S" (imagem embutida no SVG) ocupa uma faixa central de 173×230,
+ * então já cabe folgada na zona segura do maskable (círculo de 80%): o
+ * canto mais distante dele fica a ~144px do centro, contra um limite de
+ * 204px. Por isso não precisa ser reduzido.
  */
 function readFullBleedSvg() {
   return readFileSync(SOURCE_SVG, 'utf8').replace('rx="112"', 'rx="0"');

@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.28.0] - 2026-09-06
+
+### Alterado
+
+- **Novo ícone da marca**: o emblema da barra superior e o ícone do app trocaram a maleta pelo "S" da marca — uma fita curva com dois pontos de acento nas pontas —, mantendo o roxo e o "HireCash" (Hire em branco, Cash em verde-menta) como já eram.
+
 ## [0.27.0] - 2026-09-06
 
 ### Alterado

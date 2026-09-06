@@ -12,15 +12,10 @@
   -->
   <rect width="512" height="512" rx="112" fill="url(#bg)"/>
 
-  <!-- Maleta (hire) -->
-  <path d="M176 208h160a24 24 0 0 1 24 24v128a24 24 0 0 1-24 24H176a24 24 0 0 1-24-24V232a24 24 0 0 1 24-24z"
-        fill="none" stroke="#FFFFFF" stroke-width="18" stroke-linejoin="round"/>
-  <path d="M208 208v-16a24 24 0 0 1 24-24h48a24 24 0 0 1 24 24v16"
-        fill="none" stroke="#FFFFFF" stroke-width="18" stroke-linejoin="round"/>
-  <line x1="152" y1="272" x2="360" y2="272" stroke="#FFFFFF" stroke-width="18"/>
-
-  <!-- Moeda (cash) -->
-  <circle cx="256" cy="272" r="34" fill="#10B981" stroke="#FFFFFF" stroke-width="10"/>
-  <text x="256" y="283" font-family="Arial, sans-serif" font-size="34" font-weight="700"
-        text-anchor="middle" fill="#FFFFFF">$</text>
+  <!-- "S" da marca: fita curva formando um S, com dois pontos de acento
+       nas pontas — mesmo traço do emblema da barra superior. -->
+  <path d="M340 170 C200 170 200 256 270 256 C340 256 340 342 200 342"
+        fill="none" stroke="#FFFFFF" stroke-width="54" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="388" cy="132" r="22" fill="#FFFFFF"/>
+  <circle cx="152" cy="380" r="22" fill="#FFFFFF"/>
 </svg>

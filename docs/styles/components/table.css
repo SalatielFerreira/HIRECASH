@@ -69,7 +69,7 @@
 }
 
 .data-table a {
-  color: var(--color-primary);
+  color: var(--color-primary-fg);
   font-weight: 600;
 }
 
@@ -135,8 +135,8 @@
 
 .search-bar__input:focus {
   outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+  border-color: var(--color-primary-fg);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary-fg) 25%, transparent);
 }
 
 .search-empty {
@@ -217,8 +217,8 @@
 
 .filtro-campo__select:focus {
   outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+  border-color: var(--color-primary-fg);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary-fg) 25%, transparent);
 }
 
 /* O navegador esmaece campos desabilitados (opacity ~0.7 por padrão),
@@ -330,7 +330,7 @@ html[data-theme='dark'] .filtro-campo__select {
 }
 
 .data-table__cell--editable:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-primary-fg);
   outline-offset: -2px;
 }
 
@@ -347,7 +347,7 @@ html[data-theme='dark'] .filtro-campo__select {
 .cell-editor {
   width: 100%;
   padding: 5px 9px;
-  border: 1px solid var(--color-primary);
+  border: 1px solid var(--color-primary-fg);
   border-radius: var(--radius-sm);
   background: var(--color-surface);
   color: var(--color-text-primary);
@@ -394,7 +394,7 @@ html[data-theme='dark'] .filtro-campo__select {
 
 @media (hover: hover) and (pointer: fine) {
   .date-editor__picker:hover {
-    color: var(--color-primary);
+    color: var(--color-primary-fg);
   }
 }
 

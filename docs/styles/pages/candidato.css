@@ -30,8 +30,8 @@
 
 .vaga-form input:focus {
   outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+  border-color: var(--color-primary-fg);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary-fg) 25%, transparent);
 }
 
 .vaga-form .btn {

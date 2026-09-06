@@ -45,7 +45,7 @@
 }
 
 .nav-item.is-active {
-  color: var(--color-primary);
+  color: var(--color-primary-fg);
 }
 
 .nav-item.is-active svg {

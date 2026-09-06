@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.30.0] - 2026-09-06
+
+### Alterado
+
+- **Roxo da marca trocado por #1E093C** em toda a aplicação — barra superior, botões, badges de destaque, ícone do app, cor do navegador (barra de status/splash). Texto, borda e ícone em roxo sobre fundo escuro (ex.: item ativo do rodapé, botão contornado, link da tabela, campo em foco) usam automaticamente um roxo mais claro no tema escuro — o tom pedido é escuro demais pra servir de primeiro plano legível ali; fundo sólido (botão, topo, badge) continua sempre #1E093C nos dois temas.
+
 ## [0.29.1] - 2026-09-06
 
 ### Alterado

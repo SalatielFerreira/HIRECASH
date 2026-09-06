@@ -1,10 +1,18 @@
 :root {
   /* Marca */
-  --color-primary: #4f46e5;
-  --color-primary-dark: #4338ca;
-  --color-primary-light: #6366f1;
+  --color-primary: #1e093c;
+  --color-primary-dark: #15062a;
+  --color-primary-light: #8747e3;
   --color-accent: #10b981;
   --color-accent-dark: #059669;
+
+  /* Texto/borda/ícone em cor de marca (link, borda de campo focado,
+     ícone de botão contornado) — nunca fundo. --color-primary é escuro
+     demais pra servir de primeiro plano sobre uma superfície escura;
+     no tema escuro esta variável aponta pra --color-primary-light em
+     vez disso. Fundo sólido (botão, topo, badge) continua sempre
+     --color-primary mesmo, nos dois temas — só isto aqui muda. */
+  --color-primary-fg: var(--color-primary);
 
   /* Semânticas (alertas, badges) — fundos translúcidos, então já se
      adaptam sozinhos ao tema claro/escuro sem precisar de variante extra. */
@@ -92,6 +100,7 @@
     --color-border: #2b2f3a;
     --color-text-primary: #f3f4f6;
     --color-text-secondary: #9ca3af;
+    --color-primary-fg: var(--color-primary-light);
   }
 }
 
@@ -101,4 +110,5 @@
   --color-border: #2b2f3a;
   --color-text-primary: #f3f4f6;
   --color-text-secondary: #9ca3af;
+  --color-primary-fg: var(--color-primary-light);
 }

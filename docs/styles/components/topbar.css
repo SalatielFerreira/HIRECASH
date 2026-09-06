@@ -26,7 +26,7 @@
 }
 
 .topbar__logo-mark {
-  height: 44px;
+  height: 50px;
   width: auto;
 }
 
@@ -38,7 +38,7 @@
 
 .topbar__wordmark {
   margin: 0;
-  font-size: 28px;
+  font-size: 34px;
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.02em;
@@ -53,9 +53,9 @@
 
 .topbar__tagline {
   margin: 0;
-  font-size: 10.5px;
+  font-size: 9px;
   font-weight: 600;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #a78bfa;
 }

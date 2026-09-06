@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.31.1] - 2026-09-06
+
+### Alterado
+
+- **Ajuste de tamanho na logo da barra superior**: "HireCash" maior, a régua "Talentos · Comissões · Resultados" menor — as duas linhas de texto agora terminam alinhadas na mesma largura, e o "S" ficou com a mesma altura do bloco de texto (título + régua) somado.
+
 ## [0.31.0] - 2026-09-06
 
 ### Alterado

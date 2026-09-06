@@ -13,12 +13,49 @@
   box-shadow: var(--shadow-md);
 }
 
-.topbar__title {
-  margin: 0;
-  line-height: 0;
+/*
+ * Marca em três peças independentes (S recortado da arte original +
+ * "HireCash"/régua como texto de verdade) em vez de uma imagem única —
+ * assim cada uma tem seu próprio tamanho (ver as três regras abaixo) e
+ * nunca fica borrada ao crescer, já que texto não é raster.
+ */
+.topbar__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
 }
 
-.topbar__logo {
-  height: 68px;
+.topbar__logo-mark {
+  height: 44px;
   width: auto;
+}
+
+.topbar__wordmark-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.topbar__wordmark {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--color-text-inverse);
+}
+
+.topbar__wordmark-cash {
+  background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+  background-clip: text;
+  color: transparent;
+}
+
+.topbar__tagline {
+  margin: 0;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #a78bfa;
 }

@@ -54,10 +54,10 @@
 
   /* Layout */
 
-  /* 88px (era 60px): a logo real tem a régua "Talentos · Comissões ·
-     Resultados" embaixo do texto — precisa dessa altura pra ficar
-     legível, não só decorativa. */
-  --topbar-height: 88px;
+  /* 64px: a régua "Talentos · Comissões · Resultados" agora é texto de
+     verdade (não faz mais parte de uma imagem só), então não precisa
+     mais da altura extra só pra ficar legível — ver topbar.css. */
+  --topbar-height: 64px;
   --bottomnav-height: 76px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);

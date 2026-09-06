@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.33.0] - 2026-09-06
+
+### Alterado
+
+- **Barra superior mais grossa (48px → 64px) e a logo centralizada** nela, tanto na vertical quanto na horizontal (no meio da tela) — antes ficava colada à esquerda. Tamanho do S, do "HireCash" e da régua sem alteração.
+
 ## [0.32.2] - 2026-09-06
 
 ### Alterado

@@ -51,9 +51,9 @@
 
   /* Layout */
 
-  /* 48px: acompanha o tamanho da logo (S + "HireCash" + régua) em
-     topbar.css, reduzido a 2/3 do que era. */
-  --topbar-height: 48px;
+  /* 64px: mais grossa que o conteúdo (logo com 41px de altura) exige —
+     a logo fica centralizada dentro dela (ver .topbar em topbar.css). */
+  --topbar-height: 64px;
   --bottomnav-height: 76px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);

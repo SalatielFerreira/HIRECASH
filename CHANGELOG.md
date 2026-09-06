@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.25.0] - 2026-09-05
+
+### Alterado
+
+- **Filtro da página Candidato virou uma coluna lateral**, que desliza da esquerda ao clicar no botão de funil (antes era um painel pequeno com um campo e um valor por vez). Agora traz todos os campos (menos Observação) de uma vez, um abaixo do outro, cada um com todos os valores em uso — pode escolher mais de um por campo, e cada escolha vira uma "flag" removível logo abaixo do campo. As alterações só valem depois de clicar em "Filtrar"; "Cancelar" (ou fechar/Esc/clicar fora) descarta sem aplicar.
+
 ## [0.24.0] - 2026-09-05
 
 ### Alterado

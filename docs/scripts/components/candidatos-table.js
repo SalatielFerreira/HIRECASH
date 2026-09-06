@@ -31,6 +31,9 @@ const ICON_FILTER =
 const ICON_CALENDAR =
   '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
 
+const ICON_CLOSE =
+  '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+
 // Cor por valor exato (não por significado semântico) — pedido do
 // usuário, com uma paleta fixa de tons reaproveitados entre os campos.
 const STATUS_VAGA_BADGE = {
@@ -144,6 +147,79 @@ export function campo(key) {
  * lidos como números — "Vaga 2" vem antes de "Vaga 10", não depois.
  */
 const collator = new Intl.Collator('pt-BR', { sensitivity: 'base', numeric: true });
+
+/** Observação (texto livre) e Comissão (calculada) não têm um conjunto
+ *  de valores que faça sentido escolher num filtro. */
+function ehFiltravel(field) {
+  return field.type !== 'textarea' && field.type !== 'computed';
+}
+
+/** Texto exibido para o valor de um campo dentro do filtro. */
+function rotuloParaValor(field, valor) {
+  if (field.type === 'currency') {
+    return formatCurrency(valor);
+  }
+  if (field.type === 'date') {
+    return formatDate(valor) || String(valor);
+  }
+  return String(valor);
+}
+
+/**
+ * Todos os valores possíveis de um campo para o filtro: as opções
+ * cadastradas (campo select) na ordem em que aparecem lá, mais qualquer
+ * valor extra realmente usado por algum candidato (ex.: "Encerrada",
+ * atribuída sozinha pelo app, fora da lista de opções escolhíveis) —
+ * sem isso não daria pra filtrar por um valor que existe mas não é mais
+ * uma opção. Campo de texto livre usa só os valores realmente em uso,
+ * em ordem alfabética (ou numérica, em Pretensão salarial).
+ */
+function valoresDisponiveisDoCampo(field) {
+  const rotulos = new Map();
+
+  function registrar(valor) {
+    if (valor === undefined || valor === null || valor === '') {
+      return;
+    }
+    const chave = String(valor);
+    if (!rotulos.has(chave)) {
+      rotulos.set(chave, rotuloParaValor(field, valor));
+    }
+  }
+
+  if (field.type === 'select') {
+    (field.options || []).forEach(registrar);
+  }
+  listCandidatos().forEach((candidato) => registrar(candidato[field.key]));
+
+  const chaves = [...rotulos.keys()];
+
+  if (field.type === 'select') {
+    const ordemCanonica = field.options || [];
+    chaves.sort((a, b) => {
+      const indiceA = ordemCanonica.indexOf(a);
+      const indiceB = ordemCanonica.indexOf(b);
+      if (indiceA !== -1 && indiceB !== -1) {
+        return indiceA - indiceB;
+      }
+      if (indiceA !== -1) {
+        return -1;
+      }
+      if (indiceB !== -1) {
+        return 1;
+      }
+      return collator.compare(rotulos.get(a), rotulos.get(b));
+    });
+  } else if (field.type === 'currency') {
+    chaves.sort((a, b) => Number(a) - Number(b));
+  } else if (field.type === 'date') {
+    chaves.sort();
+  } else {
+    chaves.sort((a, b) => collator.compare(rotulos.get(a), rotulos.get(b)));
+  }
+
+  return chaves.map((valor) => ({ valor, rotulo: rotulos.get(valor) }));
+}
 
 /** Lista ordenada pelo nome da vaga; empate desempata pelo nome do candidato. */
 export function ordenarPorVaga(candidatos) {
@@ -431,10 +507,10 @@ function editorHtml(field, candidato) {
  * @param {Object} [config.acao]         coluna de botão no fim da linha:
  *   `{ header, rotulo, icone, classe }`. O que o botão faz é passado em
  *   `init(container, { onAcao })`, porque depende da página.
- * @param {boolean} [config.filtro]      mostra o botão de filtro por
- *   campo, ao lado da busca — um select para escolher o campo (entre os
- *   de `colunas` que têm `options`, ex.: Status do candidato, Modalidade)
- *   e outro para o valor daquele campo.
+ * @param {boolean} [config.filtro]      mostra o botão de filtro, que abre
+ *   uma coluna lateral com todos os campos (menos Observação e Comissão)
+ *   — cada um com as opções em uso escolhíveis (mais de uma por campo),
+ *   aplicadas só ao clicar em "Filtrar".
  */
 export function criarTabelaCandidatos({
   colunas,
@@ -446,16 +522,14 @@ export function criarTabelaCandidatos({
   const campos = colunas.map(campo);
   const podeEditar = new Set(editaveis);
   const busca = placeholderBusca || 'Buscar por vaga ou candidato';
-  const camposFiltraveis = filtro
-    ? campos.filter((field) => field.type === 'select' && field.options?.length > 0)
-    : [];
+  const camposFiltraveis = filtro ? campos.filter(ehFiltravel) : [];
 
   function cellHtml(field, candidato) {
     const editavel = podeEditar.has(field.key);
     const classes = editavel ? 'data-table__cell data-table__cell--editable' : 'data-table__cell';
     // Guarda o valor cru (não o HTML da badge) para o filtro por campo comparar.
     const valorFiltro =
-      field.type === 'select' ? ` data-valor="${escapeHtml(candidato[field.key] ?? '')}"` : '';
+      filtro && ehFiltravel(field) ? ` data-valor="${escapeHtml(candidato[field.key] ?? '')}"` : '';
 
     return (
       `<td class="${classes}" data-id="${escapeHtml(candidato.id)}" data-field="${field.key}"${valorFiltro}` +
@@ -466,7 +540,7 @@ export function criarTabelaCandidatos({
   /** Redesenha uma célula e mantém `data-valor` (usado pelo filtro) em dia. */
   function refreshCell(cell, field, candidato) {
     cell.innerHTML = cellContent(field, candidato);
-    if (field.type === 'select') {
+    if (filtro && ehFiltravel(field)) {
       cell.dataset.valor = candidato[field.key] ?? '';
     }
   }
@@ -485,6 +559,56 @@ export function criarTabelaCandidatos({
       ` data-id="${escapeHtml(candidato.id)}" title="${rotulo}" aria-label="${rotulo}">` +
       `${acao.icone}</button></td>`
     );
+  }
+
+  /**
+   * Bloco de um campo dentro da coluna de filtro: um select pra
+   * acrescentar um valor (os já escolhidos somem da lista) e as flags
+   * dos valores escolhidos, cada uma com um X pra remover.
+   */
+  function filtroCampoHtml(field, selecionados) {
+    const chave = escapeHtml(field.key);
+    const todos = valoresDisponiveisDoCampo(field);
+    const restantes = todos.filter((item) => !selecionados.has(item.valor));
+    const escolhidos = todos.filter((item) => selecionados.has(item.valor));
+    const semOpcoes = restantes.length === 0;
+
+    const opcoesHtml = restantes
+      .map((item, indice) => `<option value="${indice}">${escapeHtml(item.rotulo)}</option>`)
+      .join('');
+
+    const flagsHtml = escolhidos
+      .map(
+        (item) =>
+          `<span class="filtro-flag">${escapeHtml(item.rotulo)}` +
+          `<button type="button" class="filtro-flag__remover" data-campo="${chave}" ` +
+          `data-valor="${escapeHtml(item.valor)}" aria-label="Remover ${escapeHtml(item.rotulo)}">` +
+          `${ICON_CLOSE}</button></span>`
+      )
+      .join('');
+
+    return `
+      <div class="filtro-campo">
+        <label for="filtro-campo-${chave}">${escapeHtml(field.header || field.label)}</label>
+        <select
+          id="filtro-campo-${chave}"
+          class="filtro-campo__select"
+          data-campo="${chave}"
+          ${semOpcoes ? 'disabled' : ''}
+        >
+          <option value="">${semOpcoes && escolhidos.length === 0 ? 'Nenhum valor cadastrado' : 'Adicionar filtro...'}</option>
+          ${opcoesHtml}
+        </select>
+        ${flagsHtml ? `<div class="filtro-campo__flags">${flagsHtml}</div>` : ''}
+      </div>
+    `;
+  }
+
+  /** Corpo da coluna de filtro inteiro, a partir do rascunho atual. */
+  function filtroDrawerBodyHtml(filtroDraft) {
+    return camposFiltraveis
+      .map((field) => filtroCampoHtml(field, filtroDraft.get(field.key) || new Set()))
+      .join('');
   }
 
   return {
@@ -506,36 +630,23 @@ export function criarTabelaCandidatos({
         </button>`
           : '';
 
-      const filtroPainelHtml =
+      const filtroDrawerHtml =
         camposFiltraveis.length > 0
           ? `
-        <div class="filter-panel" id="filtro-painel" hidden>
-          <div class="filter-panel__campo">
-            <label for="filtro-campo">Campo</label>
-            <select id="filtro-campo">
-              <option value="">Selecione...</option>
-              ${camposFiltraveis
-                .map(
-                  (field) =>
-                    `<option value="${field.key}">${escapeHtml(field.header || field.label)}</option>`
-                )
-                .join('')}
-            </select>
-          </div>
-          <div class="filter-panel__campo">
-            <label for="filtro-valor">Valor</label>
-            <select id="filtro-valor" disabled>
-              <option value="">Selecione o campo</option>
-            </select>
-          </div>
-          <button
-            type="button"
-            class="btn btn--outline filter-panel__limpar"
-            id="filtro-limpar"
-            hidden
-          >
-            Limpar filtro
-          </button>
+        <div class="filtro-drawer-overlay" id="filtro-drawer-overlay">
+          <aside class="filtro-drawer" role="dialog" aria-modal="true" aria-labelledby="filtro-drawer-titulo">
+            <div class="modal__header">
+              <h2 id="filtro-drawer-titulo" class="modal__title">Filtrar</h2>
+              <button type="button" class="modal__close" id="filtro-drawer-fechar" aria-label="Fechar">
+                ${ICON_CLOSE}
+              </button>
+            </div>
+            <div class="modal__body" id="filtro-drawer-corpo"></div>
+            <div class="modal__footer">
+              <button type="button" class="btn btn--outline" id="filtro-drawer-cancelar">Cancelar</button>
+              <button type="button" class="btn btn--primary" id="filtro-drawer-filtrar">Filtrar</button>
+            </div>
+          </aside>
         </div>`
           : '';
 
@@ -554,7 +665,7 @@ export function criarTabelaCandidatos({
             />
           </div>
         </div>
-        ${filtroPainelHtml}
+        ${filtroDrawerHtml}
 
         <div class="data-table-scroll">
           <table class="data-table">
@@ -597,12 +708,12 @@ export function criarTabelaCandidatos({
       const searchInput = container.querySelector('#busca-candidato');
       const searchEmpty = container.querySelector('#busca-vazia');
       const filtroBotao = container.querySelector('#btn-filtro');
-      const filtroPainel = container.querySelector('#filtro-painel');
-      const filtroCampoSelect = container.querySelector('#filtro-campo');
-      const filtroValorSelect = container.querySelector('#filtro-valor');
-      const filtroLimparBotao = container.querySelector('#filtro-limpar');
+      const filtroOverlay = container.querySelector('#filtro-drawer-overlay');
 
-      let filtroAtivo = null; // { campo, valor }
+      // Mapa campo → conjunto de valores escolhidos. Só o que está aqui
+      // filtra de verdade; a coluna lateral edita um rascunho à parte
+      // (ver abrirFiltroDrawer) até o usuário confirmar em "Filtrar".
+      let filtroAplicado = new Map();
 
       function aplicarFiltro() {
         const termo = normalizar(searchInput.value.trim());
@@ -610,10 +721,17 @@ export function criarTabelaCandidatos({
 
         tbody.querySelectorAll('tr').forEach((row) => {
           const casaBusca = !termo || row.dataset.busca.includes(termo);
-          const casaFiltro =
-            !filtroAtivo ||
-            row.querySelector(`[data-field="${filtroAtivo.campo}"]`)?.dataset.valor ===
-              filtroAtivo.valor;
+          let casaFiltro = true;
+          for (const [chave, valores] of filtroAplicado) {
+            if (valores.size === 0) {
+              continue;
+            }
+            const valorCelula = row.querySelector(`[data-field="${chave}"]`)?.dataset.valor ?? '';
+            if (!valores.has(valorCelula)) {
+              casaFiltro = false;
+              break;
+            }
+          }
           const casa = casaBusca && casaFiltro;
           row.hidden = !casa;
           if (casa) {
@@ -626,54 +744,115 @@ export function criarTabelaCandidatos({
 
       searchInput.addEventListener('input', aplicarFiltro);
 
-      if (filtroBotao) {
-        filtroBotao.addEventListener('click', () => {
-          filtroPainel.hidden = !filtroPainel.hidden;
-        });
+      if (filtroBotao && filtroOverlay) {
+        const drawer = filtroOverlay.querySelector('.filtro-drawer');
+        const corpo = filtroOverlay.querySelector('#filtro-drawer-corpo');
+        const botaoFechar = filtroOverlay.querySelector('#filtro-drawer-fechar');
+        const botaoCancelar = filtroOverlay.querySelector('#filtro-drawer-cancelar');
+        const botaoFiltrar = filtroOverlay.querySelector('#filtro-drawer-filtrar');
 
-        const limparValorDoFiltro = () => {
-          filtroValorSelect.innerHTML = '<option value="">Selecione o campo</option>';
-          filtroValorSelect.disabled = true;
+        // Rascunho editado na coluna lateral — só vira filtroAplicado (e
+        // só então afeta a tabela) quando o usuário clica em "Filtrar".
+        let filtroDraft = new Map();
+        let ultimoFoco = null;
+
+        const redesenharCorpo = () => {
+          corpo.innerHTML = filtroDrawerBodyHtml(filtroDraft);
         };
 
-        const desativarFiltro = () => {
-          filtroAtivo = null;
-          filtroBotao.classList.remove('is-active');
-          filtroLimparBotao.hidden = true;
+        const fecharFiltroDrawer = () => {
+          filtroOverlay.classList.remove('is-open');
+          container.classList.remove('no-scroll');
+          document.removeEventListener('keydown', trapDoDrawer);
+          ultimoFoco?.focus();
         };
 
-        filtroCampoSelect.addEventListener('change', () => {
-          const field = camposFiltraveis.find((item) => item.key === filtroCampoSelect.value);
-          desativarFiltro();
-
-          if (!field) {
-            limparValorDoFiltro();
-            aplicarFiltro();
+        const trapDoDrawer = (event) => {
+          if (event.key === 'Escape') {
+            event.preventDefault();
+            fecharFiltroDrawer();
             return;
           }
+          if (event.key !== 'Tab') {
+            return;
+          }
+          const focaveis = Array.from(
+            drawer.querySelectorAll('button, input, select, textarea, a[href]')
+          ).filter((el) => !el.disabled && el.offsetParent !== null);
+          if (focaveis.length === 0) {
+            return;
+          }
+          const primeiro = focaveis[0];
+          const ultimo = focaveis[focaveis.length - 1];
+          if (event.shiftKey && document.activeElement === primeiro) {
+            event.preventDefault();
+            ultimo.focus();
+          } else if (!event.shiftKey && document.activeElement === ultimo) {
+            event.preventDefault();
+            primeiro.focus();
+          }
+        };
 
-          const opcoesHtml = field.options
-            .map((opcao) => `<option value="${escapeHtml(opcao)}">${escapeHtml(opcao)}</option>`)
-            .join('');
-          filtroValorSelect.innerHTML = `<option value="">Selecione o valor</option>${opcoesHtml}`;
-          filtroValorSelect.disabled = false;
-          aplicarFiltro();
+        const abrirFiltroDrawer = () => {
+          ultimoFoco = document.activeElement;
+          filtroDraft = new Map();
+          filtroAplicado.forEach((valores, chave) => filtroDraft.set(chave, new Set(valores)));
+          redesenharCorpo();
+          filtroOverlay.classList.add('is-open');
+          container.classList.add('no-scroll');
+          document.addEventListener('keydown', trapDoDrawer);
+          botaoFechar.focus();
+        };
+
+        filtroBotao.addEventListener('click', abrirFiltroDrawer);
+        botaoFechar.addEventListener('click', fecharFiltroDrawer);
+        botaoCancelar.addEventListener('click', fecharFiltroDrawer);
+
+        // Só fora do próprio drawer (clicar dentro nunca deve fechar).
+        filtroOverlay.addEventListener('click', (event) => {
+          if (event.target === filtroOverlay) {
+            fecharFiltroDrawer();
+          }
         });
 
-        filtroValorSelect.addEventListener('change', () => {
-          const campo = filtroCampoSelect.value;
-          const valor = filtroValorSelect.value;
-          filtroAtivo = campo && valor ? { campo, valor } : null;
-          filtroBotao.classList.toggle('is-active', !!filtroAtivo);
-          filtroLimparBotao.hidden = !filtroAtivo;
-          aplicarFiltro();
+        corpo.addEventListener('change', (event) => {
+          const select = event.target.closest('.filtro-campo__select');
+          if (!select || select.value === '') {
+            return;
+          }
+          const chave = select.dataset.campo;
+          const field = camposFiltraveis.find((item) => item.key === chave);
+          const jaEscolhidos = filtroDraft.get(chave) || new Set();
+          const restantes = valoresDisponiveisDoCampo(field).filter(
+            (item) => !jaEscolhidos.has(item.valor)
+          );
+          const escolhido = restantes[Number(select.value)];
+          if (!escolhido) {
+            return;
+          }
+          if (!filtroDraft.has(chave)) {
+            filtroDraft.set(chave, new Set());
+          }
+          filtroDraft.get(chave).add(escolhido.valor);
+          redesenharCorpo();
         });
 
-        filtroLimparBotao.addEventListener('click', () => {
-          filtroCampoSelect.value = '';
-          limparValorDoFiltro();
-          desativarFiltro();
+        corpo.addEventListener('click', (event) => {
+          const botao = event.target.closest('.filtro-flag__remover');
+          if (!botao) {
+            return;
+          }
+          filtroDraft.get(botao.dataset.campo)?.delete(botao.dataset.valor);
+          redesenharCorpo();
+        });
+
+        botaoFiltrar.addEventListener('click', () => {
+          filtroAplicado = new Map(
+            [...filtroDraft].filter(([, valores]) => valores.size > 0).map(([k, v]) => [k, v])
+          );
+          filtroBotao.classList.toggle('is-active', filtroAplicado.size > 0);
           aplicarFiltro();
+          fecharFiltroDrawer();
         });
       }
 

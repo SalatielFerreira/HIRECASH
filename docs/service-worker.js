@@ -5,7 +5,7 @@
  *
  * IMPORTANTE: incremente CACHE_VERSION a cada release para invalidar o cache antigo.
  */
-const CACHE_VERSION = 'hirecash-v38';
+const CACHE_VERSION = 'hirecash-v39';
 
 const APP_SHELL = [
   './',
@@ -60,6 +60,10 @@ const APP_SHELL = [
   './scripts/utils/format.js',
   './scripts/utils/logger.js',
   './scripts/utils/theme.js',
+  // Logo da barra superior — aparece em toda página, então entra no app
+  // shell como HTML/CSS/JS.
+  './images/logo-hirecash.png',
+
   // Idem para os ícones: favicon e apple-touch saem do index.html, e os
   // 192/512 do manifest — todos referenciados por caminho próprio.
   './icons/icon.svg',

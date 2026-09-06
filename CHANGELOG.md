@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.29.0] - 2026-09-06
+
+### Alterado
+
+- **Logo da barra superior trocado pela arte de marca oficial** (fornecida pelo usuário): o "S" com os dois pontos de acento e o "HireCash" (Hire branco, Cash roxo em degradê), recortados sem a régua "Talentos • Comissões • Resultados" — não cabia com texto legível na altura da barra. Substitui o emblema + texto HTML que existiam antes.
+
 ## [0.28.0] - 2026-09-06
 
 ### Alterado

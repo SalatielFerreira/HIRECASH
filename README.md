@@ -61,6 +61,7 @@ HIRECASH/
 │   ├── manifest.webmanifest
 │   ├── service-worker.js
 │   ├── icons/                     # Ícones do PWA (icon.svg é a fonte)
+│   ├── images/                    # logo-hirecash.png (logo da barra superior)
 │   ├── templates/                 # relatorio-modelo.xlsx (visual do Relatório, gerado por script)
 │   ├── vendor/                    # exceljs.min.js (vendorizado, só usado no Relatório)
 │   ├── styles/

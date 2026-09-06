@@ -13,32 +13,12 @@
   box-shadow: var(--shadow-md);
 }
 
-.topbar__badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.16);
-  flex-shrink: 0;
-}
-
-.topbar__badge svg {
-  width: 20px;
-  height: 20px;
-  stroke: var(--color-text-inverse);
-}
-
-/* Quase o dobro do tamanho anterior (17px). Cabe nos 60px da barra:
-   30px × 1.15 de entrelinha ≈ 35px. */
 .topbar__title {
-  font-size: 30px;
-  font-weight: 700;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
+  margin: 0;
+  line-height: 0;
 }
 
-.topbar__title span {
-  color: #a7f3d0;
+.topbar__logo {
+  height: 34px;
+  width: auto;
 }

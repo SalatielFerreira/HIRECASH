@@ -51,10 +51,9 @@
 
   /* Layout */
 
-  /* 72px: acompanha o "HireCash" maior (ver .topbar__wordmark em
-     topbar.css), que cresceu pra ficar do mesmo comprimento da régua
-     "Talentos · Comissões · Resultados" abaixo dele. */
-  --topbar-height: 72px;
+  /* 48px: acompanha o tamanho da logo (S + "HireCash" + régua) em
+     topbar.css, reduzido a 2/3 do que era. */
+  --topbar-height: 48px;
   --bottomnav-height: 76px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);

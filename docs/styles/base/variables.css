@@ -51,10 +51,10 @@
 
   /* Layout */
 
-  /* 64px: a régua "Talentos · Comissões · Resultados" agora é texto de
-     verdade (não faz mais parte de uma imagem só), então não precisa
-     mais da altura extra só pra ficar legível — ver topbar.css. */
-  --topbar-height: 64px;
+  /* 72px: acompanha o "HireCash" maior (ver .topbar__wordmark em
+     topbar.css), que cresceu pra ficar do mesmo comprimento da régua
+     "Talentos · Comissões · Resultados" abaixo dele. */
+  --topbar-height: 72px;
   --bottomnav-height: 76px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);

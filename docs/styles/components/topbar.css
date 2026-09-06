@@ -26,19 +26,20 @@
 }
 
 .topbar__logo-mark {
-  height: 50px;
+  height: 60.5px;
   width: auto;
 }
 
 .topbar__wordmark-group {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 2px;
 }
 
 .topbar__wordmark {
   margin: 0;
-  font-size: 34px;
+  font-size: 45px;
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.02em;

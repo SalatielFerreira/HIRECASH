@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.32.1] - 2026-09-06
+
+### Corrigido
+
+- **"HireCash" agora fica de verdade do mesmo comprimento da régua** "Talentos · Comissões · Resultados" na barra superior (45px, era 34px) — as duas linhas eram forçadas a uma largura idêntica por um comportamento padrão do flexbox (`align-items: stretch`), então pareciam já alinhadas mas não estavam: era só a régua "esticando" o HireCash até o tamanho dela, sem a fonte realmente crescer. Corrigido para cada linha usar sua largura de verdade, e só então ajustado o tamanho de "HireCash" para bater com a régua. Altura do "S" e da barra superior ajustadas para acompanhar.
+
 ## [0.32.0] - 2026-09-06
 
 ### Alterado

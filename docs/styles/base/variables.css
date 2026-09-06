@@ -45,7 +45,11 @@
   --space-6: 32px;
 
   /* Layout */
-  --topbar-height: 60px;
+
+  /* 88px (era 60px): a logo real tem a régua "Talentos · Comissões ·
+     Resultados" embaixo do texto — precisa dessa altura pra ficar
+     legível, não só decorativa. */
+  --topbar-height: 88px;
   --bottomnav-height: 76px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);

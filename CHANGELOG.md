@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.29.1] - 2026-09-06
+
+### Alterado
+
+- **Régua "Talentos · Comissões · Resultados" de volta na logo da barra superior** — fazia parte da imagem original e tinha ficado de fora na entrega anterior. Para ela ficar legível (não só decorativa), a barra superior cresceu de 60px para 88px de altura.
+
 ## [0.29.0] - 2026-09-06
 
 ### Alterado

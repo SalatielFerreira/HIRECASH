@@ -5,7 +5,7 @@
  *
  * IMPORTANTE: incremente CACHE_VERSION a cada release para invalidar o cache antigo.
  */
-const CACHE_VERSION = 'hirecash-v36';
+const CACHE_VERSION = 'hirecash-v37';
 
 const APP_SHELL = [
   './',
@@ -69,6 +69,15 @@ const APP_SHELL = [
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',
   './icons/icon-maskable-512.png',
+
+  // Modelo do Relatório: pequeno, então entra no app shell como o resto.
+  // O gerador de .xlsx (./vendor/exceljs.min.js, ~1 MB) fica DE FORA de
+  // propósito — só quem realmente usa a página baixa, e o fetch handler
+  // abaixo já cacheia sozinho no primeiro uso (fica sujeito a baixar de
+  // novo depois de um CACHE_VERSION novo, diferente do app shell, que é
+  // sempre re-populado inteiro — troca aceitável por não pesar o
+  // primeiro carregamento de quem nunca usa Relatório).
+  './templates/relatorio-modelo.xlsx',
 ];
 
 // IMPORTANTE: sem self.skipWaiting() aqui de propósito. Numa atualização

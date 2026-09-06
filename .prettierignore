@@ -1,5 +1,7 @@
 node_modules/
 docs/icons/*.png
 docs/icons/*.ico
+docs/vendor/
+docs/templates/*.xlsx
 logs/
 CHANGELOG.md

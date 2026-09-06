@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.27.0] - 2026-09-06
+
+### Alterado
+
+- **Relatório agora exporta `.xlsx` de verdade, com um modelo visual próprio** — em vez do `.csv` da entrega anterior. Título, cabeçalho colorido, linhas zebradas e quebra de linha na Observação vêm de um modelo em branco (`docs/templates/relatorio-modelo.xlsx`, gerado por `npm run generate:relatorio-modelo`); o app só abre esse arquivo e escreve os dados por baixo. Moeda e data são gravadas como número/data de verdade (com o formato do Excel aplicado), não texto — dá pra somar e ordenar direto na planilha. Usa [ExcelJS](https://github.com/exceljs/exceljs) vendorizado localmente (`docs/vendor/`, sem CDN), carregado só quando alguém gera um relatório.
+
 ## [0.26.0] - 2026-09-06
 
 ### Adicionado

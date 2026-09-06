@@ -13,6 +13,7 @@ Sem login — o app abre direto no Dashboard e pode ser instalado como aplicativ
 - [Como rodar localmente](#como-rodar-localmente)
 - [Qualidade de código](#qualidade-de-código)
 - [Ícones do PWA](#ícones-do-pwa)
+- [Modelo do Relatório](#modelo-do-relatório)
 - [Deploy (GitHub Pages)](#deploy-github-pages)
 - [Logs](#logs)
 - [Versionamento](#versionamento)
@@ -39,14 +40,16 @@ Sem login — o app abre direto no Dashboard e pode ser instalado como aplicativ
 - **Layout de tela cheia e responsivo**: o app ocupa a tela inteira em qualquer aparelho (celular, tablet, computador), sem molduras — importante para telas com bastante dado, como a tabela de candidatos.
 - **Comissão**: a página lista somente os candidatos com status **Contratado** e fonte diferente de **Indicação** (indicação não gera comissão), na mesma estrutura da de Candidato (busca + tabela), sem botão de adicionar, ordenada pela **data de contratação** — mais recentes no topo, e quem ainda não teve a data lançada fica acima de todos. Marcar um candidato como "Contratado" preenche a etapa dele como "Em atividade" automaticamente — a regra fica em `candidatos.service.js`, então vale tanto no cadastro pelo modal quanto na edição direto na tabela. O botão **Baixa** (redondo, no fim da linha, no mesmo estilo do botão de adicionar) atende o caso do contratado sair antes de fechar os meses: com confirmação, ele sai da lista e passa a status "Sem interesse" e etapa "Baixa" — o Status da vaga não muda: fica como estava até um novo contratado fechá-la de novo, ou até ser reaberto à mão. "Em atividade" e "Baixa" não são opções escolhíveis na lista de Etapa — o app as atribui sozinho. Ali se lança a **Contratação** (data, digitada por extenso no formato dd/mm/aaaa ou escolhida no ícone de calendário ao lado) e o **Nível** (N1–N4); a **Comissão** é calculada e mostrada em duas parcelas rotuladas **P1** e **P2** — R$ 100,00 no dia 15 do mês seguinte à contratação e o restante do valor do nível no dia 15 do mês seguinte a esse (N1 R$ 100 · N2 R$ 300 · N3 R$ 500 · N4 R$ 700; no N1 a P2 fica em R$ 0,00).
 - **Comissão prevista (Dashboard)**: soma, mês a mês, as parcelas (P1/P2) de todos os contratados que ainda não venceram — a partir de hoje, sem contar o que já passou —, para saber quanto vem pela frente e em quais meses.
-- **Relatório**: escolhe os filtros (mesmo campo + valores em uso da coluna de filtro do Candidato, um ou mais valores por campo) e clica em "Gerar Excel" para baixar um `.csv` com os candidatos encontrados — abre direto no Excel, acentuação correta, moeda e data já formatadas como no app. Além dos campos filtráveis, a exportação traz Observação, Contratação, Nível e uma coluna de Comissão total (soma de P1 + P2). Uma contagem ao lado do botão mostra quantos candidatos serão exportados antes de gerar o arquivo; sem nenhum filtro escolhido, sai todo mundo.
+- **Relatório**: escolhe os filtros (mesmo campo + valores em uso da coluna de filtro do Candidato, um ou mais valores por campo) e clica em "Gerar Excel" para baixar um `.xlsx` de verdade com os candidatos encontrados — título, cabeçalho colorido, linhas zebradas, moeda e data como tipos nativos do Excel (dá pra somar/ordenar direto, não é texto formatado) e coluna de Observação com quebra de linha. O visual vem de um modelo próprio (veja [Modelo do Relatório](#modelo-do-relatório)), preenchido na hora com os dados. Além dos campos filtráveis, a exportação traz Observação, Contratação, Nível e uma coluna de Comissão total (soma de P1 + P2). Uma contagem ao lado do botão mostra quantos candidatos serão exportados antes de gerar o arquivo; sem nenhum filtro escolhido, sai todo mundo.
 - **Backup dos candidatos**: em Configuração, botões de **Exportar** (folha de compartilhamento no celular, "Salvar como" no computador) e **Importar** (explorador de arquivos), gerando um `.json`. Como os dados moram no `localStorage` do navegador, esse arquivo é a rede de segurança contra limpar os dados do navegador ou trocar de aparelho. A importação nunca apaga: casa pelo `id`, atualizando quem já existe e acrescentando o resto.
 - **Versão visível**: nome do app e número da versão aparecem centralizados no rodapé da página de Configuração, atualizados a cada entrega (veja [Versionamento](#versionamento)).
 
 ## Stack
 
 Vanilla **HTML / CSS / JavaScript** (sem framework, sem etapa de build), hospedado gratuitamente em **GitHub Pages** (Deploy from a branch, pasta `/docs`).
-O `npm` é usado apenas como ferramentas de apoio ao desenvolvimento (lint, formatação, servidor local e geração de ícones) — o site final é servido estaticamente a partir de `docs/`.
+O `npm` é usado apenas como ferramentas de apoio ao desenvolvimento (lint, formatação, servidor local e geração de ícones/modelo) — o site final é servido estaticamente a partir de `docs/`.
+
+Única exceção à regra de "zero dependências": a página Relatório carrega [ExcelJS](https://github.com/exceljs/exceljs) (`docs/vendor/exceljs.min.js`, vendorizado — sem CDN, funciona offline) só quando alguém gera um arquivo, para escrever um `.xlsx` de verdade com formatação.
 
 ## Estrutura de pastas
 
@@ -58,6 +61,8 @@ HIRECASH/
 │   ├── manifest.webmanifest
 │   ├── service-worker.js
 │   ├── icons/                     # Ícones do PWA (icon.svg é a fonte)
+│   ├── templates/                 # relatorio-modelo.xlsx (visual do Relatório, gerado por script)
+│   ├── vendor/                    # exceljs.min.js (vendorizado, só usado no Relatório)
 │   ├── styles/
 │   │   ├── base/                  # reset, variáveis de design, tipografia
 │   │   ├── components/            # topbar, bottomnav, alert, banner, card...
@@ -73,7 +78,8 @@ HIRECASH/
 │       ├── utils/                 # logger.js, theme.js (tema), format.js (moeda/data/busca), arquivo.js (salvar arquivo gerado)
 │       └── version.js             # nome + versão exibidos em Configuração
 ├── scripts/                       # scripts Node de apoio (não vão para produção)
-│   └── generate-icons.js
+│   ├── generate-icons.js
+│   └── generate-relatorio-template.js
 ├── logs/                          # logs locais de desenvolvimento (git-ignorado)
 ├── CHANGELOG.md
 └── README.md
@@ -113,6 +119,16 @@ npm run generate:icons
 ```
 
 Rode este comando sempre que `icon.svg` for alterado, e commite os PNGs gerados.
+
+## Modelo do Relatório
+
+O visual do arquivo exportado em Relatório (título, cabeçalho, cores, largura de coluna) vem de um modelo em branco, `docs/templates/relatorio-modelo.xlsx` — o app só abre este arquivo e escreve as linhas de dado por baixo (`docs/scripts/pages/relatorio.js`). Pra mudar esse visual sem mexer no código que gera os dados:
+
+```bash
+npm run generate:relatorio-modelo
+```
+
+Isso reescreve `docs/templates/relatorio-modelo.xlsx` a partir de `scripts/generate-relatorio-template.js` — mude as cores/larguras/título ali, rode o comando e commite o `.xlsx` gerado. As linhas fixas que o script usa (título, "gerado em", cabeçalho) precisam bater com as constantes `LINHA_*` do topo de `relatorio.js`.
 
 ## Deploy (GitHub Pages)
 

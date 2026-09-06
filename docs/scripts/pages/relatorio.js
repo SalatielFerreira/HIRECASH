@@ -7,7 +7,19 @@ import {
 import { listCandidatos } from '../services/candidatos.service.js';
 import { calcularParcelas } from '../services/comissao.service.js';
 import { salvarArquivo } from '../utils/arquivo.js';
-import { formatCurrency, formatDate } from '../utils/format.js';
+
+const CAMINHO_VENDOR_EXCELJS = './vendor/exceljs.min.js';
+const CAMINHO_MODELO = './templates/relatorio-modelo.xlsx';
+const NOME_ABA_MODELO = 'Candidatos';
+
+// Linhas fixas do modelo (ver scripts/generate-relatorio-template.js) —
+// mudou lá, muda aqui também.
+const LINHA_GERADO_EM = 2;
+const LINHA_TOTAL = 3;
+const LINHA_PRIMEIRO_DADO = 6;
+
+const BORDA_CINZA = { argb: 'FFE5E7EB' };
+const FUNDO_ZEBRADO = { argb: 'FFF5F6FA' };
 
 const ICON_RELATORIO =
   '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6M9 9h1"/></svg>';
@@ -43,18 +55,6 @@ function comissaoTotal(candidato) {
   );
 }
 
-/** Texto de uma célula do relatório, no mesmo formato que aparece no app. */
-function valorExportado(field, candidato) {
-  const valor = candidato[field.key];
-  if (field.type === 'currency') {
-    return valor ? formatCurrency(valor) : '';
-  }
-  if (field.type === 'date') {
-    return formatDate(valor) || '';
-  }
-  return valor ?? '';
-}
-
 /** Candidatos que atendem a todos os campos com filtro ativo (E entre
  *  campos diferentes, OU entre valores escolhidos dentro do mesmo campo). */
 function candidatosFiltrados(selecoes) {
@@ -68,32 +68,125 @@ function candidatosFiltrados(selecoes) {
   );
 }
 
-/** Uma linha de CSV, com aspas em todo campo (escapando aspas internas). */
-function linhaCsv(valores) {
-  return valores.map((valor) => `"${String(valor ?? '').replaceAll('"', '""')}"`).join(';');
-}
-
-function gerarCsv(candidatos) {
-  const campos = CAMPOS_EXPORTACAO.map(campo);
-  const cabecalho = [...campos.map((field) => field.header || field.label), 'Comissão total'];
-  const linhas = candidatos.map((candidato) =>
-    linhaCsv([
-      ...campos.map((field) => valorExportado(field, candidato)),
-      formatCurrency(comissaoTotal(candidato)),
-    ])
-  );
-  // BOM no início: sem ele, o Excel do Windows abre acentos trocados
-  // (lê o arquivo como se fosse da codificação padrão do sistema).
-  const BOM = '﻿';
-  return BOM + [linhaCsv(cabecalho), ...linhas].join('\r\n');
-}
-
 function nomeDoArquivo() {
-  return `hirecash-relatorio-${new Date().toISOString().slice(0, 10)}.csv`;
+  return `hirecash-relatorio-${new Date().toISOString().slice(0, 10)}.xlsx`;
 }
 
 function plural(quantidade, singular, pluralForma) {
   return `${quantidade} ${quantidade === 1 ? singular : pluralForma}`;
+}
+
+/** "dd/mm/aaaa às hh:mm" no fuso local — igual ao resto do app, na mão,
+ *  pra não cair na armadilha de fuso do `toLocaleString`/ISO em UTC. */
+function agoraPorExtenso() {
+  const data = new Date();
+  const dia = String(data.getDate()).padStart(2, '0');
+  const mes = String(data.getMonth() + 1).padStart(2, '0');
+  const hora = String(data.getHours()).padStart(2, '0');
+  const minuto = String(data.getMinutes()).padStart(2, '0');
+  return `${dia}/${mes}/${data.getFullYear()} às ${hora}:${minuto}`;
+}
+
+let exceljsPromise = null;
+
+/** Carrega o gerador de .xlsx só quando alguém realmente for gerar um
+ *  relatório — evita baixar ~1 MB à toa pra quem nunca usa a página. */
+function carregarExcelJS() {
+  if (window.ExcelJS) {
+    return Promise.resolve(window.ExcelJS);
+  }
+  if (!exceljsPromise) {
+    exceljsPromise = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = CAMINHO_VENDOR_EXCELJS;
+      script.onload = () => resolve(window.ExcelJS);
+      script.onerror = () => {
+        exceljsPromise = null;
+        reject(new Error('Não foi possível carregar o gerador de planilhas.'));
+      };
+      document.head.appendChild(script);
+    });
+  }
+  return exceljsPromise;
+}
+
+/** Grava o valor certo na célula (número/data de verdade, não texto —
+ *  assim dá pra somar e ordenar direto no Excel) e o formato de exibição. */
+function preencherCelula(celula, field, candidato) {
+  const valor = candidato[field.key];
+
+  if (field.type === 'currency') {
+    celula.value = valor ? valor / 100 : 0;
+    celula.numFmt = '"R$" #,##0.00';
+    return;
+  }
+
+  if (field.type === 'date') {
+    if (valor) {
+      const [ano, mes, dia] = valor.split('-').map(Number);
+      celula.value = new Date(ano, mes - 1, dia);
+      celula.numFmt = 'dd/mm/yyyy';
+    }
+    return;
+  }
+
+  celula.value = valor ?? '';
+}
+
+// Índice (1-based) da coluna Observação dentro de CAMPOS_EXPORTACAO —
+// é a única com texto livre longo o bastante pra valer a pena quebrar linha.
+const COLUNA_OBSERVACAO = CAMPOS_EXPORTACAO.indexOf('observacao') + 1;
+
+function estilizarCelulaDeDado(celula, colIndice, zebrada) {
+  celula.border = {
+    top: { style: 'thin', color: BORDA_CINZA },
+    bottom: { style: 'thin', color: BORDA_CINZA },
+    left: { style: 'thin', color: BORDA_CINZA },
+    right: { style: 'thin', color: BORDA_CINZA },
+  };
+  celula.alignment = { vertical: 'top', wrapText: colIndice === COLUNA_OBSERVACAO };
+  if (zebrada) {
+    celula.fill = { type: 'pattern', pattern: 'solid', fgColor: FUNDO_ZEBRADO };
+  }
+}
+
+/** Abre o modelo (título e cabeçalho já prontos) e escreve por baixo só
+ *  as linhas de dado — devolve o .xlsx pronto como ArrayBuffer. */
+async function gerarXlsx(candidatos) {
+  const ExcelJS = await carregarExcelJS();
+
+  const resposta = await fetch(CAMINHO_MODELO);
+  if (!resposta.ok) {
+    throw new Error('Modelo do relatório não encontrado.');
+  }
+
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(await resposta.arrayBuffer());
+  const sheet = workbook.getWorksheet(NOME_ABA_MODELO);
+
+  sheet.getCell(LINHA_GERADO_EM, 1).value = `Gerado em: ${agoraPorExtenso()}`;
+  sheet.getCell(LINHA_TOTAL, 1).value =
+    `Total: ${plural(candidatos.length, 'candidato', 'candidatos')}`;
+
+  const campos = CAMPOS_EXPORTACAO.map(campo);
+
+  candidatos.forEach((candidato, indice) => {
+    const linha = sheet.getRow(LINHA_PRIMEIRO_DADO + indice);
+    const zebrada = indice % 2 === 1;
+
+    campos.forEach((field, indiceColuna) => {
+      const celula = linha.getCell(indiceColuna + 1);
+      preencherCelula(celula, field, candidato);
+      estilizarCelulaDeDado(celula, indiceColuna + 1, zebrada);
+    });
+
+    const celulaComissao = linha.getCell(campos.length + 1);
+    celulaComissao.value = comissaoTotal(candidato) / 100;
+    celulaComissao.numFmt = '"R$" #,##0.00';
+    estilizarCelulaDeDado(celulaComissao, campos.length + 1, zebrada);
+  });
+
+  return workbook.xlsx.writeBuffer();
 }
 
 export const relatorioPage = {
@@ -191,10 +284,12 @@ export const relatorioPage = {
       }
 
       const nome = nomeDoArquivo();
+      botaoGerar.disabled = true;
 
       try {
-        await salvarArquivo(gerarCsv(candidatos), nome, {
-          mime: 'text/csv',
+        const arquivo = await gerarXlsx(candidatos);
+        await salvarArquivo(arquivo, nome, {
+          mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
           descricao: 'Relatório HireCash',
         });
         showAlert({
@@ -212,6 +307,8 @@ export const relatorioPage = {
           title: 'Não foi possível gerar o relatório',
           message: 'Tente novamente. Se persistir, use outro navegador.',
         });
+      } finally {
+        botaoGerar.disabled = candidatosFiltrados(selecoes).length === 0;
       }
     });
 

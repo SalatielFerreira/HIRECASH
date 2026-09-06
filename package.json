@@ -1,6 +1,6 @@
 {
   "name": "hirecash",
-  "version": "0.26.0",
+  "version": "0.27.0",
   "private": true,
   "description": "HireCash — PWA para gestão de candidatos, dashboard e comissões.",
   "author": "Salatiel Ferreira",
@@ -13,15 +13,17 @@
     "lint:all": "npm run lint && npm run lint:css",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "generate:icons": "node scripts/generate-icons.js"
+    "generate:icons": "node scripts/generate-icons.js",
+    "generate:relatorio-modelo": "node scripts/generate-relatorio-template.js"
   },
   "devDependencies": {
     "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "stylelint": "^16.9.0",
-    "stylelint-config-standard": "^36.0.1",
+    "exceljs": "^4.4.0",
     "live-server": "^1.2.2",
-    "sharp": "^0.33.5"
+    "prettier": "^3.3.3",
+    "sharp": "^0.33.5",
+    "stylelint": "^16.9.0",
+    "stylelint-config-standard": "^36.0.1"
   },
   "allowScripts": {
     "sharp@0.33.5": true

@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.35.1] - 2026-09-13
+
+### Corrigido
+
+- **Arrastar na tabela de candidatos rola só para o lado**, como pedido — a versão anterior também rolava a página pra cima/baixo junto; a rolagem vertical volta a depender só da barra de rolagem/roda do mouse.
+
 ## [0.35.0] - 2026-09-13
 
 ### Adicionado

@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.35.0] - 2026-09-13
+
+### Adicionado
+
+- **Clicar e arrastar com o mouse na tabela de candidatos** rola tanto para o lado (a própria tabela) quanto para cima/baixo (a página), sem depender só da barra de rolagem — vale para Candidato e Comissão, que compartilham a mesma tabela.
+
 ## [0.34.0] - 2026-09-06
 
 ### Alterado

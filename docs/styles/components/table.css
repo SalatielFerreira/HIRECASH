@@ -11,6 +11,19 @@
   scrollbar-color: color-mix(in srgb, var(--color-text-secondary) 45%, transparent) transparent;
 }
 
+/* Clicar e arrastar rola a tabela (horizontal) e a página (vertical) sem
+   depender só da barra de rolagem — ver arrastar-rolagem.js. */
+@media (hover: hover) and (pointer: fine) {
+  .data-table-scroll {
+    cursor: grab;
+  }
+}
+
+.data-table-scroll.is-arrastando {
+  cursor: grabbing;
+  user-select: none;
+}
+
 .data-table-scroll::-webkit-scrollbar {
   height: 10px;
 }

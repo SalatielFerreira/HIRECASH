@@ -6,6 +6,7 @@
  * cada página só declara quais colunas quer e quais delas são editáveis.
  */
 import { showAlert } from './alert.js';
+import { ativarArrastarParaRolar } from '../utils/arrastar-rolagem.js';
 import { chaveVaga, listCandidatos, updateCandidato } from '../services/candidatos.service.js';
 import { calcularParcelas, NIVEL_OPTIONS } from '../services/comissao.service.js';
 import { resolverVagaPorCodigo } from '../services/vagas.service.js';
@@ -689,6 +690,11 @@ export function criarTabelaCandidatos({
       const tbody = container.querySelector('#candidatos-tbody');
       if (!tbody) {
         return;
+      }
+
+      const scrollWrapper = container.querySelector('.data-table-scroll');
+      if (scrollWrapper) {
+        ativarArrastarParaRolar(scrollWrapper);
       }
 
       if (acao && onAcao) {

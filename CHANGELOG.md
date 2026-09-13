@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.35.2] - 2026-09-13
+
+### Corrigido
+
+- **Espaço entre "Cancelar" e "Filtrar"** no rodapé do filtro da página de Candidato — os botões estavam colados um no outro.
+
 ## [0.35.1] - 2026-09-13
 
 ### Corrigido

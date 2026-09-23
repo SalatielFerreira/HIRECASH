@@ -217,13 +217,20 @@ export function darBaixa(id) {
   });
 }
 
-/** Conteúdo do arquivo de backup (exportação). */
-export function buildBackup() {
+/**
+ * Conteúdo do arquivo de backup (exportação).
+ *
+ * Recebe as vagas de fora (em vez de importar `vagas.service.js` aqui)
+ * pra não criar um import circular — esse serviço já importa daqui
+ * (`sincronizarVagaEmCandidatos`).
+ */
+export function buildBackup(vagas = []) {
   return {
     formato: BACKUP_FORMAT,
     versao: APP_VERSION,
     exportadoEm: new Date().toISOString(),
     candidatos: listCandidatos(),
+    vagas,
   };
 }
 

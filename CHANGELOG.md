@@ -7,6 +7,19 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.36.0] - 2026-09-23
+
+### Adicionado
+
+- **Botão de limpar filtro**: com um filtro aplicado, um "X" aparece sobre o botão de funil (fora da coluna) e clicar nele limpa na hora, sem precisar abrir a coluna; um botão "Limpar filtro" equivalente foi adicionado no rodapé da própria coluna.
+- **Candidato cadastrado com um filtro ativo não é escondido por ele**: aparece normalmente na tabela, e só passa a valer a regra do filtro quando ele é aplicado de novo (clicando em "Filtrar").
+- **Esc fecha qualquer janela aberta** (modal de candidato, modal de vagas, coluna de filtro, confirmação) — antes, o modal de candidato e o de vagas só fechavam pelo "X".
+- **Backup exporta e importa as vagas cadastradas** (código + nome) junto com os candidatos, não só os candidatos.
+
+### Corrigido
+
+- Adicionar um candidato enquanto um filtro estava aplicado fazia o filtro inteiro ser perdido (voltava tudo a aparecer) — agora ele continua aplicado.
+
 ## [0.35.2] - 2026-09-13
 
 ### Corrigido

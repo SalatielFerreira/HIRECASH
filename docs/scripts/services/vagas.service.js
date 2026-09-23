@@ -112,3 +112,58 @@ export function deleteVaga(id) {
     listVagas().filter((vaga) => vaga.id !== id)
   );
 }
+
+function parseVagas(lista) {
+  if (!Array.isArray(lista)) {
+    return null;
+  }
+  const todosObjetos = lista.every(
+    (item) => item !== null && typeof item === 'object' && !Array.isArray(item)
+  );
+  return todosObjetos ? lista : null;
+}
+
+/**
+ * Importa vagas de um backup, casando por `id` (ou, na falta dele, pelo
+ * `código`) — igual a `importCandidatos`, nunca apaga o que já existe, só
+ * acrescenta ou atualiza. Retorna `{ novas, atualizadas }`, ou `null` se
+ * a lista não for reconhecida.
+ */
+export function importVagas(lista) {
+  const itens = parseVagas(lista);
+  if (!itens) {
+    return null;
+  }
+
+  const vagas = listVagas();
+  const indicePorId = new Map(vagas.map((vaga, index) => [vaga.id, index]));
+  const indicePorCodigo = new Map(vagas.map((vaga, index) => [vaga.codigo.toLowerCase(), index]));
+
+  let novas = 0;
+  let atualizadas = 0;
+
+  itens.forEach((item) => {
+    const codigo = limpar(item.codigo);
+    const nome = limpar(item.nome);
+    if (!codigo || !nome) {
+      return;
+    }
+
+    const id = typeof item.id === 'string' && item.id ? item.id : crypto.randomUUID();
+    const index = indicePorId.get(id) ?? indicePorCodigo.get(codigo.toLowerCase());
+
+    if (index === undefined) {
+      const nova = { id, codigo, nome, criadoEm: item.criadoEm || new Date().toISOString() };
+      vagas.push(nova);
+      indicePorId.set(id, vagas.length - 1);
+      indicePorCodigo.set(codigo.toLowerCase(), vagas.length - 1);
+      novas += 1;
+    } else {
+      vagas[index] = { ...vagas[index], codigo, nome };
+      atualizadas += 1;
+    }
+  });
+
+  storage.set(KEY, vagas);
+  return { novas, atualizadas };
+}

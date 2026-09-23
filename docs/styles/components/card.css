@@ -69,6 +69,21 @@
   color: var(--color-text-inverse);
 }
 
+/* Ação de baixa ênfase (ex.: "Limpar filtro") — sem fundo nem borda,
+   só o texto, pra não competir com os botões principais ao lado. */
+.btn--ghost {
+  background: transparent;
+  color: var(--color-text-secondary);
+  padding-left: var(--space-2);
+  padding-right: var(--space-2);
+}
+
+.btn--ghost svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+}
+
 .btn-row {
   display: flex;
   flex-wrap: wrap;
@@ -83,6 +98,10 @@
 
   .btn--outline:hover {
     background: var(--color-bg);
+  }
+
+  .btn--ghost:hover {
+    color: var(--color-text-primary);
   }
 
   .btn--accent:hover {
@@ -129,12 +148,9 @@
   box-shadow: none;
 }
 
-/* Indica que um filtro está aplicado (ex.: botão de filtrar a tabela). */
-.icon-button--outline.is-active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--color-text-inverse);
-}
+/* Filtro aplicado: quem indica isso é o badge de limpar (X) sobre o
+   botão, então "is-active" não precisa mudar a cor dele — ver
+   .filtro-limpar-badge em table.css. */
 
 @media (hover: hover) and (pointer: fine) {
   .icon-button--outline:hover {

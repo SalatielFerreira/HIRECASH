@@ -614,12 +614,25 @@ export function criarTabelaCandidatos({
       .join('');
   }
 
+  // Estado do filtro por campo: vive aqui (fora do init) porque adicionar
+  // um candidato reconstrói a página inteira, e por isso chama init() de
+  // novo — sem isso, o filtro aplicado se perderia a cada candidato novo.
+  // Mapa campo → conjunto de valores escolhidos. Só o que está aqui
+  // filtra de verdade; a coluna lateral edita um rascunho à parte (ver
+  // abrirFiltroDrawer) até o usuário confirmar em "Filtrar".
+  let filtroAplicado = new Map();
+
+  // IDs que existiam no momento do último "Filtrar" — um candidato
+  // cadastrado depois disso aparece normalmente, mesmo com filtro ativo,
+  // até o usuário reabrir a coluna e clicar em "Filtrar" de novo.
+  let idsNoFiltro = null;
+
   return {
     render(candidatos) {
       const linhas = candidatos
         .map(
           (candidato) =>
-            `<tr data-busca="${escapeHtml(textoBusca(candidato))}">` +
+            `<tr data-id="${escapeHtml(candidato.id)}" data-busca="${escapeHtml(textoBusca(candidato))}">` +
             `${campos.map((field) => cellHtml(field, candidato)).join('')}` +
             `${acaoHtml(candidato)}</tr>`
         )
@@ -628,9 +641,14 @@ export function criarTabelaCandidatos({
       const filtroBotaoHtml =
         camposFiltraveis.length > 0
           ? `
-        <button type="button" class="icon-button icon-button--outline" id="btn-filtro" aria-label="Filtrar" title="Filtrar">
-          ${ICON_FILTER}
-        </button>`
+        <div class="filtro-botao-grupo">
+          <button type="button" class="icon-button icon-button--outline" id="btn-filtro" aria-label="Filtrar" title="Filtrar">
+            ${ICON_FILTER}
+          </button>
+          <button type="button" class="filtro-limpar-badge" id="btn-filtro-limpar" aria-label="Limpar filtro" title="Limpar filtro" hidden>
+            ${ICON_CLOSE}
+          </button>
+        </div>`
           : '';
 
       const filtroDrawerHtml =
@@ -645,9 +663,14 @@ export function criarTabelaCandidatos({
               </button>
             </div>
             <div class="modal__body" id="filtro-drawer-corpo"></div>
-            <div class="modal__footer">
-              <button type="button" class="btn btn--outline" id="filtro-drawer-cancelar">Cancelar</button>
-              <button type="button" class="btn btn--primary" id="filtro-drawer-filtrar">Filtrar</button>
+            <div class="modal__footer modal__footer--split">
+              <button type="button" class="btn btn--ghost" id="filtro-drawer-limpar">
+                ${ICON_CLOSE} Limpar filtro
+              </button>
+              <div class="filtro-drawer-footer-acoes">
+                <button type="button" class="btn btn--outline" id="filtro-drawer-cancelar">Cancelar</button>
+                <button type="button" class="btn btn--primary" id="filtro-drawer-filtrar">Filtrar</button>
+              </div>
             </div>
           </aside>
         </div>`
@@ -718,26 +741,27 @@ export function criarTabelaCandidatos({
       const filtroBotao = container.querySelector('#btn-filtro');
       const filtroOverlay = container.querySelector('#filtro-drawer-overlay');
 
-      // Mapa campo → conjunto de valores escolhidos. Só o que está aqui
-      // filtra de verdade; a coluna lateral edita um rascunho à parte
-      // (ver abrirFiltroDrawer) até o usuário confirmar em "Filtrar".
-      let filtroAplicado = new Map();
-
       function aplicarFiltro() {
         const termo = normalizar(searchInput.value.trim());
         let visiveis = 0;
 
         tbody.querySelectorAll('tr').forEach((row) => {
           const casaBusca = !termo || row.dataset.busca.includes(termo);
+          // Candidato cadastrado depois do último "Filtrar" não estava no
+          // grupo que o usuário filtrou — fica de fora da regra até ele
+          // reaplicar, mesmo com o filtro ainda ativo (ver idsNoFiltro).
+          const ehCandidatoNovo = idsNoFiltro !== null && !idsNoFiltro.has(row.dataset.id);
           let casaFiltro = true;
-          for (const [chave, valores] of filtroAplicado) {
-            if (valores.size === 0) {
-              continue;
-            }
-            const valorCelula = row.querySelector(`[data-field="${chave}"]`)?.dataset.valor ?? '';
-            if (!valores.has(valorCelula)) {
-              casaFiltro = false;
-              break;
+          if (!ehCandidatoNovo) {
+            for (const [chave, valores] of filtroAplicado) {
+              if (valores.size === 0) {
+                continue;
+              }
+              const valorCelula = row.querySelector(`[data-field="${chave}"]`)?.dataset.valor ?? '';
+              if (!valores.has(valorCelula)) {
+                casaFiltro = false;
+                break;
+              }
             }
           }
           const casa = casaBusca && casaFiltro;
@@ -752,10 +776,35 @@ export function criarTabelaCandidatos({
 
       searchInput.addEventListener('input', aplicarFiltro);
 
+      const filtroLimparBadge = container.querySelector('#btn-filtro-limpar');
+
+      /** Reflete filtroAplicado no visual do botão (badge de limpar + destaque). */
+      function atualizarBotaoFiltro() {
+        const ativo = filtroAplicado.size > 0;
+        filtroBotao?.classList.toggle('is-active', ativo);
+        if (filtroLimparBadge) {
+          filtroLimparBadge.hidden = !ativo;
+        }
+      }
+
+      /** Some com o filtro aplicado por completo — usado nos dois botões de limpar. */
+      function limparFiltro() {
+        filtroAplicado = new Map();
+        idsNoFiltro = null;
+        atualizarBotaoFiltro();
+        aplicarFiltro();
+      }
+
+      filtroLimparBadge?.addEventListener('click', (event) => {
+        event.stopPropagation();
+        limparFiltro();
+      });
+
       if (filtroBotao && filtroOverlay) {
         const drawer = filtroOverlay.querySelector('.filtro-drawer');
         const corpo = filtroOverlay.querySelector('#filtro-drawer-corpo');
         const botaoFechar = filtroOverlay.querySelector('#filtro-drawer-fechar');
+        const botaoLimparDrawer = filtroOverlay.querySelector('#filtro-drawer-limpar');
         const botaoCancelar = filtroOverlay.querySelector('#filtro-drawer-cancelar');
         const botaoFiltrar = filtroOverlay.querySelector('#filtro-drawer-filtrar');
 
@@ -858,11 +907,25 @@ export function criarTabelaCandidatos({
           filtroAplicado = new Map(
             [...filtroDraft].filter(([, valores]) => valores.size > 0).map(([k, v]) => [k, v])
           );
-          filtroBotao.classList.toggle('is-active', filtroAplicado.size > 0);
+          // A partir de agora, só quem já está listado entra na regra do
+          // filtro — candidato cadastrado depois disso ignora o filtro até
+          // o usuário voltar aqui e clicar em "Filtrar" de novo.
+          idsNoFiltro =
+            filtroAplicado.size > 0 ? new Set(listCandidatos().map((item) => item.id)) : null;
+          atualizarBotaoFiltro();
           aplicarFiltro();
           fecharFiltroDrawer();
         });
+
+        botaoLimparDrawer?.addEventListener('click', () => {
+          filtroDraft = new Map();
+          limparFiltro();
+          fecharFiltroDrawer();
+        });
       }
+
+      atualizarBotaoFiltro();
+      aplicarFiltro();
 
       // --- Edição inline ---------------------------------------------
       let editing = null;

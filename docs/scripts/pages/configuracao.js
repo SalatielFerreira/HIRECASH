@@ -1,6 +1,7 @@
 import { getTheme, toggleTheme } from '../utils/theme.js';
 import { showAlert } from '../components/alert.js';
 import { buildBackup, importCandidatos, listCandidatos } from '../services/candidatos.service.js';
+import { importVagas, listVagas } from '../services/vagas.service.js';
 import { logger } from '../utils/logger.js';
 import { salvarArquivo } from '../utils/arquivo.js';
 import { APP_NAME, APP_VERSION } from '../version.js';
@@ -147,13 +148,13 @@ export const configuracaoPage = {
     }
 
     exportButton.addEventListener('click', async () => {
-      const backup = buildBackup();
+      const backup = buildBackup(listVagas());
 
-      if (backup.candidatos.length === 0) {
+      if (backup.candidatos.length === 0 && backup.vagas.length === 0) {
         showAlert({
           type: 'warning',
           title: 'Nada para exportar',
-          message: 'Nenhum candidato cadastrado ainda.',
+          message: 'Nenhum candidato ou vaga cadastrado ainda.',
         });
         return;
       }
@@ -165,11 +166,14 @@ export const configuracaoPage = {
           mime: 'application/json',
           descricao: 'Backup HireCash',
         });
-        logger.info('backup', `Backup exportado (${backup.candidatos.length} candidatos)`);
+        logger.info(
+          'backup',
+          `Backup exportado (${backup.candidatos.length} candidatos, ${backup.vagas.length} vagas)`
+        );
         showAlert({
           type: 'success',
           title: 'Backup exportado',
-          message: `${plural(backup.candidatos.length, 'candidato salvo', 'candidatos salvos')} em ${nome}.`,
+          message: `${plural(backup.candidatos.length, 'candidato salvo', 'candidatos salvos')} e ${plural(backup.vagas.length, 'vaga salva', 'vagas salvas')} em ${nome}.`,
         });
       } catch (error) {
         // O usuário fechar o diálogo de salvar/compartilhar não é erro.
@@ -194,7 +198,8 @@ export const configuracaoPage = {
       }
 
       try {
-        const resultado = importCandidatos(JSON.parse(await arquivo.text()));
+        const payload = JSON.parse(await arquivo.text());
+        const resultado = importCandidatos(payload);
 
         if (!resultado) {
           showAlert({
@@ -205,12 +210,16 @@ export const configuracaoPage = {
           return;
         }
 
+        // Backups antigos (de antes das vagas entrarem no arquivo) não têm
+        // esse campo — nesse caso não há o que importar aqui.
+        const resultadoVagas = importVagas(payload?.vagas) || { novas: 0, atualizadas: 0 };
+
         atualizarContagem();
-        logger.info('backup', 'Backup importado', resultado);
+        logger.info('backup', 'Backup importado', { ...resultado, vagas: resultadoVagas });
         showAlert({
           type: 'success',
           title: 'Backup importado',
-          message: `${plural(resultado.novos, 'candidato novo', 'candidatos novos')} e ${plural(resultado.atualizados, 'atualizado', 'atualizados')}.`,
+          message: `${plural(resultado.novos, 'candidato novo', 'candidatos novos')} e ${plural(resultado.atualizados, 'atualizado', 'atualizados')}. ${plural(resultadoVagas.novas, 'vaga nova', 'vagas novas')} e ${plural(resultadoVagas.atualizadas, 'atualizada', 'atualizadas')}.`,
         });
       } catch (error) {
         logger.error('backup', 'Falha ao importar candidatos', error);

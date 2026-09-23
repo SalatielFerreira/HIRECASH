@@ -159,6 +159,48 @@
   color: var(--color-text-secondary);
 }
 
+/* Botão de filtro + badge de limpar (X) que aparece sobre ele quando há
+   um filtro aplicado — clicar no badge limpa na hora, sem abrir a coluna. */
+.filtro-botao-grupo {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.filtro-limpar-badge {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-bg);
+  background: var(--color-text-primary);
+  color: var(--color-surface);
+}
+
+.filtro-limpar-badge svg {
+  width: 10px;
+  height: 10px;
+  stroke: currentColor;
+  stroke-width: 3;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .filtro-limpar-badge:hover {
+    background: var(--color-text-secondary);
+  }
+}
+
+/* Rodapé do filtro: "Limpar filtro" à esquerda (ver .modal__footer--split
+   em modal.css), Cancelar/Filtrar agrupados à direita. */
+.filtro-drawer-footer-acoes {
+  display: flex;
+  gap: var(--space-3);
+}
+
 /*
  * Coluna de filtro: painel lateral que desliza da esquerda pra direita
  * (ver @keyframes filtro-drawer-in), com um bloco por campo — select pra

@@ -225,8 +225,13 @@ function renderVagasModal() {
 }
 
 /** Alterna Tab entre os elementos focáveis de um modal aberto. */
-function setupFocusTrap(overlay) {
+function setupFocusTrap(overlay, onEscape) {
   return function trap(event) {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      onEscape?.();
+      return;
+    }
     if (event.key !== 'Tab') {
       return;
     }
@@ -300,7 +305,7 @@ export const candidatoPage = {
     const openButton = container.querySelector('#btn-add-candidato');
     const closeButton = container.querySelector('#candidato-modal-close');
     const form = container.querySelector('#candidato-form');
-    const candidatoTrap = setupFocusTrap(overlay);
+    const candidatoTrap = setupFocusTrap(overlay, () => closeModal());
 
     let lastFocused = null;
 
@@ -322,8 +327,8 @@ export const candidatoPage = {
       container.querySelector('#f-vaga')?.focus();
     }
 
-    // Única forma de fechar o modal é pelo botão "X" — não fecha ao
-    // clicar fora nem com a tecla Esc, para não perder dados digitados.
+    // Fecha pelo "X" ou com Esc — clicar fora continua sem fechar, pra não
+    // perder dados digitados sem querer.
     function closeModal() {
       overlay.classList.remove('is-open');
       container.classList.remove('no-scroll');
@@ -445,7 +450,7 @@ export const candidatoPage = {
     const codigoVagaInput = container.querySelector('#f-codigo-vaga');
     const nomeVagaInput = container.querySelector('#f-nome-vaga');
     const vagasLista = container.querySelector('#vagas-lista');
-    const vagasTrap = setupFocusTrap(vagasOverlay);
+    const vagasTrap = setupFocusTrap(vagasOverlay, () => closeVagasModal());
 
     let vagasLastFocused = null;
 
@@ -457,9 +462,9 @@ export const candidatoPage = {
       codigoVagaInput.focus();
     }
 
-    // Mesmo funcionamento do modal de candidato: só fecha pelo "X". Ao
-    // fechar, a página é re-renderizada — uma vaga renomeada ou excluída
-    // aqui pode ter mudado nomes e status exibidos na tabela por trás.
+    // Fecha pelo "X" ou com Esc. Ao fechar, a página é re-renderizada —
+    // uma vaga renomeada ou excluída aqui pode ter mudado nomes e status
+    // exibidos na tabela por trás.
     function closeVagasModal() {
       vagasOverlay.classList.remove('is-open');
       container.classList.remove('no-scroll');

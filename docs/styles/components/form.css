@@ -71,22 +71,26 @@
 }
 
 /* Localização: estado (largura fixa) + cidade (o resto do espaço). Os
-   dois selects já herdam a aparência de ".field select" acima. */
+   dois campos já herdam a aparência de ".field input" acima — são
+   <input> com sugestão de <datalist>, não <select>, pra dar pra digitar
+   o nome e completar a partir das opções em uso. */
 .localizacao-campo {
   display: flex;
   gap: var(--space-2);
 }
 
-.localizacao-campo select:first-child {
+.localizacao-campo input:first-child {
   flex: 0 0 96px;
 }
 
-.localizacao-campo select:last-child {
+.localizacao-campo input:last-child {
   flex: 1 1 auto;
   min-width: 0;
 }
 
-.localizacao-campo select:disabled {
+/* O navegador esmaece input desabilitado por padrão — quase some no
+   fundo escuro do formulário. */
+.localizacao-campo input:disabled {
   opacity: 1;
   color: var(--color-text-secondary);
   cursor: not-allowed;

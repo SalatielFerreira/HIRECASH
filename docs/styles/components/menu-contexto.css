@@ -1,0 +1,48 @@
+/*
+ * Menu de contexto (botão direito do mouse) — ver menu-contexto.js.
+ * Posição em fixed, calculada em JS pra não vazar da tela.
+ */
+.menu-contexto {
+  position: fixed;
+  z-index: var(--z-modal);
+  display: flex;
+  flex-direction: column;
+  min-width: 170px;
+  padding: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  animation: menu-contexto-in var(--transition-fast) both;
+}
+
+@keyframes menu-contexto-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.menu-contexto__item {
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .menu-contexto__item:hover {
+    background: var(--color-bg);
+  }
+}
+
+.menu-contexto__item--perigo {
+  color: #dc2626;
+}

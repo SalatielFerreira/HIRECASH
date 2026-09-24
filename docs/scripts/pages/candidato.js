@@ -1,14 +1,16 @@
 import { showAlert } from '../components/alert.js';
 import { showConfirm } from '../components/confirm.js';
+import { abrirMenuContexto } from '../components/menu-contexto.js';
 import {
   CAMPOS,
   attachCurrencyMask,
   campo,
-  cidadeOptionsHtml,
+  cidadeDatalistHtml,
   criarTabelaCandidatos,
   ordenarPorVaga,
   parseValue,
-  ufOptionsHtml,
+  resolverUf,
+  ufDatalistHtml,
 } from '../components/candidatos-table.js';
 import { addCandidato, deleteCandidato, listCandidatos } from '../services/candidatos.service.js';
 import {
@@ -63,18 +65,7 @@ const COLUNAS = [
   'observacao',
 ];
 
-const tabela = criarTabelaCandidatos({
-  colunas: COLUNAS,
-  editaveis: COLUNAS,
-  filtro: true,
-  acao: {
-    header: 'Excluir',
-    rotulo: 'Excluir candidato',
-    icone: ICON_CLOSE,
-    // Mesmo modelo redondo do botão de adicionar, só que vermelho.
-    classe: 'icon-button icon-button--danger',
-  },
-});
+const tabela = criarTabelaCandidatos({ colunas: COLUNAS, editaveis: COLUNAS, filtro: true });
 
 function renderEmptyState() {
   return `
@@ -107,14 +98,16 @@ function modalField(key) {
   } else if (field.type === 'textarea') {
     control = `<textarea id="${id}" name="${key}" rows="3"></textarea>`;
   } else if (field.type === 'localizacao') {
-    // Escolher estado e depois cidade, em vez de digitar livre — o
-    // select de cidade carrega o "name" do campo: o valor de cada opção
-    // já é "Cidade - UF" (ver cidadeOptionsHtml), então o FormData do
+    // Digita o estado e a cidade, com sugestões de uma <datalist> — o
+    // campo de cidade carrega o "name" do campo: o valor de cada opção
+    // já é "Cidade - UF" (ver cidadeDatalistHtml), então o FormData do
     // formulário lê o texto certo sem precisar recompor nada no submit.
     control =
       `<div class="localizacao-campo">` +
-      `<select id="${id}-uf" aria-label="Estado">${ufOptionsHtml('')}</select>` +
-      `<select id="${id}" name="${key}" aria-label="Cidade" disabled>${cidadeOptionsHtml('')}</select>` +
+      `<input type="text" id="${id}-uf" list="${id}-ufs" aria-label="Estado" placeholder="Estado" autocomplete="off" />` +
+      `<input type="text" id="${id}" name="${key}" list="${id}-cidades" aria-label="Cidade" placeholder="Cidade" autocomplete="off" disabled />` +
+      `<datalist id="${id}-ufs">${ufDatalistHtml()}</datalist>` +
+      `<datalist id="${id}-cidades"></datalist>` +
       `</div>`;
   } else {
     const attrs = [
@@ -361,15 +354,19 @@ export const candidatoPage = {
       }
     });
 
-    // Localização: a cidade só existe depois de escolher o estado.
+    // Localização: a cidade só existe depois de completar um estado
+    // válido — digitando a sigla, o nome por extenso, ou escolhendo a
+    // sugestão da <datalist> (ver resolverUf).
     const localizacaoUf = container.querySelector('#f-localizacao-uf');
     const localizacaoCidade = container.querySelector('#f-localizacao');
-    if (localizacaoUf && localizacaoCidade) {
-      localizacaoUf.addEventListener('change', () => {
-        const uf = localizacaoUf.value;
+    const localizacaoCidadeLista = container.querySelector('#f-localizacao-cidades');
+    if (localizacaoUf && localizacaoCidade && localizacaoCidadeLista) {
+      localizacaoUf.addEventListener('input', () => {
+        const uf = resolverUf(localizacaoUf.value);
         localizacaoCidade.disabled = !uf;
-        localizacaoCidade.innerHTML = cidadeOptionsHtml(uf, '');
         if (uf) {
+          localizacaoCidadeLista.innerHTML = cidadeDatalistHtml(uf);
+          localizacaoCidade.value = '';
           localizacaoCidade.focus();
         }
       });
@@ -453,30 +450,58 @@ export const candidatoPage = {
       candidatoPage.init(container);
     });
 
-    tabela.init(container, {
-      async onAcao(candidato) {
-        const confirmado = await showConfirm({
-          title: 'Excluir candidato',
-          message: `Excluir ${candidato.nome}? Essa ação não pode ser desfeita.`,
-          confirmLabel: 'Excluir',
-          confirmClass: 'btn--danger',
-        });
+    tabela.init(container);
 
-        if (!confirmado) {
-          return;
-        }
+    // --- Excluir candidato: menu de contexto (botão direito) na linha ----
 
-        deleteCandidato(candidato.id);
-        showAlert({
-          type: 'success',
-          title: 'Candidato excluído',
-          message: `${candidato.nome} foi removido do cadastro.`,
-        });
+    async function excluirCandidato(candidato) {
+      const confirmado = await showConfirm({
+        title: 'Excluir candidato',
+        message: `Excluir ${candidato.nome}? Essa ação não pode ser desfeita.`,
+        confirmLabel: 'Excluir',
+        confirmClass: 'btn--danger',
+      });
 
-        // Re-renderiza para a linha sair da tabela.
-        container.innerHTML = candidatoPage.render();
-        candidatoPage.init(container);
-      },
+      if (!confirmado) {
+        return;
+      }
+
+      deleteCandidato(candidato.id);
+      showAlert({
+        type: 'success',
+        title: 'Candidato excluído',
+        message: `${candidato.nome} foi removido do cadastro.`,
+      });
+
+      // Re-renderiza para a linha sair da tabela.
+      container.innerHTML = candidatoPage.render();
+      candidatoPage.init(container);
+    }
+
+    container.querySelector('#candidatos-tbody')?.addEventListener('contextmenu', (event) => {
+      // Deixa o menu nativo do navegador (copiar, colar, corretor) em
+      // campos de edição — só substitui pelo nosso no resto da linha.
+      if (event.target.closest('input, select, textarea, a')) {
+        return;
+      }
+      const row = event.target.closest('tr');
+      const candidato = row && listCandidatos().find((item) => item.id === row.dataset.id);
+      if (!candidato) {
+        return;
+      }
+
+      event.preventDefault();
+      abrirMenuContexto({
+        x: event.clientX,
+        y: event.clientY,
+        itens: [
+          {
+            rotulo: 'Excluir candidato',
+            perigo: true,
+            aoClicar: () => excluirCandidato(candidato),
+          },
+        ],
+      });
     });
 
     // --- Modal de vagas --------------------------------------------------

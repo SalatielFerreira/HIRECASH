@@ -355,40 +355,50 @@ function parseDateDigitada(raw) {
 }
 
 /**
- * Localização é sempre "Cidade - UF" (ver `cidadeOptionsHtml`, que já
+ * Localização é sempre "Cidade - UF" (ver `cidadeDatalistHtml`, que já
  * grava esse texto como o `value` de cada opção — não precisa recompor
- * aqui). Estas três funções são compartilhadas entre o editor inline da
+ * aqui). Estas funções são compartilhadas entre o editor inline da
  * tabela e o formulário de cadastro (candidato.js), para o estado/cidade
  * nunca divergirem entre os dois lugares.
+ *
+ * São <option>s de uma <datalist> (não de um <select>): o campo de
+ * verdade é um `<input>` de texto, então dá pra digitar o nome e deixar
+ * o navegador sugerir e completar a partir das opções em uso, em vez de
+ * só escolher de uma lista fechada.
  */
-export function ufOptionsHtml(ufSelecionada) {
-  return (
-    `<option value="">Estado</option>` +
-    ESTADOS.map(
-      (estado) =>
-        `<option value="${estado.sigla}"${estado.sigla === ufSelecionada ? ' selected' : ''}>` +
-        `${escapeHtml(estado.nome)}</option>`
-    ).join('')
-  );
+export function ufDatalistHtml() {
+  return ESTADOS.map(
+    (estado) => `<option value="${estado.sigla}">${escapeHtml(estado.nome)}</option>`
+  ).join('');
 }
 
-export function cidadeOptionsHtml(uf, cidadeSelecionada) {
-  if (!uf) {
-    return `<option value="">Escolha o estado</option>`;
-  }
+export function cidadeDatalistHtml(uf) {
   const cidades = CIDADES_POR_UF[uf] || [];
-  return (
-    `<option value="">Cidade</option>` +
-    cidades
-      .map((nomeCidade) => {
-        const valorOpcao = `${nomeCidade} - ${uf}`;
-        return (
-          `<option value="${escapeHtml(valorOpcao)}"${nomeCidade === cidadeSelecionada ? ' selected' : ''}>` +
-          `${escapeHtml(nomeCidade)}</option>`
-        );
-      })
-      .join('')
+  return cidades
+    .map((nomeCidade) => {
+      const valorOpcao = `${nomeCidade} - ${uf}`;
+      return `<option value="${escapeHtml(valorOpcao)}">${escapeHtml(nomeCidade)}</option>`;
+    })
+    .join('');
+}
+
+/**
+ * Sigla do estado a partir do texto digitado no campo de Estado — aceita
+ * tanto a sigla (SP) quanto o nome por extenso (São Paulo), sem
+ * diferenciar maiúsculas/acentos, porque a sugestão da <datalist> mostra
+ * o nome mas preenche a sigla (ver `ufDatalistHtml`) e nada impede quem
+ * digita de terminar de escrever o nome inteiro sem clicar na sugestão.
+ * `null` se não bater com nenhum estado.
+ */
+export function resolverUf(texto) {
+  const alvo = normalizar((texto || '').trim());
+  if (!alvo) {
+    return null;
+  }
+  const estado = ESTADOS.find(
+    (item) => normalizar(item.sigla) === alvo || normalizar(item.nome) === alvo
   );
+  return estado ? estado.sigla : null;
 }
 
 /** Separa "Cidade - UF" de volta em `{ cidade, uf }`, para pré-selecionar
@@ -508,25 +518,29 @@ function editorHtml(field, candidato) {
   }
 
   if (field.type === 'localizacao') {
-    // Escolher estado e depois cidade, em vez de digitar livre — cada
-    // opção de cidade já carrega "Cidade - UF" como valor (ver
-    // `cidadeOptionsHtml`), então o select de cidade É o `.cell-editor`:
-    // seu `value` já é o texto certo para gravar, sem recompor nada.
+    // Digita o estado e a cidade, com as opções em uso sugeridas por uma
+    // <datalist> conforme digita, em vez de escolher de uma lista
+    // fechada — cada opção de cidade já carrega "Cidade - UF" como
+    // valor (ver `cidadeDatalistHtml`), então o campo de cidade É o
+    // `.cell-editor`: seu `value` já é o texto certo para gravar, sem
+    // recompor nada.
     const bruto = String(value || '').trim();
-    const { cidade, uf } = parseLocalizacao(bruto);
+    const { uf } = parseLocalizacao(bruto);
     // Dado gravado antes desta função existir, digitado livre — sem UF
-    // pra casar. Mantém como uma opção própria até o usuário escolher um
-    // estado de verdade, em vez de simplesmente apagar o que já tinha.
+    // pra casar. Mantém como está até o usuário digitar um estado de
+    // verdade, em vez de simplesmente apagar o que já tinha.
     const foraDaLista = bruto && !uf;
 
     return (
       `<span class="localizacao-editor">` +
-      `<select class="localizacao-editor__uf" aria-label="Estado">${ufOptionsHtml(uf)}</select>` +
-      `<select class="cell-editor localizacao-editor__cidade" aria-label="${rotulo}"${!uf && !foraDaLista ? ' disabled' : ''}>` +
-      (foraDaLista
-        ? `<option value="${escapeHtml(bruto)}" selected>${escapeHtml(bruto)}</option>`
-        : cidadeOptionsHtml(uf, cidade)) +
-      `</select></span>`
+      `<input type="text" class="localizacao-editor__uf" list="localizacao-editor-ufs" ` +
+      `aria-label="Estado" placeholder="Estado" autocomplete="off" value="${escapeHtml(uf)}" />` +
+      `<input type="text" class="cell-editor localizacao-editor__cidade" list="localizacao-editor-cidades" ` +
+      `aria-label="${rotulo}" placeholder="Cidade" autocomplete="off"${!uf && !foraDaLista ? ' disabled' : ''} ` +
+      `value="${escapeHtml(bruto)}" />` +
+      `<datalist id="localizacao-editor-ufs">${ufDatalistHtml()}</datalist>` +
+      `<datalist id="localizacao-editor-cidades">${cidadeDatalistHtml(uf)}</datalist>` +
+      `</span>`
     );
   }
 
@@ -1157,7 +1171,8 @@ export function criarTabelaCandidatos({
           field.type === 'text' ||
           field.type === 'link' ||
           field.type === 'currency' ||
-          field.type === 'date'
+          field.type === 'date' ||
+          field.type === 'localizacao'
         ) {
           editor.select();
         }
@@ -1194,45 +1209,51 @@ export function criarTabelaCandidatos({
         }
 
         if (field.type === 'localizacao') {
-          const ufSelect = cell.querySelector('.localizacao-editor__uf');
+          const ufInput = cell.querySelector('.localizacao-editor__uf');
+          const cidadeLista = cell.querySelector('#localizacao-editor-cidades');
 
-          // Os dois selects trocam foco entre si (escolher UF foca a
-          // cidade em seguida) — só sai da edição quando o foco realmente
-          // deixa os dois, não a cada troca de um pro outro.
+          // Os dois campos trocam foco entre si (completar o estado foca
+          // a cidade em seguida) — só sai da edição quando o foco
+          // realmente deixa os dois, não a cada troca de um pro outro.
           const saiuDoEditor = (event) =>
-            event.relatedTarget !== ufSelect && event.relatedTarget !== editor;
+            event.relatedTarget !== ufInput && event.relatedTarget !== editor;
 
-          ufSelect.addEventListener('change', () => {
-            const uf = ufSelect.value;
+          ufInput.addEventListener('input', () => {
+            const uf = resolverUf(ufInput.value);
             editor.disabled = !uf;
-            editor.innerHTML = cidadeOptionsHtml(uf, '');
             if (uf) {
+              cidadeLista.innerHTML = cidadeDatalistHtml(uf);
+              editor.value = '';
               editor.focus();
             }
           });
-          ufSelect.addEventListener('blur', (event) => {
+          ufInput.addEventListener('blur', (event) => {
             if (saiuDoEditor(event)) {
               finishEdit(true);
             }
           });
-          ufSelect.addEventListener('keydown', (event) => {
+          ufInput.addEventListener('keydown', (event) => {
             if (event.key === 'Escape') {
               event.preventDefault();
               finishEdit(false);
               cell.focus();
+            } else if (event.key === 'Enter') {
+              event.preventDefault();
+              finishEdit(true);
+              cell.focus();
             } else {
-              navegarComSeta(event, field, cell, null);
+              navegarComSeta(event, field, cell, ufInput);
             }
           });
 
-          editor.addEventListener('change', () => finishEdit(true));
           editor.addEventListener('blur', (event) => {
             if (saiuDoEditor(event)) {
               finishEdit(true);
             }
           });
 
-          ufSelect.focus();
+          ufInput.select();
+          ufInput.focus();
         } else {
           editor.focus();
           editor.addEventListener('blur', () => finishEdit(true));
@@ -1242,7 +1263,8 @@ export function criarTabelaCandidatos({
           field.type === 'text' ||
           field.type === 'link' ||
           field.type === 'currency' ||
-          field.type === 'date';
+          field.type === 'date' ||
+          field.type === 'localizacao';
 
         editor.addEventListener('keydown', (event) => {
           if (event.key === 'Escape') {

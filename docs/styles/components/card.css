@@ -169,12 +169,6 @@
   }
 }
 
-/* Ação destrutiva no fim da linha (ex.: excluir candidato) — mesmo
-   modelo redondo do .icon-button, só que vermelho. */
-.icon-button--danger {
-  background: #dc2626;
-}
-
 .empty-state {
   text-align: center;
   padding: var(--space-6) var(--space-5);

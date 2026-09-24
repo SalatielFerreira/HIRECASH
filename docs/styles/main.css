@@ -8,6 +8,7 @@
 @import './components/card.css';
 @import './components/form.css';
 @import './components/modal.css';
+@import './components/menu-contexto.css';
 @import './components/table.css';
 @import './pages/dashboard.css';
 @import './pages/candidato.css';

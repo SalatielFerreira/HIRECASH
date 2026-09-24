@@ -4,4 +4,4 @@
  * package.json e uma entrada correspondente no CHANGELOG.md.
  */
 export const APP_NAME = 'HireCash';
-export const APP_VERSION = '0.37.0';
+export const APP_VERSION = '0.38.0';

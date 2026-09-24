@@ -552,7 +552,9 @@ html[data-theme='dark'] select.cell-editor {
 
 /* Campo de localização: estado (largura fixa) + cidade (o resto do
    espaço) — a cidade É o .cell-editor, o estado é só um controle auxiliar
-   ao lado, sem gravar nada sozinho. */
+   ao lado, sem gravar nada sozinho. Os dois são <input> com sugestão de
+   <datalist>, não <select> — dá pra digitar o nome e completar a partir
+   das opções em uso. */
 .localizacao-editor {
   display: inline-flex;
   width: 100%;
@@ -576,9 +578,9 @@ html[data-theme='dark'] select.cell-editor {
   min-width: 0;
 }
 
-/* O navegador esmaece select desabilitado por padrão — quase some no
+/* O navegador esmaece input desabilitado por padrão — quase some no
    fundo claro da célula em edição (mesmo ajuste do painel de filtro). */
-.data-table .localizacao-editor select:disabled {
+.data-table .localizacao-editor input:disabled {
   opacity: 1;
   color: var(--color-text-secondary);
   cursor: not-allowed;

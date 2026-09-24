@@ -7,6 +7,13 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.38.0] - 2026-09-23
+
+### Adicionado
+
+- **Excluir candidato por menu de contexto**: o botão vermelho na tabela deu lugar ao botão direito do mouse em qualquer ponto da linha, na página Candidato, que abre um menu com "Excluir candidato" — mesma confirmação de antes. Dentro de um campo em edição, o menu nativo do navegador (copiar, colar, corretor) continua funcionando normalmente.
+- **Estado e cidade agora se digitam, com sugestão e completar automático**: no cadastro de candidato e na edição direto na tabela, os campos de Estado e Cidade viraram texto com sugestões de uma lista (`<datalist>`) — dá pra digitar a sigla ("SP") ou o nome todo ("São Paulo") que o campo reconhece, e a cidade sugere a partir das opções da UF escolhida. Antes só dava pra escolher de uma lista fechada.
+
 ## [0.37.0] - 2026-09-23
 
 ### Adicionado

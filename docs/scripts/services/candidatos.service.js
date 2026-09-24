@@ -218,6 +218,27 @@ export function darBaixa(id) {
 }
 
 /**
+ * Remove um candidato do cadastro. Recalcula o status da vaga dele em
+ * seguida — era o único contratado, por exemplo, e a vaga deve reabrir.
+ *
+ * Retorna `true` se removeu, `false` se o id não existir.
+ */
+export function deleteCandidato(id) {
+  const candidatos = listCandidatos();
+  const alvo = candidatos.find((candidato) => candidato.id === id);
+  if (!alvo) {
+    return false;
+  }
+
+  const restantes = recalcularStatusVaga(
+    candidatos.filter((candidato) => candidato.id !== id),
+    chaveVaga(alvo)
+  );
+  storage.set(KEY, restantes);
+  return true;
+}
+
+/**
  * Conteúdo do arquivo de backup (exportação).
  *
  * Recebe as vagas de fora (em vez de importar `vagas.service.js` aqui)

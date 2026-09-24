@@ -7,6 +7,13 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.37.0] - 2026-09-23
+
+### Adicionado
+
+- **Ctrl+Z desfaz o último campo alterado no formulário de candidato** — funciona tanto para texto quanto para a escolha de uma opção (select), que o undo nativo do navegador não cobria.
+- **Botão de excluir candidato**: na página Candidato, um botão vermelho (X) no fim de cada linha da tabela — mesmo modelo redondo do botão de "Baixa" da página Comissão —, com confirmação antes de remover.
+
 ## [0.36.0] - 2026-09-23
 
 ### Adicionado

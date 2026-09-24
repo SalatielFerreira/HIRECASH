@@ -10,7 +10,7 @@ import {
   parseValue,
   ufOptionsHtml,
 } from '../components/candidatos-table.js';
-import { addCandidato, listCandidatos } from '../services/candidatos.service.js';
+import { addCandidato, deleteCandidato, listCandidatos } from '../services/candidatos.service.js';
 import {
   addVaga,
   deleteVaga,
@@ -21,6 +21,7 @@ import {
 } from '../services/vagas.service.js';
 import { ETAPA_EM_ATIVIDADE, STATUS_CONTRATADO } from '../services/candidato-opcoes.js';
 import { escapeHtml } from '../utils/format.js';
+import { ativarUndoFormulario } from '../utils/undo-formulario.js';
 
 const ICON_CANDIDATO =
   '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>';
@@ -62,7 +63,18 @@ const COLUNAS = [
   'observacao',
 ];
 
-const tabela = criarTabelaCandidatos({ colunas: COLUNAS, editaveis: COLUNAS, filtro: true });
+const tabela = criarTabelaCandidatos({
+  colunas: COLUNAS,
+  editaveis: COLUNAS,
+  filtro: true,
+  acao: {
+    header: 'Excluir',
+    rotulo: 'Excluir candidato',
+    icone: ICON_CLOSE,
+    // Mesmo modelo redondo do botão de adicionar, só que vermelho.
+    classe: 'icon-button icon-button--danger',
+  },
+});
 
 function renderEmptyState() {
   return `
@@ -306,6 +318,7 @@ export const candidatoPage = {
     const closeButton = container.querySelector('#candidato-modal-close');
     const form = container.querySelector('#candidato-form');
     const candidatoTrap = setupFocusTrap(overlay, () => closeModal());
+    const reiniciarUndo = ativarUndoFormulario(form, () => overlay.classList.contains('is-open'));
 
     let lastFocused = null;
 
@@ -321,6 +334,7 @@ export const candidatoPage = {
       }
 
       lastFocused = document.activeElement;
+      reiniciarUndo();
       overlay.classList.add('is-open');
       container.classList.add('no-scroll');
       document.addEventListener('keydown', candidatoTrap);
@@ -439,7 +453,31 @@ export const candidatoPage = {
       candidatoPage.init(container);
     });
 
-    tabela.init(container);
+    tabela.init(container, {
+      async onAcao(candidato) {
+        const confirmado = await showConfirm({
+          title: 'Excluir candidato',
+          message: `Excluir ${candidato.nome}? Essa ação não pode ser desfeita.`,
+          confirmLabel: 'Excluir',
+          confirmClass: 'btn--danger',
+        });
+
+        if (!confirmado) {
+          return;
+        }
+
+        deleteCandidato(candidato.id);
+        showAlert({
+          type: 'success',
+          title: 'Candidato excluído',
+          message: `${candidato.nome} foi removido do cadastro.`,
+        });
+
+        // Re-renderiza para a linha sair da tabela.
+        container.innerHTML = candidatoPage.render();
+        candidatoPage.init(container);
+      },
+    });
 
     // --- Modal de vagas --------------------------------------------------
 

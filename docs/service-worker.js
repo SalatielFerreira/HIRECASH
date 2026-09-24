@@ -5,7 +5,7 @@
  *
  * IMPORTANTE: incremente CACHE_VERSION a cada release para invalidar o cache antigo.
  */
-const CACHE_VERSION = 'hirecash-v52';
+const CACHE_VERSION = 'hirecash-v53';
 
 const APP_SHELL = [
   './',
@@ -61,6 +61,7 @@ const APP_SHELL = [
   './scripts/utils/format.js',
   './scripts/utils/logger.js',
   './scripts/utils/theme.js',
+  './scripts/utils/undo-formulario.js',
   // Logo da barra superior — aparece em toda página, então entra no app
   // shell como HTML/CSS/JS.
   './images/logo-s-mark.png',

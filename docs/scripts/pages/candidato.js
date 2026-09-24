@@ -467,7 +467,25 @@ export const candidatoPage = {
 
     tabela.init(container);
 
-    // --- Excluir candidato: menu de contexto (botão direito) na linha ----
+    // --- Clonar/excluir candidato: menu de contexto (botão direito) ------
+
+    function clonarCandidato(candidato) {
+      // COLUNAS + vagaCodigo (que não é uma coluna própria, mas anda
+      // junto do nome da vaga) — id/criadoEm/atualizadoEm ficam de fora
+      // de propósito, o clone é um candidato novo, não uma cópia exata.
+      const camposClonaveis = [...COLUNAS, 'vagaCodigo'];
+      const campos = Object.fromEntries(camposClonaveis.map((key) => [key, candidato[key]]));
+      const clone = addCandidato({ ...campos, nome: `${candidato.nome} (cópia)` });
+      showAlert({
+        type: 'success',
+        title: 'Candidato clonado',
+        message: `${clone.nome} foi criado a partir de ${candidato.nome}.`,
+      });
+
+      // Re-renderiza para a nova linha aparecer na tabela.
+      container.innerHTML = candidatoPage.render();
+      candidatoPage.init(container);
+    }
 
     async function excluirCandidato(candidato) {
       const confirmado = await showConfirm({
@@ -510,6 +528,11 @@ export const candidatoPage = {
         x: event.clientX,
         y: event.clientY,
         itens: [
+          {
+            rotulo: 'Clonar candidato',
+            aoClicar: () => clonarCandidato(candidato),
+          },
+          { separador: true },
           {
             rotulo: 'Excluir candidato',
             perigo: true,

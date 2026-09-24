@@ -21,7 +21,11 @@ function fecharMenuAberto() {
  * @param {Object} options
  * @param {number} options.x
  * @param {number} options.y
- * @param {{ rotulo: string, perigo?: boolean, aoClicar: () => void }[]} options.itens
+ * @param {({ rotulo: string, perigo?: boolean, aoClicar: () => void } | { separador: true })[]} options.itens
+ *   Um item com `separador: true` (sem `rotulo`/`aoClicar`) desenha uma
+ *   linha divisória — mesmo modelo do menu de contexto nativo, que
+ *   separa grupos de ações relacionadas (ex.: ações normais das
+ *   destrutivas).
  */
 export function abrirMenuContexto({ x, y, itens }) {
   fecharMenuAberto();
@@ -30,9 +34,10 @@ export function abrirMenuContexto({ x, y, itens }) {
   menu.className = 'menu-contexto';
   menu.setAttribute('role', 'menu');
   menu.innerHTML = itens
-    .map(
-      (item, index) =>
-        `<button type="button" class="menu-contexto__item${item.perigo ? ' menu-contexto__item--perigo' : ''}" role="menuitem" data-index="${index}">${item.rotulo}</button>`
+    .map((item, index) =>
+      item.separador
+        ? '<div class="menu-contexto__separador" role="separator"></div>'
+        : `<button type="button" class="menu-contexto__item${item.perigo ? ' menu-contexto__item--perigo' : ''}" role="menuitem" data-index="${index}">${item.rotulo}</button>`
     )
     .join('');
 

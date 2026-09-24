@@ -7,6 +7,12 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.40.0] - 2026-09-23
+
+### Adicionado
+
+- **Clonar candidato**: no menu de contexto (botão direito) da página Candidato, ao lado de "Excluir candidato" — cria um novo candidato com os mesmos dados, nome com "(cópia)" no final. O menu ganhou uma linha divisória entre as duas ações, no modelo do menu de contexto nativo do sistema.
+
 ## [0.39.0] - 2026-09-23
 
 ### Adicionado

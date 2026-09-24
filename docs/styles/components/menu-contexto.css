@@ -7,13 +7,19 @@
   z-index: var(--z-modal);
   display: flex;
   flex-direction: column;
-  min-width: 170px;
+  min-width: 200px;
   padding: 6px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
   box-shadow: var(--shadow-lg);
   animation: menu-contexto-in var(--transition-fast) both;
+}
+
+.menu-contexto__separador {
+  height: 1px;
+  margin: 6px 8px;
+  background: var(--color-border);
 }
 
 @keyframes menu-contexto-in {

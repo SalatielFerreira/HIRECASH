@@ -7,6 +7,7 @@
  */
 import { showAlert } from './alert.js';
 import { ativarArrastarParaRolar } from '../utils/arrastar-rolagem.js';
+import { ativarAutocompletarPalavra } from '../utils/autocompletar-palavra.js';
 import { chaveVaga, listCandidatos, updateCandidato } from '../services/candidatos.service.js';
 import { calcularParcelas, NIVEL_OPTIONS } from '../services/comissao.service.js';
 import { resolverVagaPorCodigo } from '../services/vagas.service.js';
@@ -931,10 +932,12 @@ export function criarTabelaCandidatos({
           fecharFiltroDrawer();
         });
 
+        // Só limpa o rascunho (as flags somem) — não fecha a coluna nem
+        // muda o filtro de verdade: isso só acontece em "Filtrar" ou
+        // "Cancelar", como qualquer outra edição feita aqui dentro.
         botaoLimparDrawer?.addEventListener('click', () => {
           filtroDraft = new Map();
-          limparFiltro();
-          fecharFiltroDrawer();
+          redesenharCorpo();
         });
       }
 
@@ -1212,19 +1215,30 @@ export function criarTabelaCandidatos({
           const ufInput = cell.querySelector('.localizacao-editor__uf');
           const cidadeLista = cell.querySelector('#localizacao-editor-cidades');
 
-          // Os dois campos trocam foco entre si (completar o estado foca
-          // a cidade em seguida) — só sai da edição quando o foco
-          // realmente deixa os dois, não a cada troca de um pro outro.
+          // Autocompleta o resto da palavra conforme digita — registrado
+          // antes do listener abaixo pra ele já enxergar o valor
+          // completado, não só o que foi digitado.
+          ativarAutocompletarPalavra(ufInput, () => ESTADOS.map((estado) => estado.nome));
+          ativarAutocompletarPalavra(editor, () =>
+            [...cidadeLista.options].map((option) => option.value)
+          );
+
+          // Os dois campos trocam foco entre si (Tab leva de um pro
+          // outro) — só sai da edição quando o foco realmente deixa os
+          // dois, não a cada troca de um pro outro.
           const saiuDoEditor = (event) =>
             event.relatedTarget !== ufInput && event.relatedTarget !== editor;
 
+          // Sem focar a cidade sozinho aqui: o autocompletar acima já
+          // deixa um estado válido (ainda não confirmado, só sugerido e
+          // selecionado) na caixa a cada tecla — forçar o foco puxaria o
+          // usuário pra fora do campo antes de ele terminar de digitar.
           ufInput.addEventListener('input', () => {
             const uf = resolverUf(ufInput.value);
             editor.disabled = !uf;
             if (uf) {
               cidadeLista.innerHTML = cidadeDatalistHtml(uf);
               editor.value = '';
-              editor.focus();
             }
           });
           ufInput.addEventListener('blur', (event) => {

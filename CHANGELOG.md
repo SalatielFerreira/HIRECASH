@@ -7,6 +7,16 @@ e este projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.39.0] - 2026-09-23
+
+### Adicionado
+
+- **Estado e Cidade autocompletam a palavra conforme digita**: além da sugestão em lista já existente, o campo agora completa sozinho o resto do nome assim que o que foi digitado bate com uma opção (aceita continuar digitando por cima da sugestão, ou confirmar com →/Tab/Enter) — tanto no cadastro de candidato quanto na edição direto na tabela.
+
+### Corrigido
+
+- **"Limpar filtro" (dentro da coluna de filtro) fechava a coluna sozinho** — devia só esvaziar as escolhas feitas ali. Agora só limpa as flags; a coluna só fecha ao clicar em "Filtrar" ou "Cancelar", como qualquer edição feita ali dentro.
+
 ## [0.38.0] - 2026-09-23
 
 ### Adicionado

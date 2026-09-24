@@ -22,6 +22,8 @@ import {
   updateVaga,
 } from '../services/vagas.service.js';
 import { ETAPA_EM_ATIVIDADE, STATUS_CONTRATADO } from '../services/candidato-opcoes.js';
+import { ESTADOS } from '../data/localizacao.js';
+import { ativarAutocompletarPalavra } from '../utils/autocompletar-palavra.js';
 import { escapeHtml } from '../utils/format.js';
 import { ativarUndoFormulario } from '../utils/undo-formulario.js';
 
@@ -356,18 +358,31 @@ export const candidatoPage = {
 
     // Localização: a cidade só existe depois de completar um estado
     // válido — digitando a sigla, o nome por extenso, ou escolhendo a
-    // sugestão da <datalist> (ver resolverUf).
+    // sugestão da <datalist> (ver resolverUf). Os dois campos também
+    // autocompletam o resto da palavra conforme digita (ver
+    // ativarAutocompletarPalavra) — registrado antes do listener abaixo
+    // pra ele já enxergar o valor completado, não só o que foi digitado.
     const localizacaoUf = container.querySelector('#f-localizacao-uf');
     const localizacaoCidade = container.querySelector('#f-localizacao');
     const localizacaoCidadeLista = container.querySelector('#f-localizacao-cidades');
     if (localizacaoUf && localizacaoCidade && localizacaoCidadeLista) {
+      ativarAutocompletarPalavra(localizacaoUf, () => ESTADOS.map((estado) => estado.nome));
+      ativarAutocompletarPalavra(localizacaoCidade, () =>
+        [...localizacaoCidadeLista.options].map((option) => option.value)
+      );
+
+      // Sem focar a cidade sozinho aqui: o autocompletar acima já deixa
+      // um estado válido (ainda não confirmado, só sugerido e
+      // selecionado) na caixa a cada tecla — forçar o foco puxaria o
+      // usuário pra fora do campo antes de ele terminar de digitar.
+      // Tab (ou clicar) leva pra cidade normalmente, como qualquer par
+      // de campos do formulário.
       localizacaoUf.addEventListener('input', () => {
         const uf = resolverUf(localizacaoUf.value);
         localizacaoCidade.disabled = !uf;
         if (uf) {
           localizacaoCidadeLista.innerHTML = cidadeDatalistHtml(uf);
           localizacaoCidade.value = '';
-          localizacaoCidade.focus();
         }
       });
     }
